@@ -4,15 +4,17 @@ A Blazor Server forum application built with .NET 8, Entity Framework Core, and 
 
 ## ER Diagram
 
-<img width="350" height="350" alt="bild" src="https://github.com/user-attachments/assets/e9a72147-5bcb-4a36-81a2-56d4afc3697a" />
+<img width="1100" height="560" alt="ER" src="https://github.com/user-attachments/assets/10e95f4a-556e-45f2-a92c-21220b9917c5" />
+<br>
+<br>
 
-
-**Entities:** User, Category, Thread, Comment
+**Entities:** User, Category, Thread, Comment, (Admin?)
 
 **Notes:**
 - Maybe Admin is a role (via Identity) and not a separate entity?
 - Thread body is the first comment (no Body field on Thread) – and comments don't have a header.
-- Replies use `ParentCommentId` with flat display (no nested comments for replies).
+- Replies use `ParentCommentId` with flat display (no nested comments for replies). Is this ok, instead of nested replies?
+- Int vs Guid for PK?
 
 ## Architecture
 
@@ -70,8 +72,6 @@ src/
     │   └── Shared/
     └── wwwroot/
 
----
-
 ```
 ## API Contract
 
@@ -95,7 +95,7 @@ Used to list and filter the forum's subject areas.
 
 Manages posts within the categories.
 
-* **GET `/api/threads?categoryId={guid}**`
+* **GET `/api/threads?categoryId={int}**`
 * **Description:** Retrieves all threads belonging to a specific category.
 * **Response (200 OK):** A list of `ThreadSummaryDto`.
 
@@ -114,7 +114,7 @@ Manages posts within the categories.
 
 
 
-### 3. Comments – Including "Replies to replies"
+### 3. Comments – Including "Replies to comments"
 
 This section handles the hierarchical structure.
 
@@ -151,7 +151,7 @@ The following DTOs (Data Transfer Objects) are used in the contract:
 
 #### **ThreadSummaryDto:**
 
-* `Id` (Guid)
+* `Id` (Int)
 * `Title` (String)
 * `AuthorName` (String)
 * `CreatedAt` (DateTime)
@@ -159,11 +159,11 @@ The following DTOs (Data Transfer Objects) are used in the contract:
 
 #### **CommentDto:** (Crucial for the assignment requirements)
 
-* `Id` (Guid)
+* `Id` (Int)
 * `Text` (String)
 * `AuthorName` (String)
 * `CreatedAt` (DateTime)
-* `ParentCommentId` (Guid, can be null)
+* `ParentCommentId` (Int, can be null)
 * `Replies` (List of `CommentDto`)
 
 ## API Example
