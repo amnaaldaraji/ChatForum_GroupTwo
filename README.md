@@ -69,9 +69,6 @@ src/
     │   ├── Layout/
     │   └── Shared/
     └── wwwroot/
-```
-## API Structure 
-To create your `README.md` file, you should copy the block below and save it as a file named `README.md` in the root folder of your project.
 
 ---
 
