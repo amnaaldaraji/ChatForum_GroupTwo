@@ -16,6 +16,12 @@ A Blazor Server forum application built with .NET 8, Entity Framework Core, and 
 - Replies use `ParentCommentId` with flat display (no nested comments for replies). Is this ok, instead of nested replies?
 - Int vs Guid for PK?
 
+**Delete behaviour:**
+- User: Restricted (deleting a user does not delete their threads or comments, though should probably hide the name for them).
+- Category: Cascade (deleting a category should also delete threads within that category).
+- Thread: Cascade (deleting a thread should also delete all comments within that thread).
+- Comment: Restricted (deleting a comment should only delete replies to that comment).
+
 ## Architecture
 
 <img width="300" height="500" alt="Arkitekturdiagram" src="https://github.com/user-attachments/assets/6de69c36-cf0a-4dc2-97b0-b456b54410f6" />
