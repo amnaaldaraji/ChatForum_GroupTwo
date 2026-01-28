@@ -72,6 +72,7 @@ src/
 
 ---
 
+```
 ## API Contract
 
 This specification defines the communication between the Blazor frontend and the Backend API.
