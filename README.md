@@ -70,6 +70,103 @@ src/
     │   └── Shared/
     └── wwwroot/
 ```
+## API Structure 
+To create your `README.md` file, you should copy the block below and save it as a file named `README.md` in the root folder of your project.
+
+---
+
+## API Contract
+
+This specification defines the communication between the Blazor frontend and the Backend API.
+
+### 1. Categories
+
+Used to list and filter the forum's subject areas.
+
+* **GET `/api/categories**`
+* **Description:** Retrieves all available categories (e.g., "Programming", "Leisure").
+* **Response (200 OK):** A list of `CategoryDto`.
+
+
+* **GET `/api/categories/{id}**`
+* **Description:** Retrieves details for a specific category.
+
+
+
+### 2. Threads
+
+Manages posts within the categories.
+
+* **GET `/api/threads?categoryId={guid}**`
+* **Description:** Retrieves all threads belonging to a specific category.
+* **Response (200 OK):** A list of `ThreadSummaryDto`.
+
+
+* **GET `/api/threads/{id}**`
+* **Description:** Retrieves a specific thread including its content.
+
+
+* **POST `/api/threads**`
+* **Description:** Creates a new thread. **Requires Authentication.**
+* **Request Body:** `CreateThreadRequest`.
+
+
+* **PUT/DELETE `/api/threads/{id}**`
+* **Description:** Updates or deletes a thread. **Restricted to the owner (Author).**
+
+
+
+### 3. Comments – Including "Replies to replies"
+
+This section handles the hierarchical structure.
+
+* **GET `/api/threads/{threadId}/comments**`
+* **Description:** Retrieves all comments for a thread. Returned in a tree structure (`Replies`).
+* **Response (200 OK):** A list of `CommentDto`.
+
+
+* **POST `/api/comments**`
+* **Description:** Creates a new comment.
+* **Request Body:** `CreateCommentRequest` (Contains `ParentCommentId` if it is a reply to another comment).
+
+
+
+### 4. Authentication (Identity)
+
+The contracts for user management are structured as follows:
+
+* **POST `/api/identity/register**`
+* **Body:** `RegisterUserRequest` (Username, Email, Password).
+
+
+* **POST `/api/identity/login**`
+* **Body:** `LoginUserRequest` (Email, Password).
+* **Response:** JWT Token or Cookie confirmation.
+
+
+
+---
+
+### Data Structures (Text Models)
+
+The following DTOs (Data Transfer Objects) are used in the contract:
+
+#### **ThreadSummaryDto:**
+
+* `Id` (Guid)
+* `Title` (String)
+* `AuthorName` (String)
+* `CreatedAt` (DateTime)
+* `CommentCount` (Int)
+
+#### **CommentDto:** (Crucial for the assignment requirements)
+
+* `Id` (Guid)
+* `Text` (String)
+* `AuthorName` (String)
+* `CreatedAt` (DateTime)
+* `ParentCommentId` (Guid, can be null)
+* `Replies` (List of `CommentDto`)
 
 ## API Example
 
