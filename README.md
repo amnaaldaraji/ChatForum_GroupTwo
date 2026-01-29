@@ -4,17 +4,16 @@ A Blazor Server forum application built with .NET 8, Entity Framework Core, and 
 
 ## ER Diagram
 
-<img width="1100" height="560" alt="ER" src="https://github.com/user-attachments/assets/10e95f4a-556e-45f2-a92c-21220b9917c5" />
+<img width="650" height="1500" alt="ER_new" src="https://github.com/user-attachments/assets/f2357693-a4bc-4c03-b1e7-c575ce45dff6" />
 <br>
 <br>
 
-**Entities:** User, Category, Thread, Comment, (Admin?)
+**Entities:** User, Category, Thread, Comment
 
 **Notes:**
-- Maybe Admin is a role (via Identity) and not a separate entity?
+- Admin is a role (via Identity) and not a separate entity.
 - Thread body is the first comment (no Body field on Thread) – and comments don't have a header.
-- Replies use `ParentCommentId` with flat display (no nested comments for replies). Is this ok, instead of nested replies?
-- Int vs Guid for PK?
+- Replies use `ParentCommentId` with flat display (no nested comments for replies). Is this ok, instead of nested replies.
 
 **Delete behaviour:**
 - User: Restricted (deleting a user does not delete their threads or comments, though should probably hide the name for them).
