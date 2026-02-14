@@ -17,7 +17,7 @@ public interface ICommentRepository : IRepository<Comment>
         CancellationToken cancellationToken = default);
 
     Task<(IReadOnlyList<Comment> Items, int TotalCount)> GetPagedAsync(
-        CommentFIlterParams filterParams,
+        CommentFilterParams filterParams,
         CancellationToken cancellationToken = default);
     
     Task<IReadOnlyList<Comment>> GetUserByIdAsync(int userId,int count, CancellationToken cancellationToken = default);
