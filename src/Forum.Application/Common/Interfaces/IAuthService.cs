@@ -1,4 +1,5 @@
 using Forum.Application.Common.Models;
+using Forum.Application.DTOs.Auth;
 
 namespace Forum.Application.Common.Interfaces;
 
@@ -10,6 +11,6 @@ namespace Forum.Application.Common.Interfaces;
 public interface IAuthService
 {
     Task<Result<object>> RegisterAsync(string username, string email, string password);
-    Task<Result<AuthResonse>> LoginAsync(string username, string password);
+    Task<Result<AuthResponse>> LoginAsync(string username, string password);
     Task<Result> LogoutAsync();
 }
