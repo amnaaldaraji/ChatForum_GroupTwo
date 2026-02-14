@@ -1,10 +1,12 @@
 using Forum.Application.DTOs.Thread;
-using Forum.Domain.Entities;
+using ThreadEntity = Forum.Domain.Entities.Thread;
 
 namespace Forum.Application.Repositories;
 
 /// <summary>
 /// Extends the generic repository interface with custom thread-specific methods.
+///
+/// Using alias (ThreadEntity) to avoid conflict with System.Threading.Thread.
 /// </summary>
 public interface IThreadRepository : IRepository<ThreadEntity>
 {
