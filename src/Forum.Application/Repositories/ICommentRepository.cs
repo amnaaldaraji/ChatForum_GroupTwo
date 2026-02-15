@@ -20,7 +20,8 @@ public interface ICommentRepository : IRepository<Comment>
         CommentFilterParams filterParams,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyList<Comment>> GetUserByIdAsync(int userId,int count, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Comment>> GetByUserIdAsync(string userId, int count,
+        CancellationToken cancellationToken = default);
     Task<Comment?> GetFirstCommentByThreadIdAsync(int threadId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Comment>> GetRepliesAsync (int commentId, CancellationToken cancellationToken = default);
 }
