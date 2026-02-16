@@ -40,7 +40,6 @@ public static class DbSeeder
     // Create initial users and assign appropriate roles.
     private static async Task<(User Admin, User Regular, User User2)> SeedUsersAsync(UserManager<User> userManager)
     {
-        //
         var adminUser = new User
         {
             UserName = "admin",
@@ -50,7 +49,6 @@ public static class DbSeeder
         await userManager.CreateAsync(adminUser, "Admin123!");
         await userManager.AddToRoleAsync(adminUser, "Admin");
 
-        //
         var regularUser = new User
         {
             UserName = "john_doe",
@@ -59,7 +57,6 @@ public static class DbSeeder
         };
         await userManager.CreateAsync(regularUser, "User123!");
 
-        //
         var user2 = new User
         {
             UserName = "jane_smith",
@@ -68,7 +65,6 @@ public static class DbSeeder
         };
         await userManager.CreateAsync(user2, "User123!");
 
-        //
         return (adminUser, regularUser, user2);
     }
 
@@ -94,7 +90,6 @@ public static class DbSeeder
 
     // Create sample threads associated with seeded users and categories.
     private static async Task<List<ThreadEntity>> SeedThreadsAsync
-        //
     (
         ForumDbContext context,
         User adminUser,
@@ -155,7 +150,6 @@ public static class DbSeeder
 
     // Create sample comments and a reply to demonstrate comment threading.
     private static async Task SeedCommentsAsync
-        //
     (
         ForumDbContext context,
         User adminUser,
