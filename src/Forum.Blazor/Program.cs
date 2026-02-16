@@ -1,10 +1,15 @@
 using Forum.Blazor.Components;
+using Forum.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<ForumDbContext>(options =>
+    options.UseSqlite("Data Source=forum.db"));
 
 var app = builder.Build();
 
