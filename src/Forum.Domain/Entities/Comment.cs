@@ -5,6 +5,7 @@ public class Comment
     public int CommentId { get; set; }
     public string Content { get; set; } = string.Empty;
     public DateTime TimeCreated { get; set; }
+    public bool IsDeleted { get; set; }
 
     // Foreign keys
     public string UserId { get; set; } = string.Empty;
