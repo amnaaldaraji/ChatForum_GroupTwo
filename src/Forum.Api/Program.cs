@@ -2,6 +2,7 @@ using System.Text;
 using Forum.Api.Endpoints;
 using Forum.Application;
 using Forum.Domain.Entities;
+using Forum.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +15,14 @@ builder.Services.AddSwaggerGen();
 
 // Register Application layer services (MediatR handlers, business logic services).
 builder.Services.AddApplicationServices();
+
+// Resolve the database path to the solution root so it works regardless of working directory.
+var solutionRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", ".."));
+var dbPath = Path.Combine(solutionRoot, "forum.db");
+builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={dbPath}";
+
+// Register Infrastructure layer services (DbContext, repositories, UnitOfWork, AuthService).
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Configure Identity with the custom User entity (extends IdentityUser) and IdentityRole.
 builder.Services.AddIdentity<User, IdentityRole>(options =>

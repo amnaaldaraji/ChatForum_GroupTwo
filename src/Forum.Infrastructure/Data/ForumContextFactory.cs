@@ -8,9 +8,11 @@ public class ForumDbContextFactory
 {
     public ForumDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ForumDbContext>();
+        var solutionRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", ".."));
+        var dbPath = Path.Combine(solutionRoot, "forum.db");
 
-        optionsBuilder.UseSqlite("Data Source=forum.db");
+        var optionsBuilder = new DbContextOptionsBuilder<ForumDbContext>();
+        optionsBuilder.UseSqlite($"Data Source={dbPath}");
 
         return new ForumDbContext(optionsBuilder.Options);
     }
