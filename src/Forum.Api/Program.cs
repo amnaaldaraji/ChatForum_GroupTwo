@@ -16,6 +16,11 @@ builder.Services.AddSwaggerGen();
 // Register Application layer services (MediatR handlers, business logic services).
 builder.Services.AddApplicationServices();
 
+// Resolve the database path to the solution root so it works regardless of working directory.
+var solutionRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", ".."));
+var dbPath = Path.Combine(solutionRoot, "forum.db");
+builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={dbPath}";
+
 // Register Infrastructure layer services (DbContext, repositories, UnitOfWork, AuthService).
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
