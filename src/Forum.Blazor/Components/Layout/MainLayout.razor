@@ -1,23 +1,148 @@
 ﻿@inherits LayoutComponentBase
-
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="site-wrapper">
+    <header class="main-header">
+        <div class="top-row-black">
+            <div class="header-container">
+                <div class="brand">
+                    <a href="/">SPORT<span class="red-text">FORUM</span></a>
+                </div>
+                <div class="user-actions">
+                    <button class="btn-outline">Log In</button>
+                    <button class="btn-red">Register</button>
+                </div>
+            </div>
         </div>
-
-        <article class="content px-4">
+        <nav class="sub-nav-white">
+            <div class="header-container">
+                <ul class="nav-menu">
+                    <li><a href="/" class="active">News</a></li>
+                    <li><a href="/threads">Forums</a></li>
+                    <li><a href="/">Magazine</a></li>
+                    <li><a href="/">Live</a></li>
+                    <li><a href="/">Results</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main class="main-body">
+        <div class="header-container">
             @Body
-        </article>
+        </div>
     </main>
+    <footer class="main-footer">
+        <div class="header-container footer-content">
+            <p>&copy; 2026 Sport Forum Digital Media. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">About Us</a> | <a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
 </div>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+    .site-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    .main-body {
+        flex: 1;
+        padding: 40px 0;
+    }
+    .header-container {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .top-row-black {
+        background: #1a1a1a;
+        padding: 12px 0;
+        color: white;
+    }
+    .brand a {
+        font-size: 30px;
+        font-weight: 900;
+        color: white;
+        text-decoration: none;
+        letter-spacing: -1.5px;
+        font-family: 'Arial Black', Gadget, sans-serif;
+    }
+    .red-text { color: #e10600; }
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #444;
+        color: white;
+        padding: 7px 18px;
+        font-weight: 700;
+        font-size: 11px;
+        text-transform: uppercase;
+        cursor: pointer;
+        margin-right: 10px;
+        transition: 0.2s;
+    }
+    .btn-outline:hover { background: #333; }
+    .btn-red {
+        background: #e10600;
+        border: none;
+        color: white;
+        padding: 8px 19px;
+        font-weight: 700;
+        font-size: 11px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-red:hover { background: #b30500; }
+    .sub-nav-white {
+        background: white;
+        border-bottom: 4px solid #e10600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .nav-menu {
+        list-style: none;
+        display: flex;
+        margin: 0;
+        padding: 0;
+    }
+    .nav-menu li a {
+        display: block;
+        padding: 16px 20px;
+        color: #1a1a1a;
+        text-decoration: none;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+    .nav-menu li a:hover, .nav-menu li a.active {
+        color: #e10600;
+    }
+    .main-footer {
+        background: #fff;
+        border-top: 1px solid #ddd;
+        padding: 40px 0;
+        color: #888;
+        font-size: 12px;
+    }
+    .footer-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .footer-links a {
+        color: #888;
+        text-decoration: none;
+        margin: 0 5px;
+    }
+    .footer-links a:hover { color: #333; }
+</style>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
