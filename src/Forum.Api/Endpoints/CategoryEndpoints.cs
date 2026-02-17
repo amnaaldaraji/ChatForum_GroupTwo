@@ -3,7 +3,7 @@ using Forum.Application.Features.Categories.Commands;
 using Forum.Application.Features.Categories.Queries;
 using MediatR;
 
-namespace Forum.Api.EndPoints;
+namespace Forum.Api.Endpoints;
 
 public static class CategoryEndpoints
 {

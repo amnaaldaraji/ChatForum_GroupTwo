@@ -5,7 +5,7 @@ using Forum.Application.Features.Users.Queries;
 using Microsoft.AspNetCore.Http;
 using MediatR;
 
-namespace Forum.Api.EndPoints;
+namespace Forum.Api.Endpoints;
 
 public static class UserEndpoints
 {
