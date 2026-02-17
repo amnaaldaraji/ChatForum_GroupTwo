@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 <div class="site-wrapper">
     <header class="main-header">
         <div class="top-row-black">
@@ -6,10 +6,14 @@
                 <div class="brand">
                     <a href="/">SPORT<span class="red-text">FORUM</span></a>
                 </div>
-                <div class="user-actions">
-                    <button class="btn-outline">Log In</button>
-                    <button class="btn-red">Register</button>
-                </div>
+                    <div class="user-actions">
+                        <div class="forum-search-container">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="Search this forum..." />
+                        </div>
+                        <button class="btn-outline">Log In</button>
+                        <button class="btn-red">Register</button>
+                    </div>
             </div>
         </div>
         <nav class="sub-nav-white">
@@ -18,8 +22,7 @@
                     <li><a href="/" class="active">News</a></li>
                     <li><a href="/threads">Forums</a></li>
                     <li><a href="/">Magazine</a></li>
-                    <li><a href="/">Live</a></li>
-                    <li><a href="/">Results</a></li>
+                    <li><a href="/">Live Results</a></li>
                 </ul>
             </div>
         </nav>
@@ -78,6 +81,29 @@
         font-family: 'Arial Black', Gadget, sans-serif;
     }
     .red-text { color: #e10600; }
+    .user-actions {
+        display: flex;
+        align-items: center;
+    }
+    .forum-search-container { position: relative; margin-right: 15px; }
+    .search-input { 
+        border: 1px solid #444; 
+        background: #333;
+        color: white;
+        padding: 5px 10px 5px 30px; 
+        font-size: 12px; 
+        width: 180px; 
+        outline: none;
+        border-radius: 4px;
+    }
+    .search-icon { 
+        position: absolute; 
+        left: 10px; 
+        top: 50%; 
+        transform: translateY(-50%); 
+        color: #999; 
+        font-size: 12px;
+    }
     .btn-outline {
         background: transparent;
         border: 1px solid #444;
