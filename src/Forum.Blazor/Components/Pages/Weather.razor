@@ -1,12 +1,8 @@
 ﻿@page "/weather"
 @attribute [StreamRendering]
-
 <PageTitle>Weather</PageTitle>
-
 <h1>Weather</h1>
-
 <p>This component demonstrates showing data.</p>
-
 @if (forecasts == null)
 {
     <p>
@@ -37,15 +33,11 @@ else
         </tbody>
     </table>
 }
-
 @code {
     private WeatherForecast[]? forecasts;
-
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
         await Task.Delay(500);
-
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
         forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
@@ -55,7 +47,6 @@ else
             Summary = summaries[Random.Shared.Next(summaries.Length)]
         }).ToArray();
     }
-
     private class WeatherForecast
     {
         public DateOnly Date { get; set; }
@@ -63,5 +54,5 @@ else
         public string? Summary { get; set; }
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
-
 }
+
