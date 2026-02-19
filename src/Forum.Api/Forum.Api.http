@@ -1,6 +1,214 @@
-@Forum.Api_HostAddress = http://localhost:5141
+### ============================================================
+### GWT SMOKE TESTS
+### ============================================================
+### First run the API project.
+### Then execute these requests from top to bottom, in order.
+### ============================================================
 
-GET {{Forum.Api_HostAddress}}/weatherforecast/
+@baseUrl = http://localhost:5141
+
+### AUTH ENDPOINTS (/api/auth)
+# ============================================================
+
+### Scenario 1: Register a new user
+# Given: valid registration data with a unique username
+# When: POST /api/auth/register is called
+# Then: 200 OK with userId and token in response
+
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "smoketest_user",
+  "email": "smoketest@example.com",
+  "password": "Test123!"
+}
+
+> {%
+    client.global.set("newUserId", response.body.userId);
+    client.global.set("newUserToken", response.body.token);
+%}
+
+### Scenario 2: Login with valid credentials (admin)
+# Given: seeded admin user exists (admin / Admin123!)
+# When: POST /api/auth/login is called with correct credentials
+# Then: 200 OK with JWT token, userId, and username
+
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Admin123!"
+}
+
+> {%
+    client.global.set("adminToken", response.body.token);
+    client.global.set("adminUserId", response.body.userId);
+%}
+
+### Scenario 3: Login with valid credentials (regular user — john_doe)
+# Given: seeded regular user exists (john_doe / User123!)
+# When: POST /api/auth/login is called with correct credentials
+# Then: 200 OK with JWT token, userId, and username
+
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "password": "User123!"
+}
+
+> {%
+    client.global.set("regularToken", response.body.token);
+    client.global.set("regularUserId", response.body.userId);
+%}
+
+
+### CATEGORY ENDPOINTS (/api/categories)
+### ============================================================
+
+### Scenario 4: Get all categories
+# Given: seeded categories exist (General, Programming, News, Gaming, Sports)
+# When: GET /api/categories is called without authentication
+# Then: 200 OK with array of category objects
+
+GET {{baseUrl}}/api/categories
 Accept: application/json
 
-###
+### Scenario 5: Create category as admin
+# Given: user is authenticated as admin
+# When: POST /api/categories is called with a valid category name
+# Then: 201 Created with the new category object
+
+POST {{baseUrl}}/api/categories
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Smoke Test Category"
+}
+
+### Scenario 6: Create category as regular user (forbidden)
+# Given: user is authenticated as regular user (john_doe, no Admin role)
+# When: POST /api/categories is called
+# Then: 403 Forbidden (RequireRole("Admin") policy)
+
+POST {{baseUrl}}/api/categories
+Content-Type: application/json
+Authorization: Bearer {{regularToken}}
+
+{
+  "name": "Should Not Be Created"
+}
+
+
+### THREAD ENDPOINTS (/api/threads)
+### ============================================================
+
+### Scenario 7: Get all threads (paginated)
+# Given: seeded threads exist (5 threads across categories)
+# When: GET /api/threads is called without authentication
+# Then: 200 OK with paged result containing items, totalCount, pageNumber, pageSize
+
+GET {{baseUrl}}/api/threads
+Accept: application/json
+
+### Scenario 8: Get thread by existing ID
+# Given: thread with ID 1 exists ("Welcome to the Forum! Ask Anything!")
+# When: GET /api/threads/1 is called
+# Then: 200 OK with thread detail including bodyComment and comments array
+
+GET {{baseUrl}}/api/threads/1
+Accept: application/json
+
+### Scenario 9: Create thread as authenticated user
+# Given: john_doe is authenticated and category 1 (General) exists
+# When: POST /api/threads is called with title, categoryId, and body
+# Then: 201 Created with new thread object (body becomes first comment)
+
+POST {{baseUrl}}/api/threads
+Content-Type: application/json
+Authorization: Bearer {{regularToken}}
+
+{
+  "title": "Smoke Test Thread",
+  "categoryId": 1,
+  "body": "This is the body of the smoke test thread."
+}
+
+
+### COMMENT ENDPOINTS (/api/comments)
+### ============================================================
+
+### Scenario 10: Get comments by thread
+# Given: thread 1 has seeded comments ("Welcome to the Forum!")
+# When: GET /api/comments/thread/1 is called
+# Then: 200 OK with paged result of comments for that thread
+
+GET {{baseUrl}}/api/comments/thread/1?pageNumber=1&pageSize=50
+Accept: application/json
+
+### Scenario 11: Create comment as authenticated user
+# Given: john_doe is authenticated and thread 1 exists
+# When: POST /api/comments is called with threadId and content
+# Then: 201 Created with new comment object
+
+POST {{baseUrl}}/api/comments
+Content-Type: application/json
+Authorization: Bearer {{regularToken}}
+
+{
+  "threadId": 1,
+  "content": "This is a smoke test comment.",
+  "parentCommentId": null
+}
+
+### Scenario 12: Create comment without authentication
+# Given: no authentication token is provided
+# When: POST /api/comments is called
+# Then: 401 Unauthorized
+
+POST {{baseUrl}}/api/comments
+Content-Type: application/json
+
+{
+  "threadId": 1,
+  "content": "This should fail.",
+  "parentCommentId": null
+}
+
+
+### USER ENDPOINTS (/api/users)
+### ============================================================
+
+### Scenario 13: Get user profile by existing ID
+# Given: admin user exists (use the userId from admin_login response)
+# When: GET /api/users/{adminUserId} is called
+# Then: 200 OK with user profile (userName, email, recentThreads, recentComments)
+
+GET {{baseUrl}}/api/users/{{adminUserId}}
+Accept: application/json
+
+### Scenario 14: Update own profile
+# Given: john_doe is authenticated and updating their own profile
+# When: PUT /api/users/{regularUserId} is called with a new email
+# Then: 200 OK with updated profile
+
+PUT {{baseUrl}}/api/users/{{regularUserId}}
+Content-Type: application/json
+Authorization: Bearer {{regularToken}}
+
+{
+  "userName": "john_doe",
+  "email": "john_updated@example.com"
+}
+
+### Scenario 15: Get user profile by non-existent ID
+# Given: no user with ID "nonexistent-id-12345" exists
+# When: GET /api/users/nonexistent-id-12345 is called
+# Then: 404 Not Found
+
+GET {{baseUrl}}/api/users/nonexistent-id-12345
+Accept: application/json
