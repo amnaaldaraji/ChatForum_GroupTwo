@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+﻿using Forum.Application.DTOs.Thread;
+using Forum.Application.Features.Threads.Commands;
+using Forum.Application.Features.Threads.Queries;
+using Forum.Api.Extensions;
+using MediatR;
 
 namespace Forum.Api.Endpoints;
 
@@ -8,36 +10,68 @@ public static class ThreadEndpoints
 {
     public static IEndpointRouteBuilder MapThreadEndpoints(this IEndpointRouteBuilder app)
     {
-        // skapar en grupp för trådar med taggen "Threads"
-        var group = app.MapGroup("/api/threads").WithTags("Threads");
+        var group = app.MapGroup("/api/threads")
+            .WithTags("Threads");
 
-        // hämtar en lista med alla trådar
-        group.MapGet("/", () => Results.Ok(new { message = "threads list" }))
-            .WithName("ListThreads");
-
-        // hämtar en specifik tråd baserat på id
-        group.MapGet("/{id:int}", (int id) => Results.Ok(new { threadId = id }))
-            .WithName("GetThreadById");
-
-        // skapar en ny tråd
-        group.MapPost("/", (HttpContext ctx, ThreadCreateRequest dto) =>
+        // get paged list of threads
+        group.MapGet("/", async ([AsParameters] ThreadFilterParams filter, IMediator mediator, CancellationToken ct) =>
         {
-            var created = new { threadId = 1, title = dto.Title, categoryId = dto.CategoryId };
-            return Results.Created($"/api/threads/{created.threadId}", created);
-        }).WithName("CreateThread");
+            var result = await mediator.Send(new GetThreadsQuery(filter), ct);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : Results.BadRequest(new { result.Error });
+        })
+        .AllowAnonymous();
 
-        // uppdaterar en befintlig tråd
-        group.MapPut("/{id:int}", (int id, ThreadUpdateRequest dto) =>
-            Results.Ok(new { threadId = id, title = dto.Title, categoryId = dto.CategoryId }))
-            .WithName("UpdateThread");
+        // get thread by id
+        group.MapGet("/{id:int}", async (int id, IMediator mediator, CancellationToken ct) =>
+        {
+            var result = await mediator.Send(new GetThreadByIdQuery(id), ct);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : Results.NotFound(new { result.Error });
+        })
+        .WithName("GetThreadById")
+        .AllowAnonymous();
 
-        // tar bort en tråd
-        group.MapDelete("/{id:int}", (int id) => Results.NoContent())
-            .WithName("DeleteThread");
+        // create new thread
+        group.MapPost("/", async (CreateThreadDto dto, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
+        {
+            var userId = httpContext.User.GetUserId();
+            if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
+
+            var result = await mediator.Send(new CreateThreadCommand(userId, dto.Title, dto.CategoryId, dto.Body), ct);
+            return result.IsSuccess
+                ? Results.Created($"/api/threads/{result.Value!.ThreadId}", result.Value)
+                : Results.BadRequest(new { result.Error });
+        }).RequireAuthorization();
+
+        // update thread
+        group.MapPut("/{id:int}", async (int id, UpdateThreadDto dto, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
+        {
+            var userId = httpContext.User.GetUserId();
+            var isAdmin = httpContext.User.IsAdmin();
+            if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
+
+            var result = await mediator.Send(new UpdateThreadCommand(id, dto.Title, dto.CategoryId, userId, isAdmin), ct);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : Results.BadRequest(new { result.Error });
+        }).RequireAuthorization();
+
+        // delete thread
+        group.MapDelete("/{id:int}", async (int id, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
+        {
+            var userId = httpContext.User.GetUserId();
+            var isAdmin = httpContext.User.IsAdmin();
+            if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
+
+            var result = await mediator.Send(new DeleteThreadCommand(id, userId, isAdmin), ct);
+            return result.IsSuccess
+                ? Results.NoContent()
+                : Results.BadRequest(new { result.Error });
+        }).RequireAuthorization();
 
         return app;
     }
 }
-
-public record ThreadCreateRequest(string Title, int CategoryId, string? Body);
-public record ThreadUpdateRequest(string Title, int CategoryId);
