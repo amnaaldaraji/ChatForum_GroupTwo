@@ -2,25 +2,29 @@
 @page "/threads"
 @using Microsoft.AspNetCore.Components.Web
 @rendermode InteractiveServer
+
 <PageTitle>Sport Forum - Racing Comments</PageTitle>
+
 <div class="forum-view-wrapper">
     <nav class="breadcrumb-trail">
         SPORT FORUM > FORUMS > <strong>RACING COMMENTS</strong>
     </nav>
+
     <div class="forum-intro">
         <h1>Racing Comments</h1>
         <p>The place for debates on the current affairs and recent past of Formula 1, rallying, MotoGP and all other forms of motorsport.</p>
     </div>
+
     <div class="forum-toolbar">
         <div class="category-tabs-row">
             @foreach (var cat in Categories)
             {
-                var currentCat = cat;
-                <button type="button" 
-                        class="tab-link @(SelectedCategory == currentCat ? "active" : "")" 
-                        @onclick="() => SelectCategory(currentCat)">
-                    @currentCat.ToUpper()
-                </button>
+            var currentCat = cat;
+            <button type="button"
+                    class="tab-link @(SelectedCategory == currentCat ? "active" : "")"
+                    @onclick="() => SelectCategory(currentCat)">
+                @currentCat.ToUpper()
+            </button>
             }
         </div>
         <div class="forum-search-container">
@@ -28,195 +32,103 @@
             <input type="text" class="search-input" placeholder="Search this forum..." @bind="SearchText" @bind:event="oninput" />
         </div>
     </div>
+
     <div class="forum-table-container">
         <table class="autosport-table">
             <thead>
-                <tr>
-                    <th class="th-main">TOPIC</th>
-                    <th class="th-stats text-center">STATS</th>
-                    <th class="th-last">LAST POST</th>
-                </tr>
+            <tr>
+                <th class="th-main">TOPIC</th>
+                <th class="th-stats text-center">STATS</th>
+                <th class="th-last">LAST POST</th>
+            </tr>
             </thead>
             <tbody>
-                @{
-                    var displayThreads = GetFilteredThreads();
-                }
-                @if (!displayThreads.Any())
-                {
-                    <tr>
-                        <td colspan="3" class="no-results">
-                            No topics found matching your criteria in <strong>@SelectedCategory</strong>.
-                        </td>
-                    </tr>
-                }
-                else
-                {
-                    @foreach (var t in displayThreads)
-                    {
-                        <tr class="topic-row">
-                            <td class="td-main">
-                                <div class="topic-box">
-                                    <div class="status-indicator">
-                                        <i class="bi bi-chat-left-text-fill"></i>
-                                    </div>
-                                    <div class="topic-info">
-                                        <a href="javascript:void(0)" class="topic-title">@t.Title</a>
-                                        <div class="topic-subtext">
-                                            Started by <span class="author-bold">@t.Author</span>, @t.CreatedAt
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="td-stats text-center">
-                                <div class="stat-group">
-                                    <span class="stat-count">@t.RepliesCount.ToString("N0")</span>
-                                    <span class="stat-label">REPLIES</span>
-                                </div>
-                            </td>
-                            <td class="td-last">
-                                <div class="last-post-box">
-                                    <span class="lp-time">@t.LastActivity</span>
-                                    <span class="lp-author">By <span class="red-name">@t.LastPoster</span></span>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
+            @{
+            var displayThreads = GetFilteredThreads();
+            }
+            @if (!displayThreads.Any())
+            {
+            <tr>
+                <td colspan="3" class="no-results">
+                    No topics found matching your criteria in <strong>@SelectedCategory</strong>.
+                </td>
+            </tr>
+            }
+            else
+            {
+            @foreach (var t in displayThreads)
+            {
+            <tr class="topic-row">
+                <td class="td-main">
+                    <div class="topic-box">
+                        <div class="status-indicator">
+                            <i class="bi bi-chat-left-text-fill"></i>
+                        </div>
+                        <div class="topic-info">
+                            <a href="javascript:void(0)" class="topic-title">@t.Title</a>
+                            <div class="topic-subtext">
+                                Started by <span class="author-bold">@t.Author</span>, @t.CreatedAt
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="td-stats text-center">
+                    <div class="stat-group">
+                        <span class="stat-count">@t.RepliesCount.ToString("N0")</span>
+                        <span class="stat-label">REPLIES</span>
+                    </div>
+                </td>
+                <td class="td-last">
+                    <div class="last-post-box">
+                        <span class="lp-time">@t.LastActivity</span>
+                        <span class="lp-author">By <span class="red-name">@t.LastPoster</span></span>
+                    </div>
+                </td>
+            </tr>
+            }
+            }
             </tbody>
         </table>
     </div>
 </div>
-<style>
-    .forum-view-wrapper { padding: 10px 0; }
-    .breadcrumb-trail { 
-        font-size: 11px; 
-        font-weight: 700; 
-        color: #999; 
-        margin-bottom: 15px; 
-        letter-spacing: 0.5px;
-    }
-    .forum-intro h1 { 
-        font-size: 34px; 
-        font-weight: 900; 
-        color: #1a1a1a; 
-        margin: 0; 
-        letter-spacing: -1.2px; 
-    }
-    .forum-intro p { 
-        font-size: 14px; 
-        color: #666; 
-        margin: 10px 0 30px 0; 
-        line-height: 1.5; 
-        max-width: 850px; 
-    }
-    .forum-toolbar { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: flex-end; 
-        border-bottom: 3px solid #1a1a1a; 
-    }
-    .category-tabs-row { display: flex; gap: 2px; }
-    .tab-link { 
-        border: none; 
-        background: #e0e0e0; 
-        padding: 12px 22px; 
-        font-weight: 900; 
-        font-size: 12px; 
-        cursor: pointer; 
-        border-radius: 3px 3px 0 0; 
-        color: #444; 
-        transition: 0.2s;
-    }
-    .tab-link:hover { background: #d0d0d0; }
-    .tab-link.active { background: #1a1a1a; color: #fff; }
-    .forum-search-container { position: relative; margin-bottom: 8px; }
-    .search-input { 
-        border: 1px solid #ccc; 
-        padding: 8px 10px 8px 30px; 
-        font-size: 13px; 
-        width: 250px; 
-        outline: none;
-    }
-    .search-icon { 
-        position: absolute; 
-        left: 10px; 
-        top: 50%; 
-        transform: translateY(-50%); 
-        color: #999; 
-        font-size: 12px;
-    }
-    .forum-table-container { background: #fff; border: 1px solid #ddd; border-top: none; }
-    .autosport-table { width: 100%; border-collapse: collapse; }
-    .autosport-table th { 
-        background: #f4f4f4; 
-        padding: 12px 15px; 
-        font-size: 11px; 
-        font-weight: 800; 
-        color: #777; 
-        border-bottom: 1px solid #ddd; 
-        text-align: left; 
-    }
-    .topic-row { border-bottom: 1px solid #eee; transition: 0.1s; }
-    .topic-row:hover { background: #fcfcfc; }
-    .topic-row td { padding: 18px 15px; vertical-align: middle; }
-    .topic-box { display: flex; align-items: flex-start; gap: 15px; }
-    .status-indicator { color: #d0d0d0; font-size: 18px; margin-top: 2px; }
-    .topic-title { 
-        color: #0056b3; 
-        font-weight: 700; 
-        text-decoration: none; 
-        font-size: 18px; 
-        line-height: 1.2; 
-        display: block;
-    }
-    .topic-title:hover { text-decoration: underline; }
-    .topic-subtext { font-size: 12px; color: #888; margin-top: 5px; }
-    .author-bold { font-weight: 700; color: #555; }
-    .td-stats { width: 120px; border-left: 1px solid #f2f2f2; border-right: 1px solid #f2f2f2; }
-    .stat-group { display: flex; flex-direction: column; }
-    .stat-count { font-weight: 800; font-size: 16px; color: #333; }
-    .stat-label { font-size: 10px; color: #bbb; font-weight: 800; }
-    .text-center { text-align: center; }
-    .td-last { width: 220px; padding-left: 20px !important; }
-    .last-post-box { display: flex; flex-direction: column; font-size: 13px; line-height: 1.5; }
-    .lp-time { font-weight: 700; color: #444; }
-    .red-name { color: #e10600; font-weight: 800; }
-    .no-results { padding: 60px !important; text-align: center; color: #999; font-style: italic; }
-</style>
+
 @code {
-    private string SelectedCategory = "Formula 1";
-    private string SearchText = "";
-    private string[] Categories = ["Formula 1", "Fotboll", "Basket", "Sport (Allm�nt)"];
-    private record ThreadVm(
-        string Title, string Category, string Author, string CreatedAt, 
-        int RepliesCount, string LastActivity, string LastPoster);
-    private void SelectCategory(string category)
-    {
-        SelectedCategory = category;
-    }
-    private List<ThreadVm> GetFilteredThreads()
-    {
-        return BuildMockThreads()
-            .Where(t => t.Category.Equals(SelectedCategory, StringComparison.OrdinalIgnoreCase))
-            .Where(t => string.IsNullOrWhiteSpace(SearchText) || 
-                        t.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-    private List<ThreadVm> BuildMockThreads()
-    {
-        return new List<ThreadVm>
-        {
-            new("F1 2026: New Engine Regulations Discussion", "Formula 1", "Buttonneer", "Jan 30, 2026", 1245, "Today, 14:20", "MaxFan"),
-            new("Is Lewis Hamilton's move to Ferrari a mistake?", "Formula 1", "Tifosi_Red", "Feb 01, 2026", 892, "10m ago", "Charles_CL"),
-            new("The greatest Monaco GP of all time?", "Formula 1", "HistoryBuff", "Jan 15, 2026", 45, "Yesterday", "Senna1"),
-            new("Premier League Title Race: Liverpool vs City", "Fotboll", "Kloppite", "Feb 02, 2026", 3412, "Just now", "GoalMachine"),
-            new("Champions League Draw: All reactions here", "Fotboll", "UEFA_Watcher", "Feb 03, 2026", 562, "2h ago", "PitchKing"),
-            new("Is the VAR system actually improving the game?", "Fotboll", "RefJudge", "Feb 05, 2026", 128, "1h ago", "OffsideGuy"),
-            new("NBA All-Star Game: Who deserved the MVP?", "Basket", "HoopsJunkie", "Feb 04, 2026", 215, "Yesterday", "SlamDunk"),
-            new("The decline of mid-range shooting in the NBA", "Basket", "StatsGuy", "Feb 05, 2026", 45, "3d ago", "PointGuard"),
-            new("Olympic Games 2026: Ticket info released", "Sport (Allm�nt)", "WinterFan", "Jan 15, 2026", 12, "Last week", "Skier99"),
-            new("Tennis: Is the era of the 'Big Three' officially over?", "Sport (Allm�nt)", "RacketMan", "Jan 20, 2026", 89, "Today", "AceHigh")
-        };
-    }
+private string SelectedCategory = "Formula 1";
+private string SearchText = "";
+private string[] Categories = ["Formula 1", "Fotboll", "Basket", "Sport (Allmänt)"];
+
+private record ThreadVm(
+string Title, string Category, string Author, string CreatedAt,
+int RepliesCount, string LastActivity, string LastPoster);
+
+private void SelectCategory(string category)
+{
+SelectedCategory = category;
 }
 
+private List<ThreadVm> GetFilteredThreads()
+{
+return BuildMockThreads()
+.Where(t => t.Category.Equals(SelectedCategory, StringComparison.OrdinalIgnoreCase))
+.Where(t => string.IsNullOrWhiteSpace(SearchText) ||
+t.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+.ToList();
+}
+
+private List<ThreadVm> BuildMockThreads()
+{
+return new List<ThreadVm>
+{
+new("F1 2026: New Engine Regulations Discussion", "Formula 1", "Buttonneer", "Jan 30, 2026", 1245, "Today, 14:20", "MaxFan"),
+new("Is Lewis Hamilton's move to Ferrari a mistake?", "Formula 1", "Tifosi_Red", "Feb 01, 2026", 892, "10m ago", "Charles_CL"),
+new("The greatest Monaco GP of all time?", "Formula 1", "HistoryBuff", "Jan 15, 2026", 45, "Yesterday", "Senna1"),
+new("Premier League Title Race: Liverpool vs City", "Fotboll", "Kloppite", "Feb 02, 2026", 3412, "Just now", "GoalMachine"),
+new("Champions League Draw: All reactions here", "Fotboll", "UEFA_Watcher", "Feb 03, 2026", 562, "2h ago", "PitchKing"),
+new("Is the VAR system actually improving the game?", "Fotboll", "RefJudge", "Feb 05, 2026", 128, "1h ago", "OffsideGuy"),
+new("NBA All-Star Game: Who deserved the MVP?", "Basket", "HoopsJunkie", "Feb 04, 2026", 215, "Yesterday", "SlamDunk"),
+new("The decline of mid-range shooting in the NBA", "Basket", "StatsGuy", "Feb 05, 2026", 45, "3d ago", "PointGuard"),
+new("Olympic Games 2026: Ticket info released", "Sport (Allmänt)", "WinterFan", "Jan 15, 2026", 12, "Last week", "Skier99"),
+new("Tennis: Is the era of the 'Big Three' officially over?", "Sport (Allmänt)", "RacketMan", "Jan 20, 2026", 89, "Today", "AceHigh")
+};
+}
+}
