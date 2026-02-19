@@ -41,6 +41,6 @@ public class Result<T> : Result
         ? _value!
         : throw new InvalidOperationException("Cannot access value of a failed result.");
 
-    public static Result<T> Sucess(T value) => new(value);
+    public new static Result<T> Success(T value) => new(value);
     public new static Result<T> Failure(string error) => new (error);
 }
