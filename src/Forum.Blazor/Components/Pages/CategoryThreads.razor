@@ -1,61 +1,67 @@
-@page "/"
+@page "/category/{CategoryName}"
 @rendermode InteractiveServer
 
-<PageTitle>Sport Forum</PageTitle>
+<PageTitle>@CategoryName - Sport Forum</PageTitle>
 
-<link rel="stylesheet" href="/css/home.css" />
+<link rel="stylesheet" href="/css/category.css" />
 
-<div class="forum-home">
-    <div class="hero-section">
+<div class="category-page">
+    <div class="category-hero @(CategoryName.ToLower())">
         <div class="hero-content">
-            <h1 class="hero-title">Sport Forum</h1>
-            <p class="hero-description">The place for debates on current affairs and recent past of motorsport and all sports.</p>
+            <h1 class="category-title">@CategoryName.ToUpper()</h1>
+            <p class="category-description">discussions about @CategoryName.ToLower()</p>
         </div>
     </div>
 
-    @if (_categories == null)
+    @if (_threads == null)
     {
-        <div class="loading">loading categories...</div>
+        <div class="loading">loading threads...</div>
+    }
+    else if (!_threads.Any())
+    {
+        <div class="no-threads">no threads in @CategoryName yet. be the first to start a discussion!</div>
     }
     else
     {
-        @foreach (var category in _categories)
-        {
-            <div class="category-section">
-                <div class="category-header">
-                    <h2>@category.Name</h2>
-                    <a href="/category/@(category.Name.ToLower() == "Fotboll" ? "football" : category.Name.ToLower())" class="view-all-link">View all threads →</a>
-                </div>
-                
-                @if (category.RecentThreads == null || !category.RecentThreads.Any())
-                {
-                    <div class="no-threads">no threads in this category yet.</div>
-                }
-                else
-                {
-                    <div class="recent-threads">
-                        @foreach (var thread in category.RecentThreads.Take(3))
+        <div class="forum-view-wrapper">
+            <div class="autosport-table">
+                <table class="threads-table">
+                    <thead>
+                        <tr>
+                            <th>thread</th>
+                            <th>author</th>
+                            <th>replies</th>
+                            <th>last activity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var thread in _threads)
                         {
-                            <div class="thread-item">
-                                <div class="thread-info">
+                            <tr class="thread-row">
+                                <td class="thread-title-cell">
                                     <a href="/thread/@thread.Id" class="thread-title">@thread.Title</a>
-                                    <div class="thread-meta">
-                                        started by <span class="author">@thread.Author</span> • 
-                                        @thread.Created.ToString("MMM dd, yyyy") • 
-                                        @thread.CommentsCount replies
-                                    </div>
-                                </div>
-                            </div>
+                                </td>
+                                <td class="author-cell">@thread.Author</td>
+                                <td class="replies-cell">@thread.CommentsCount</td>
+                                <td class="activity-cell">@thread.Created.ToString("MMM dd, yyyy")</td>
+                            </tr>
                         }
-                    </div>
-                }
+                    </tbody>
+                </table>
             </div>
-        }
+        </div>
     }
+
+    <div class="create-thread-section">
+        <a href="/create-thread" class="btn btn-primary">create new thread</a>
+    </div>
 </div>
 
 @code {
-    private List<CategoryWithThreadsDto>? _categories;
+    [Parameter]
+    public string CategoryName { get; set; } = string.Empty;
+
+    private List<ThreadDto>? _threads;
 
     // thread dto with requested property names
     private record ThreadDto(
@@ -66,26 +72,22 @@
         int CommentsCount
     );
 
-    // temporary dto for home page
-    private record CategoryWithThreadsDto(
-        string Name,
-        List<ThreadDto> RecentThreads
-    );
-
     protected override void OnInitialized()
     {
-        LoadCategoriesAndThreads();
+        LoadCategoryThreads();
     }
 
-    private void LoadCategoriesAndThreads()
+    private void LoadCategoryThreads()
     {
-        // mockup data for all categories
-        _categories = [
-            new("Football", GetFootballThreads().Take(3).ToList()),
-            new("Basketball", GetBasketballThreads().Take(3).ToList()),
-            new("Tennis", GetTennisThreads().Take(3).ToList()),
-            new("Formula 1", GetFormula1Threads().Take(3).ToList())
-        ];
+        // mockup data for different sports categories
+        _threads = CategoryName.ToLower() switch
+        {
+            "football" => GetFootballThreads(),
+            "basketball" => GetBasketballThreads(),
+            "tennis" => GetTennisThreads(),
+            "formula1" => GetFormula1Threads(),
+            _ => []
+        };
     }
 
     // mockup football threads

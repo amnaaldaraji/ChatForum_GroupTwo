@@ -8,8 +8,14 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient("ForumApi", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5141");
+    client.BaseAddress = new Uri("https://localhost:7077/");
 });
+
+builder.Services.AddHttpClient("Default", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7077/");
+});
+
 
 builder.Services.AddScoped<TokenStorageService>();
 builder.Services.AddScoped<ApiAuthenticationStateProvider>();

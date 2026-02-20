@@ -1,0 +1,149 @@
+@page "/create-thread"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Create New Thread</PageTitle>
+
+<link rel="stylesheet" href="/css/create-thread.css" />
+
+<div class="create-thread-container">
+    <div class="form-header">
+        <h1>Create New Thread</h1>
+        <p>start a new discussion in the forum.</p>
+    </div>
+
+    @if (_isSubmitting)
+    {
+        <div class="submitting">creating thread...</div>
+    }
+    else
+    {
+        <EditForm Model="@_newThread" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            
+            <div class="form-group">
+                <label for="title">title</label>
+                <InputText id="title" @bind-Value="@_newThread.Title" class="form-control" />
+                <ValidationMessage For="@(() => _newThread.Title)" />
+            </div>
+
+            <div class="form-group">
+                <label for="category">category</label>
+                <select id="category" class="form-control" @bind="@_newThread.CategoryIdString">
+                    <option value="">select a category</option>
+                    @if (_categories != null)
+                    {
+                        @foreach (var category in _categories)
+                        {
+                            <option value="@category.CategoryId">@category.Name</option>
+                        }
+                    }
+                </select>
+                <ValidationMessage For="@(() => _newThread.CategoryIdString)" />
+            </div>
+
+            <div class="form-group">
+                <label for="body">message</label>
+                <InputTextArea id="body" @bind-Value="@_newThread.Body" class="form-control" rows="10" />
+                <ValidationMessage For="@(() => _newThread.Body)" />
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+                    create thread
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/", true))">
+                    cancel
+                </button>
+            </div>
+        </EditForm>
+    }
+
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="error-message">@_errorMessage</div>
+    }
+</div>
+
+@code {
+    private CreateThreadModel _newThread = new();
+    private List<CategoryDto>? _categories;
+    private bool _isSubmitting;
+    private string _errorMessage = string.Empty;
+
+    // model with validation attributes
+    public class CreateThreadModel
+    {
+        [Required(ErrorMessage = "title is required")]
+        [StringLength(200, MinimumLength = 3, ErrorMessage = "title must be between 3 and 200 characters")]
+        public string Title { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "category is required")]
+        public string CategoryIdString { get; set; } = string.Empty;
+
+        public int CategoryId => string.IsNullOrEmpty(CategoryIdString) ? 0 : int.Parse(CategoryIdString);
+
+        [Required(ErrorMessage = "message is required")]
+        [StringLength(2000, MinimumLength = 10, ErrorMessage = "message must be between 10 and 2000 characters")]
+        public string Body { get; set; } = string.Empty;
+
+        public CreateThreadDto ToDto() => new(Title, CategoryId, Body);
+    }
+
+    protected override void OnInitialized()
+    {
+        LoadCategories();
+    }
+
+    private void LoadCategories()
+    {
+        // mockup categories since API doesn't exist
+        _categories = [
+            new CategoryDto(1, "Football", 0),
+            new CategoryDto(2, "Basketball", 0),
+            new CategoryDto(3, "Tennis", 0),
+            new CategoryDto(4, "Formula 1", 0)
+        ];
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (_categories == null) return;
+
+        _isSubmitting = true;
+        _errorMessage = string.Empty;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/threads", _newThread.ToDto());
+            
+            if (response.IsSuccessStatusCode)
+            {
+                // navigate to threads page on success
+                var selectedCategory = _categories.FirstOrDefault(c => c.CategoryId == _newThread.CategoryId);
+                if (selectedCategory != null)
+                {
+                    NavigationManager.NavigateTo($"/category/{selectedCategory.Name}", true);
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/threads", true);
+                }
+            }
+            else
+            {
+                _errorMessage = "failed to create thread. please try again.";
+            }
+        }
+        catch
+        {
+            _errorMessage = "an error occurred while creating the thread.";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}
