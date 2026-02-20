@@ -15,6 +15,8 @@ builder.Services.AddScoped<TokenStorageService>();
 builder.Services.AddScoped<ApiAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<ApiAuthenticationStateProvider>());
+builder.Services.AddAuthentication("BlazorServer")
+    .AddCookie("BlazorServer");
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 
