@@ -13,6 +13,14 @@ public class UserService : ApiClientBase
     }
 
     /// <summary>
+    /// GET /api/users — returns all users (admin only).
+    /// </summary>
+    public async Task<List<UserDto>> GetAllAsync()
+    {
+        return await GetAuthenticatedAsync<List<UserDto>>("api/users") ?? [];
+    }
+
+    /// <summary>
     /// GET /api/users/{id} — returns user profile with recent threads and comments.
     /// </summary>
     public async Task<UserProfileDto?> GetProfileAsync(string id)
