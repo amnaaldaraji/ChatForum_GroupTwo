@@ -58,6 +58,7 @@ public class ThreadRepository : Repository<ThreadEntity>, IThreadRepository
             .Include(t => t.User)
             .Include(t => t.Category)
             .Include(t => t.Comments)
+                .ThenInclude(c => c.User)
             .AsQueryable();
         
         if (filterParams.CategoryId.HasValue)

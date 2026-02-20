@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Forum.Application.Common.Models;
 
 /// <summary>
@@ -15,6 +17,7 @@ public class PagedResult<T>
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber < TotalPages;
 
+    [JsonConstructor]
     public PagedResult(IReadOnlyList<T> items, int totalCount, int pageNumber, int pageSize)
     {
         Items = items;
