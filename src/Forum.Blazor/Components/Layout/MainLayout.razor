@@ -24,6 +24,15 @@
                     <li><a href="/category/basketball">Basketball</a></li>
                     <li><a href="/category/tennis">Tennis</a></li>
                     <li><a href="/category/formula1">Formula 1</a></li>
+                    <li><a href="/" class="active">News</a></li>
+                    <li><a href="/threads">Forums</a></li>
+                    <li><a href="/">Magazine</a></li>
+                    <li><a href="/">Live Results</a></li>
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <li><a href="/admin" class="admin-link">Admin</a></li>
+                        </Authorized>
+                    </AuthorizeView>
                 </ul>
             </div>
         </nav>

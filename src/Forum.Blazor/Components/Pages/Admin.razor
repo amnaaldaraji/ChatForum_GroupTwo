@@ -1,0 +1,332 @@
+@page "/admin"
+@rendermode InteractiveServer
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@inject CategoryService CategoryService
+@inject ThreadService ThreadService
+@inject UserService UserService
+@inject IJSRuntime JS
+
+<PageTitle>Admin Panel - Sport Forum</PageTitle>
+
+<div class="admin-wrapper">
+    <nav class="breadcrumb-trail">
+        SPORT FORUM > <strong>ADMIN PANEL</strong>
+    </nav>
+
+    <h1 class="admin-title">Admin Panel</h1>
+
+    <div class="admin-tabs">
+        <button class="admin-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
+        <button class="admin-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
+        <button class="admin-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="admin-status @(isError ? "error" : "success")">@statusMessage</div>
+    }
+
+    @* ===== CATEGORIES TAB ===== *@
+    @if (activeTab == "categories")
+    {
+        <div class="admin-section">
+            <h2>Manage Categories</h2>
+
+            <div class="admin-add-form">
+                <input type="text" class="admin-input" placeholder="New category name..." @bind="newCategoryName" />
+                <button class="btn-red" @onclick="AddCategory" disabled="@isLoading">Add Category</button>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Threads</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in categories)
+                    {
+                        <tr>
+                            <td>@cat.CategoryId</td>
+                            <td>@cat.Name</td>
+                            <td>@cat.ThreadCount</td>
+                            <td>
+                                <button class="btn-danger-sm" @onclick="() => DeleteCategory(cat.CategoryId, cat.Name)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @* ===== THREADS TAB ===== *@
+    @if (activeTab == "threads")
+    {
+        <div class="admin-section">
+            <h2>Manage Threads</h2>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (threads != null)
+                    {
+                        @foreach (var t in threads)
+                        {
+                            <tr>
+                                <td>@t.ThreadId</td>
+                                <td>@t.Title</td>
+                                <td>@t.AuthorUserName</td>
+                                <td>@t.CategoryName</td>
+                                <td>@t.TimeCreated.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <button class="btn-danger-sm" @onclick="() => DeleteThread(t.ThreadId, t.Title)">Delete</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            @if (threadsPaged != null && threadsPaged.TotalPages > 1)
+            {
+                <div class="admin-pagination">
+                    <button class="btn-outline-sm" disabled="@(threadsPage <= 1)" @onclick="PrevThreadsPage">Previous</button>
+                    <span>Page @threadsPage of @threadsPaged.TotalPages</span>
+                    <button class="btn-outline-sm" disabled="@(threadsPage >= threadsPaged.TotalPages)" @onclick="NextThreadsPage">Next</button>
+                </div>
+            }
+        </div>
+    }
+
+    @* ===== USERS TAB ===== *@
+    @if (activeTab == "users")
+    {
+        <div class="admin-section">
+            <h2>Manage Users</h2>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Threads</th>
+                        <th>Comments</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td>
+                                @if (editingUserId == user.Id)
+                                {
+                                    <input type="text" class="admin-input-inline" @bind="editingUserName" />
+                                }
+                                else
+                                {
+                                    @user.UserName
+                                }
+                            </td>
+                            <td>@(user.Email ?? "—")</td>
+                            <td>@user.ThreadCount</td>
+                            <td>@user.CommentCount</td>
+                            <td>@(user.IsDeleted ? "Deleted" : "Active")</td>
+                            <td class="admin-actions">
+                                @if (!user.IsDeleted)
+                                {
+                                    @if (editingUserId == user.Id)
+                                    {
+                                        <button class="btn-success-sm" @onclick="() => SaveUserName(user.Id)">Save</button>
+                                        <button class="btn-outline-sm" @onclick="CancelEditUser">Cancel</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn-outline-sm" @onclick="() => StartEditUser(user.Id, user.UserName)">Rename</button>
+                                        <button class="btn-danger-sm" @onclick="() => DeleteUser(user.Id, user.UserName)">Delete</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private string activeTab = "categories";
+    private string statusMessage = "";
+    private bool isError;
+    private bool isLoading;
+
+    // Categories
+    private List<CategoryDto> categories = [];
+    private string newCategoryName = "";
+
+    // Threads
+    private List<ThreadSummaryDto> threads = [];
+    private PagedResult<ThreadSummaryDto>? threadsPaged;
+    private int threadsPage = 1;
+
+    // Users
+    private List<UserDto> users = [];
+    private string? editingUserId;
+    private string editingUserName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+        await LoadThreads();
+        await LoadUsers();
+    }
+
+    private void SetStatus(string message, bool error = false)
+    {
+        statusMessage = message;
+        isError = error;
+    }
+
+    // ===== Categories =====
+    private async Task LoadCategories()
+    {
+        categories = await CategoryService.GetAllAsync();
+    }
+
+    private async Task AddCategory()
+    {
+        if (string.IsNullOrWhiteSpace(newCategoryName)) return;
+        isLoading = true;
+        var response = await CategoryService.CreateAsync(new CreateCategoryDto(newCategoryName.Trim()));
+        if (response.IsSuccessStatusCode)
+        {
+            newCategoryName = "";
+            await LoadCategories();
+            SetStatus("Category created.");
+        }
+        else
+        {
+            SetStatus("Failed to create category.", true);
+        }
+        isLoading = false;
+    }
+
+    private async Task DeleteCategory(int id, string name)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete category \"{name}\"? All threads in it will also be deleted.");
+        if (!confirmed) return;
+
+        var response = await CategoryService.DeleteAsync(id);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadCategories();
+            SetStatus($"Category \"{name}\" deleted.");
+        }
+        else
+        {
+            SetStatus("Failed to delete category.", true);
+        }
+    }
+
+    // ===== Threads =====
+    private async Task LoadThreads()
+    {
+        threadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams { PageNumber = threadsPage, PageSize = 20 });
+        threads = threadsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task DeleteThread(int id, string title)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete thread \"{title}\"?");
+        if (!confirmed) return;
+
+        var response = await ThreadService.DeleteAsync(id);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadThreads();
+            SetStatus($"Thread \"{title}\" deleted.");
+        }
+        else
+        {
+            SetStatus("Failed to delete thread.", true);
+        }
+    }
+
+    private async Task PrevThreadsPage()
+    {
+        if (threadsPage > 1) { threadsPage--; await LoadThreads(); }
+    }
+
+    private async Task NextThreadsPage()
+    {
+        if (threadsPaged != null && threadsPage < threadsPaged.TotalPages) { threadsPage++; await LoadThreads(); }
+    }
+
+    // ===== Users =====
+    private async Task LoadUsers()
+    {
+        users = await UserService.GetAllAsync();
+    }
+
+    private void StartEditUser(string id, string currentName)
+    {
+        editingUserId = id;
+        editingUserName = currentName;
+    }
+
+    private void CancelEditUser()
+    {
+        editingUserId = null;
+        editingUserName = "";
+    }
+
+    private async Task SaveUserName(string id)
+    {
+        if (string.IsNullOrWhiteSpace(editingUserName)) return;
+
+        var response = await UserService.UpdateAsync(id, new UpdateUserProfileDto(editingUserName.Trim(), null));
+        if (response.IsSuccessStatusCode)
+        {
+            editingUserId = null;
+            editingUserName = "";
+            await LoadUsers();
+            SetStatus("Username updated.");
+        }
+        else
+        {
+            SetStatus("Failed to update username.", true);
+        }
+    }
+
+    private async Task DeleteUser(string id, string name)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete user \"{name}\"? This is a soft-delete.");
+        if (!confirmed) return;
+
+        var response = await UserService.DeleteAsync(id);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadUsers();
+            SetStatus($"User \"{name}\" deleted.");
+        }
+        else
+        {
+            SetStatus("Failed to delete user.", true);
+        }
+    }
+}

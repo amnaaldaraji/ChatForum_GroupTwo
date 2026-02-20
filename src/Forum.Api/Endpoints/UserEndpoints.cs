@@ -2,7 +2,6 @@
 using Forum.Application.DTOs.User;
 using Forum.Application.Features.Users.Commands;
 using Forum.Application.Features.Users.Queries;
-using Microsoft.AspNetCore.Http;
 using MediatR;
 
 namespace Forum.Api.Endpoints;
@@ -12,6 +11,15 @@ public static class UserEndpoints
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/users").WithTags("Users");
+
+        // GET all users (Admin only)
+        group.MapGet("/", async (IMediator mediator, CancellationToken ct) =>
+        {
+            var result = await mediator.Send(new GetAllUsers(), ct);
+            return result.IsSuccess
+                ? Results.Ok(result.Value)
+                : Results.BadRequest(new { result.Error });
+        }).RequireAuthorization(p => p.RequireRole("Admin"));
 
         // GET a user profile by id using MediatR and return it if found
         group.MapGet("/{id}", async (string id, IMediator mediator, CancellationToken ct) =>
