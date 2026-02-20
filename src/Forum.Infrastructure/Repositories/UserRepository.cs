@@ -19,6 +19,17 @@ public class UserRepository : Repository<User>, IUserRepository
     }
 
     /// <summary>
+    /// Retrieves all users with their threads and comments eagerly loaded for count display.
+    /// </summary>
+    public override async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(u => u.Threads)
+            .Include(u => u.Comments)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Retrieves a user by their ID with their threads and comments eagerly loaded.
     /// For user profile views that display activity statistics.
     /// </summary>

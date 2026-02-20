@@ -24,6 +24,11 @@
                     <li><a href="/threads">Forums</a></li>
                     <li><a href="/">Magazine</a></li>
                     <li><a href="/">Live Results</a></li>
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <li><a href="/admin" class="admin-link">Admin</a></li>
+                        </Authorized>
+                    </AuthorizeView>
                 </ul>
             </div>
         </nav>
