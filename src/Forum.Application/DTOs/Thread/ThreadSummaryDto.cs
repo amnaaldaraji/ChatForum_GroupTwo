@@ -13,5 +13,7 @@ public record ThreadSummaryDto(
     string CategoryName,
     DateTime TimeCreated,
     DateTime TimeUpdated,
-    int CommentCount
+    int CommentCount,
+    string? LastPosterUserName,
+    DateTime? LastCommentTime
 );

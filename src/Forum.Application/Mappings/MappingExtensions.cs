@@ -44,16 +44,26 @@ public static class MappingExtensions
             ? DeletedUserName
             : thread.User?.UserName ?? string.Empty;
 
+        var lastComment = thread.Comments?
+            .OrderByDescending(c => c.TimeCreated)
+            .FirstOrDefault();
+
+        var lastPosterUserName = lastComment?.User?.IsDeleted == true
+            ? DeletedUserName
+            : lastComment?.User?.UserName;
+
         return new ThreadSummaryDto(
             thread.ThreadId,
             thread.Title,
             thread.UserId,
             authorUserName,
             thread.CategoryId,
-            thread.Category?.Name ?? string.Empty, 
+            thread.Category?.Name ?? string.Empty,
             thread.TimeCreated,
             thread.TimeUpdated,
-            thread.Comments?.Count ?? 0 
+            thread.Comments?.Count ?? 0,
+            lastPosterUserName,
+            lastComment?.TimeCreated
         );
     }
 
