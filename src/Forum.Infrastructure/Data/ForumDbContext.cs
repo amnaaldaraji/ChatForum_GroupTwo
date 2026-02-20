@@ -13,6 +13,19 @@ public class ForumDbContext : IdentityDbContext<User>
     public DbSet<Forum.Domain.Entities.Thread> Threads => Set<Forum.Domain.Entities.Thread>();
     public DbSet<Comment> Comments => Set<Comment>();
 
+    public static List<User> _users = new List<User>();
+
+    public bool SaveUser(User user)
+    {
+        bool isExist = _users.Any(x => x.Email == user.Email);
+        if (!isExist)
+        {
+            _users.Add(user);
+            return true;
+        }
+        return false;
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

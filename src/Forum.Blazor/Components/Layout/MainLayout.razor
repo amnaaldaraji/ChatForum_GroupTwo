@@ -1,3 +1,4 @@
+@inject NavigationManager Nav
 @inherits LayoutComponentBase
 
 <div class="site-wrapper">
@@ -13,7 +14,11 @@
                         <input type="text" class="search-input" placeholder="Search this forum..." />
                     </div>
                     <button class="btn-outline">Log In</button>
-                    <button class="btn-red">Register</button>
+
+                    <!-- Use NavLink for client-side routing; anchor provides a fallback full-page navigation -->
+                    <NavLink class="btn-outline" href="/register">Register</NavLink>
+                    <a class="btn-outline d-none" href="/register">Register (fallback)</a>
+
                 </div>
             </div>
         </div>
@@ -44,3 +49,10 @@
         </div>
     </footer>
 </div>
+
+@code {
+    private void GoToRegister()
+    {
+        Nav.NavigateTo("/register", forceLoad: true);
+    }
+}
