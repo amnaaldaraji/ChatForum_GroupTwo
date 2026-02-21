@@ -74,11 +74,14 @@ public static class DbSeeder
         // Prepare a list of default categories.
         var categories = new List<Category>
         {
-            new() { Name = "General" },
-            new() { Name = "Programming" },
-            new() { Name = "News" },
-            new() { Name = "Gaming" },
-            new() { Name = "Sports" }
+            new() { Name = "Formula 1" },
+            new() { Name = "Football" },
+            new() { Name = "Basketball" },
+            new() { Name = "Tennis" },
+            new() { Name = "Hockey" },
+            new() { Name = "Golf" },
+            new() { Name = "Cycling" },
+            new() { Name = "Rugby" }
         };
 
         // Add the categories to the context and save so they receive keys.
@@ -100,44 +103,76 @@ public static class DbSeeder
         // Sample Thread including their title, id created by and when they were created and updated.
         var threads = new List<ThreadEntity>
         {
+            // Formula 1
             new()
             {
-                Title = "Welcome to the Forum! Ask Anything!",
-                UserId = adminUser.Id,
+                Title = "2025 Season Predictions - Who takes the championship?",
+                UserId = regularUser.Id,
                 CategoryId = categories[0].CategoryId,
                 TimeCreated = DateTime.UtcNow.AddDays(-10),
                 TimeUpdated = DateTime.UtcNow.AddDays(-10)
             },
+            // Football
             new()
             {
-                Title = "What are the BEST programming languages?",
-                UserId = regularUser.Id,
+                Title = "Champions League Semi-Finals Discussion",
+                UserId = user2.Id,
                 CategoryId = categories[1].CategoryId,
                 TimeCreated = DateTime.UtcNow.AddDays(-8),
                 TimeUpdated = DateTime.UtcNow.AddDays(-7)
             },
+            // Basketball
             new()
             {
-                Title = "Best practices for ASP.NET Core",
-                UserId = user2.Id,
-                CategoryId = categories[1].CategoryId,
-                TimeCreated = DateTime.UtcNow.AddDays(-5),
-                TimeUpdated = DateTime.UtcNow.AddDays(-5)
-            },
-            new()
-            {
-                Title = "Latest AI developments",
+                Title = "NBA Playoffs - Who's making it out of the West?",
                 UserId = regularUser.Id,
                 CategoryId = categories[2].CategoryId,
+                TimeCreated = DateTime.UtcNow.AddDays(-6),
+                TimeUpdated = DateTime.UtcNow.AddDays(-5)
+            },
+            // Tennis
+            new()
+            {
+                Title = "Is Sinner the new GOAT?",
+                UserId = user2.Id,
+                CategoryId = categories[3].CategoryId,
+                TimeCreated = DateTime.UtcNow.AddDays(-5),
+                TimeUpdated = DateTime.UtcNow.AddDays(-4)
+            },
+            // Hockey
+            new()
+            {
+                Title = "Stanley Cup contenders this year",
+                UserId = adminUser.Id,
+                CategoryId = categories[4].CategoryId,
+                TimeCreated = DateTime.UtcNow.AddDays(-4),
+                TimeUpdated = DateTime.UtcNow.AddDays(-3)
+            },
+            // Golf
+            new()
+            {
+                Title = "Masters 2025 - Early favorites?",
+                UserId = regularUser.Id,
+                CategoryId = categories[5].CategoryId,
                 TimeCreated = DateTime.UtcNow.AddDays(-3),
                 TimeUpdated = DateTime.UtcNow.AddDays(-2)
             },
+            // Cycling
             new()
             {
-                Title = "What games are recommended?",
+                Title = "Tour de France route looks insane this year",
                 UserId = user2.Id,
-                CategoryId = categories[3].CategoryId,
+                CategoryId = categories[6].CategoryId,
                 TimeCreated = DateTime.UtcNow.AddDays(-2),
+                TimeUpdated = DateTime.UtcNow.AddDays(-1)
+            },
+            // Rugby
+            new()
+            {
+                Title = "Six Nations 2025 - Ireland vs France was incredible",
+                UserId = adminUser.Id,
+                CategoryId = categories[7].CategoryId,
+                TimeCreated = DateTime.UtcNow.AddDays(-1),
                 TimeUpdated = DateTime.UtcNow.AddDays(-1)
             }
         };
@@ -160,91 +195,157 @@ public static class DbSeeder
         // Prepare a list of sample comments tied to threads and users.
         var comments = new List<Comment>
         {
+            // Thread 0: F1 - body comment
             new()
             {
-                Content = "Welcome everyone! This is a place to discuss anything and everything. Please be respectful and follow the forum rules.",
-                UserId = adminUser.Id,
+                Content = "With the new regulations shaking things up, who do you think takes the 2025 Drivers' Championship? I'm leaning towards Verstappen again but Norris is looking seriously quick.",
+                UserId = regularUser.Id,
                 ThreadId = threads[0].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-10)
             },
+            // Thread 0: F1 - reply
             new()
             {
-                Content = "Thanks for creating this forum! Looking forward to great discussions.",
-                UserId = regularUser.Id,
+                Content = "McLaren have the best car right now. Norris finally has the machinery to fight for it. My money is on him.",
+                UserId = user2.Id,
                 ThreadId = threads[0].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-9)
             },
+            // Thread 0: F1 - reply
             new()
             {
-                Content = "I've been using C# for years and I absolutely love it. The ecosystem is great and it keeps getting better!",
-                UserId = regularUser.Id,
-                ThreadId = threads[1].ThreadId,
-                TimeCreated = DateTime.UtcNow.AddDays(-8)
+                Content = "Never count out Verstappen. He always finds another gear when it matters most.",
+                UserId = adminUser.Id,
+                ThreadId = threads[0].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-9).AddHours(2)
             },
+            // Thread 1: Football - body comment
             new()
             {
-                Content = "Python is my go-to for data science and scripting. The simplicity is unmatched.",
+                Content = "The Champions League semis are set! Real Madrid vs Arsenal and Barcelona vs Bayern. What are your predictions?",
                 UserId = user2.Id,
                 ThreadId = threads[1].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-8)
             },
+            // Thread 1: Football - reply
             new()
             {
-                Content = "Both are great! I think it really depends on what you're trying to build.",
-                UserId = adminUser.Id,
+                Content = "Arsenal finally have the squad depth to go all the way. Saka has been unreal this season.",
+                UserId = regularUser.Id,
                 ThreadId = threads[1].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-7)
             },
+            // Thread 1: Football - reply
             new()
             {
-                Content = "Use dependency injection properly, implement the repository pattern, and always use async/await for I/O operations.",
+                Content = "Real Madrid in the Champions League is a different beast. You just can't bet against them at the Bernabeu.",
+                UserId = adminUser.Id,
+                ThreadId = threads[1].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-7).AddHours(3)
+            },
+            // Thread 2: Basketball - body comment
+            new()
+            {
+                Content = "The Western Conference is stacked this year. Thunder, Nuggets, Wolves, and the Mavs all look dangerous. Who's your pick to make the Finals?",
+                UserId = regularUser.Id,
+                ThreadId = threads[2].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-6)
+            },
+            // Thread 2: Basketball - reply
+            new()
+            {
+                Content = "OKC Thunder all the way. SGA is playing at an MVP level and their defense is elite.",
                 UserId = user2.Id,
                 ThreadId = threads[2].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-5)
             },
+            // Thread 3: Tennis - body comment
             new()
             {
-                Content = "Don't forget about proper error handling and logging! Serilog is great for logging in ASP.NET Core.",
-                UserId = regularUser.Id,
-                ThreadId = threads[2].ThreadId,
+                Content = "Sinner has been dominating the hard courts and looking untouchable. With Djokovic winding down, is Sinner the next GOAT in the making?",
+                UserId = user2.Id,
+                ThreadId = threads[3].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-5)
             },
+            // Thread 3: Tennis - reply
             new()
             {
-                Content = "The recent advances in large language models are incredible. GPT-4 and Claude are game changers.",
+                Content = "He's incredible but let's not forget Alcaraz. Those two are going to have an epic rivalry for years to come.",
                 UserId = regularUser.Id,
                 ThreadId = threads[3].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-4)
+            },
+            // Thread 4: Hockey - body comment
+            new()
+            {
+                Content = "Who are your top Stanley Cup contenders? I think the Panthers are looking to repeat and Edmonton is hungry after last year's final loss.",
+                UserId = adminUser.Id,
+                ThreadId = threads[4].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-4)
+            },
+            // Thread 4: Hockey - reply
+            new()
+            {
+                Content = "The Rangers have been quietly building something special. Shesterkin is a wall and their offense is clicking.",
+                UserId = regularUser.Id,
+                ThreadId = threads[4].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-3)
             },
+            // Thread 5: Golf - body comment
             new()
             {
-                Content = "I agree! The capabilities are amazing, but we also need to be mindful of the ethical implications.",
-                UserId = adminUser.Id,
-                ThreadId = threads[3].ThreadId,
-                TimeCreated = DateTime.UtcNow.AddDays(-2)
-            },
-            // Baldur's gate is peak
-            new()
-            {
-                Content = "Currently playing Baldur's Gate 3. The depth and storytelling are phenomenal!",
-                UserId = user2.Id,
-                ThreadId = threads[4].ThreadId,
-                TimeCreated = DateTime.UtcNow.AddDays(-2)
-            },
-            new()
-            {
-                Content = "I've been meaning to try that! Right now I'm hooked on Elden Ring.",
+                Content = "Augusta is right around the corner. Who are your early picks to win the green jacket this year? Scheffler has to be the favorite.",
                 UserId = regularUser.Id,
-                ThreadId = threads[4].ThreadId,
+                ThreadId = threads[5].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-3)
+            },
+            // Thread 5: Golf - reply
+            new()
+            {
+                Content = "Scheffler is the obvious pick but watch out for Rory. He's due for a Masters win and has been playing incredible golf.",
+                UserId = user2.Id,
+                ThreadId = threads[5].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-2)
+            },
+            // Thread 6: Cycling - body comment
+            new()
+            {
+                Content = "Have you seen the Tour de France route? Multiple mountain stages back to back. This is going to be a war of attrition. Pogacar vs Vingegaard round 4!",
+                UserId = user2.Id,
+                ThreadId = threads[6].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-2)
+            },
+            // Thread 6: Cycling - reply
+            new()
+            {
+                Content = "Pogacar is on another level right now. After winning the Giro and Tour double last year, he's the clear favorite.",
+                UserId = adminUser.Id,
+                ThreadId = threads[6].ThreadId,
                 TimeCreated = DateTime.UtcNow.AddDays(-1)
+            },
+            // Thread 7: Rugby - body comment
+            new()
+            {
+                Content = "What a match! Ireland vs France in the Six Nations was an absolute classic. Ireland's defense in the last 10 minutes was heroic.",
+                UserId = adminUser.Id,
+                ThreadId = threads[7].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-1)
+            },
+            // Thread 7: Rugby - reply
+            new()
+            {
+                Content = "France were brilliant in attack but Ireland just know how to win these tight games. Grand Slam contenders for sure.",
+                UserId = regularUser.Id,
+                ThreadId = threads[7].ThreadId,
+                TimeCreated = DateTime.UtcNow.AddDays(-1).AddHours(3)
             }
         };
         // Create a reply linked to the second comment to demonstrate parent/child.
         var firstCommentWithReply = comments[1];
         var replyToFirstComment = new Comment
         {
-            Content = "Happy to have you here!",
-            UserId = adminUser.Id,
+            Content = "Exactly! The McLaren upgrades have been spot on all season.",
+            UserId = regularUser.Id,
             ThreadId = threads[0].ThreadId,
             ParentCommentId = firstCommentWithReply.CommentId,
             TimeCreated = DateTime.UtcNow.AddDays(-9).AddHours(1)
