@@ -1,5 +1,8 @@
-@page "/thread/{Id}"
+@page "/thread/{Id:int}"
 @rendermode InteractiveServer
+@inject ThreadService ThreadService
+
+<link rel="stylesheet" href="/css/thread-details.css" />
 
 <PageTitle>Thread Details</PageTitle>
 
@@ -15,35 +18,35 @@ else
 {
     <div class="thread-details">
         <div class="breadcrumb">
-            SPORT FORUM > @GetCategoryName(_thread.Id).ToUpper() > @_thread.Title
+            SPORT FORUM > @_thread.CategoryName.ToUpper() > @_thread.Title
         </div>
-        
+
         <div class="thread-header">
             <h1>@_thread.Title</h1>
             <div class="thread-meta">
-                <span>started by <strong>@_thread.Author</strong></span>
-                <span>@_thread.Created.ToString("MMM dd, yyyy")</span>
-                <span>in <strong>@GetCategoryName(_thread.Id)</strong></span>
+                <span>started by <strong>@_thread.AuthorUserName</strong></span>
+                <span>@_thread.TimeCreated.ToString("MMM dd, yyyy")</span>
+                <span>in <strong>@_thread.CategoryName</strong></span>
             </div>
         </div>
 
-        @if (!string.IsNullOrEmpty(_thread.Body))
+        @if (_thread.BodyComment != null && !string.IsNullOrEmpty(_thread.BodyComment.Content))
         {
             <div class="body-comment">
-                <div class="comment-content">@_thread.Body</div>
+                <div class="comment-content">@_thread.BodyComment.Content</div>
             </div>
         }
 
         <div class="comments-section">
-            <h3>comments (@_thread.CommentsCount)</h3>
-            
-            @if (!_comments.Any())
+            <h3>comments (@(_thread.Comments?.Count ?? 0))</h3>
+
+            @if (_thread.Comments == null || !_thread.Comments.Any())
             {
                 <div class="no-comments">no comments yet.</div>
             }
             else
             {
-                @foreach (var comment in _comments)
+                @foreach (var comment in _thread.Comments)
                 {
                     <div class="comment">
                         <div class="comment-header">
@@ -64,163 +67,12 @@ else
     </div>
 }
 
-<style>
-    .thread-details {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-    .breadcrumb {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 20px;
-        text-transform: uppercase;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 4px;
-    }
-    
-    .thread-header {
-        margin-bottom: 30px;
-        padding: 20px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .thread-header h1 {
-        margin-bottom: 15px;
-        color: #333;
-        font-size: 2em;
-    }
-    
-    .thread-meta {
-        display: flex;
-        gap: 20px;
-        color: #666;
-        font-size: 14px;
-    }
-    
-    .thread-meta span {
-        display: flex;
-        align-items: center;
-    }
-    
-    .thread-meta strong {
-        color: #333;
-    }
-    
-    .body-comment {
-        margin-bottom: 30px;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border-left: 4px solid #0066cc;
-    }
-    
-    .comment-content {
-        line-height: 1.6;
-        color: #333;
-    }
-    
-    .comments-section {
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .comments-section h3 {
-        margin-bottom: 20px;
-        color: #333;
-        font-size: 1.3em;
-        text-transform: uppercase;
-    }
-    
-    .comment {
-        margin-bottom: 20px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .comment:last-child {
-        border-bottom: none;
-    }
-    
-    .comment-header {
-        display: flex;
-        gap: 15px;
-        align-items: center;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
-    
-    .comment-header strong {
-        color: #333;
-        font-weight: 600;
-    }
-    
-    .comment-time {
-        color: #666;
-    }
-    
-    .reply-info {
-        color: #0066cc;
-        font-style: italic;
-    }
-    
-    .comment-body {
-        line-height: 1.5;
-        color: #333;
-        margin-left: 10px;
-    }
-    
-    .loading, .error {
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-        font-style: italic;
-        background: #f8f9fa;
-        border-radius: 8px;
-        margin: 20px 0;
-    }
-    
-    .error {
-        color: #d32f2f;
-        background: #ffebee;
-    }
-    
-    .no-comments {
-        text-align: center;
-        padding: 40px;
-        color: #666;
-        font-style: italic;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-</style>
-
 @code {
     [Parameter]
     public int Id { get; set; }
 
-    private ThreadDto? _thread;
-    private List<CommentDto> _comments = [];
+    private ThreadDetailDto? _thread;
     private bool _isLoading = true;
-
-    // thread dto with requested property names
-    private record ThreadDto(
-        int Id,
-        string Author,
-        DateTime Created,
-        string Title,
-        string Body,
-        int CommentsCount,
-        string CategoryName
-    );
 
     protected override async Task OnParametersSetAsync()
     {
@@ -232,12 +84,7 @@ else
         _isLoading = true;
         try
         {
-            // mockup thread data
-            _thread = GetMockThread(Id);
-            if (_thread != null)
-            {
-                _comments = GetMockComments(Id);
-            }
+            _thread = await ThreadService.GetByIdAsync(Id);
         }
         catch
         {
@@ -247,62 +94,5 @@ else
         {
             _isLoading = false;
         }
-    }
-
-    private string GetCategoryName(int threadId)
-    {
-        return threadId switch
-        {
-            <= 5 => "Football",
-            <= 10 => "Basketball",
-            <= 15 => "Tennis",
-            <= 20 => "Formula 1",
-            _ => "General"
-        };
-    }
-
-    private ThreadDto? GetMockThread(int id)
-    {
-        return id switch
-        {
-            1 => new(1, "JohnSmith", DateTime.Now.AddDays(-5), "Manchester United vs Liverpool - Match Discussion", "Who do you think will win this weekend's big match? I think United has the edge with their current form, but Liverpool is always dangerous at Anfield.", 45, "Football"),
-            2 => new(2, "FootballFan92", DateTime.Now.AddDays(-3), "Best Premier League Goals This Season", "Let's share the best goals we've seen so far this season. I'll start with Haaland's bicycle kick against West Ham - absolutely incredible!", 23, "Football"),
-            3 => new(3, "SoccerExpert", DateTime.Now.AddDays(-1), "World Cup 2026 Predictions", "Which teams are looking strong for the next World Cup? Argentina will be tough to beat, but France and Brazil are always contenders. What do you think?", 67, "Football"),
-            6 => new(6, "HoopsFan", DateTime.Now.AddDays(-4), "Lakers vs Celtics - Rivalry Renewed", "This classic matchup never gets old! Both teams are looking strong this season. Who do you think has the advantage?", 89, "Basketball"),
-            7 => new(7, "BasketballGuru", DateTime.Now.AddDays(-2), "LeBron James - Greatest of All Time?", "Is LeBron really the GOAT or is it Jordan? Let's have a respectful debate about this. Both have strong arguments!", 156, "Basketball"),
-            11 => new(11, "TennisPro", DateTime.Now.AddDays(-3), "Nadal vs Djokovic - Who Wins?", "The eternal debate continues. Both legends have dominated different eras. Who do you think is the greater player?", 203, "Tennis"),
-            12 => new(12, "ServeAce", DateTime.Now.AddDays(-1), "Wimbledon 2026 Favorites", "Who's taking the title this year? Alcaraz looks unstoppable on grass, but you can never count out the experienced players.", 67, "Tennis"),
-            16 => new(16, "F1Expert", DateTime.Now.AddDays(-2), "Verstappen Dominance - Too Much?", "Is Max making F1 boring or is he just that good? I think his dominance is similar to Schumacher's era - incredible but maybe too predictable.", 145, "Formula 1"),
-            17 => new(17, "RacingFan", DateTime.Now.AddDays(-1), "2026 Season Predictions", "Who can challenge Red Bull this year? Mercedes seems to be closing the gap, and Ferrari is always a threat.", 98, "Formula 1"),
-            _ => null
-        };
-    }
-
-    private List<CommentDto> GetMockComments(int threadId)
-    {
-        return threadId switch
-        {
-            1 => [
-                new(1, "I agree! United's midfield has been solid this season. Casemiro has been a game-changer.", "user1", "MikeJohnson", 1, null, null, DateTime.Now.AddDays(-4), 0, false),
-                new(2, "Come on! Liverpool at Anfield is a different beast. Salah will be hungry for goals against his former club.", "user2", "LiverpoolFan", 1, null, null, DateTime.Now.AddDays(-3), 0, false),
-                new(3, "I think it'll be a draw. Both teams are evenly matched right now.", "user3", "NeutralViewer", 1, null, null, DateTime.Now.AddDays(-2), 0, false)
-            ],
-            6 => [
-                new(4, "Lakers have LeBron and AD, but Celtics have better depth. This will be a close series!", "user4", "LakersFan4Life", 6, null, null, DateTime.Now.AddDays(-3), 0, false),
-                new(5, "Tatum is playing at MVP level. Celtics in 6 games!", "user5", "BostonStrong", 6, null, null, DateTime.Now.AddDays(-2), 0, false),
-                new(6, "Don't sleep about the Lakers' role players. Austin Reaves has been clutch this season.", "user6", "BasketballJunkie", 6, null, null, DateTime.Now.AddDays(-1), 0, false)
-            ],
-            11 => [
-                new(7, "Nadal on clay is unbeatable, but Djokovic is better on other surfaces. Overall, I'd give it to Djokovic.", "user7", "TennisLover", 11, null, null, DateTime.Now.AddDays(-2), 0, false),
-                new(8, "You can't discount Nadal's 22 Grand Slams! He's the greatest of all time, period.", "user8", "RafaFan", 11, null, null, DateTime.Now.AddDays(-1), 0, false),
-                new(9, "Both are legends. Let's just appreciate watching them play while we still can!", "user9", "TennisAnalyst", 11, null, null, DateTime.Now.AddHours(-12), 0, false)
-            ],
-            16 => [
-                new(10, "Verstappen is just operating on another level. It's not boring, it's historic dominance!", "user10", "F1Purist", 16, null, null, DateTime.Now.AddDays(-1), 0, false),
-                new(11, "I miss the days of wheel-to-wheel racing. F1 needs more competition at the front.", "user11", "RacingEnthusiast", 16, null, null, DateTime.Now.AddHours(-18), 0, false),
-                new(12, "Red Bull's aerodynamics are just superior. Other teams need to catch up technically.", "user12", "TechnicalExpert", 16, null, null, DateTime.Now.AddHours(-6), 0, false)
-            ],
-            _ => []
-        };
     }
 }

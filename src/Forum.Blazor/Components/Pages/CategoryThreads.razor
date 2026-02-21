@@ -1,15 +1,17 @@
 @page "/category/{CategoryName}"
 @rendermode InteractiveServer
+@inject CategoryService CategoryService
+@inject ThreadService ThreadService
 
 <PageTitle>@CategoryName - Sport Forum</PageTitle>
 
 <link rel="stylesheet" href="/css/category.css" />
+<link rel="stylesheet" href="/css/forum-table.css" />
 
 <div class="category-page">
-    <div class="category-hero @(CategoryName.ToLower())">
+    <div class="category-hero @(CategoryName?.ToLower())">
         <div class="hero-content">
-            <h1 class="category-title">@CategoryName.ToUpper()</h1>
-            <p class="category-description">discussions about @CategoryName.ToLower()</p>
+            <h1 class="category-title">@CategoryName?.ToUpper()</h1>
         </div>
     </div>
 
@@ -39,11 +41,11 @@
                         {
                             <tr class="thread-row">
                                 <td class="thread-title-cell">
-                                    <a href="/thread/@thread.Id" class="thread-title">@thread.Title</a>
+                                    <a href="/thread/@thread.ThreadId" class="thread-title">@thread.Title</a>
                                 </td>
-                                <td class="author-cell">@thread.Author</td>
-                                <td class="replies-cell">@thread.CommentsCount</td>
-                                <td class="activity-cell">@thread.Created.ToString("MMM dd, yyyy")</td>
+                                <td class="author-cell">@thread.AuthorUserName</td>
+                                <td class="replies-cell">@thread.CommentCount</td>
+                                <td class="activity-cell">@thread.TimeCreated.ToString("MMM dd, yyyy")</td>
                             </tr>
                         }
                     </tbody>
@@ -52,89 +54,45 @@
         </div>
     }
 
-    <div class="create-thread-section">
-        <a href="/create-thread" class="btn btn-primary">create new thread</a>
-    </div>
+    <AuthorizeView>
+        <Authorized>
+            <div class="create-thread-section">
+                <a href="/create-thread" class="btn btn-primary">create new thread</a>
+            </div>
+        </Authorized>
+    </AuthorizeView>
 </div>
 
 @code {
     [Parameter]
     public string CategoryName { get; set; } = string.Empty;
 
-    private List<ThreadDto>? _threads;
+    private List<ThreadSummaryDto>? _threads;
 
-    // thread dto with requested property names
-    private record ThreadDto(
-        int Id,
-        string Author,
-        DateTime Created,
-        string Title,
-        int CommentsCount
-    );
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadCategoryThreads();
+        await LoadCategoryThreads();
     }
 
-    private void LoadCategoryThreads()
+    private async Task LoadCategoryThreads()
     {
-        // mockup data for different sports categories
-        _threads = CategoryName.ToLower() switch
+        var categories = await CategoryService.GetAllAsync();
+        var category = categories?.FirstOrDefault(c =>
+            string.Equals(c.Name, CategoryName, StringComparison.OrdinalIgnoreCase));
+
+        if (category == null)
         {
-            "football" => GetFootballThreads(),
-            "basketball" => GetBasketballThreads(),
-            "tennis" => GetTennisThreads(),
-            "formula1" => GetFormula1Threads(),
-            _ => []
+            _threads = [];
+            return;
+        }
+
+        var filter = new ThreadFilterParams
+        {
+            CategoryId = category.CategoryId,
+            PageSize = 20,
+            SortBy = ThreadSortBy.Newest
         };
-    }
-
-    // mockup football threads
-    private List<ThreadDto> GetFootballThreads()
-    {
-        return [
-            new(1, "JohnSmith", DateTime.Now.AddDays(-5), "Manchester United vs Liverpool - Match Discussion", 45),
-            new(2, "FootballFan92", DateTime.Now.AddDays(-3), "Best Premier League Goals This Season", 23),
-            new(3, "SoccerExpert", DateTime.Now.AddDays(-1), "World Cup 2026 Predictions", 67),
-            new(4, "GoalKeeper", DateTime.Now.AddDays(-2), "Messi vs Ronaldo - Final Verdict", 128),
-            new(5, "TacticalMaster", DateTime.Now.AddDays(-4), "4-3-3 vs 3-5-2 Formation Analysis", 34)
-        ];
-    }
-
-    // mockup basketball threads
-    private List<ThreadDto> GetBasketballThreads()
-    {
-        return [
-            new(6, "HoopsFan", DateTime.Now.AddDays(-4), "Lakers vs Celtics - Rivalry Renewed", 89),
-            new(7, "BasketballGuru", DateTime.Now.AddDays(-2), "LeBron James - Greatest of All Time?", 156),
-            new(8, "ThreePointer", DateTime.Now.AddDays(-1), "NBA Playoffs Predictions 2026", 78),
-            new(9, "DunkMaster", DateTime.Now.AddDays(-3), "Best Dunks of the Season So Far", 45),
-            new(10, "PointGuard", DateTime.Now.AddDays(-5), "Stephen Curry's Legacy", 92)
-        ];
-    }
-
-    // mockup tennis threads
-    private List<ThreadDto> GetTennisThreads()
-    {
-        return [
-            new(11, "TennisPro", DateTime.Now.AddDays(-3), "Nadal vs Djokovic - Who Wins?", 203),
-            new(12, "ServeAce", DateTime.Now.AddDays(-1), "Wimbledon 2026 Favorites", 67),
-            new(13, "RacketMaster", DateTime.Now.AddDays(-4), "Best Tennis Rivalries of All Time", 134),
-            new(14, "BaselinePlayer", DateTime.Now.AddDays(-2), "Women's Tennis - New Era", 89),
-            new(15, "NetPlayer", DateTime.Now.AddDays(-5), "Grass vs Clay vs Hard Court", 56)
-        ];
-    }
-
-    // mockup formula 1 threads
-    private List<ThreadDto> GetFormula1Threads()
-    {
-        return [
-            new(16, "F1Expert", DateTime.Now.AddDays(-2), "Verstappen Dominance - Too Much?", 145),
-            new(17, "RacingFan", DateTime.Now.AddDays(-1), "2026 Season Predictions", 98),
-            new(18, "PitStop", DateTime.Now.AddDays(-4), "Best F1 Circuits in the World", 76),
-            new(19, "CheckeredFlag", DateTime.Now.AddDays(-3), "Hamilton's Future at Mercedes", 167),
-            new(20, "GrandPrix", DateTime.Now.AddDays(-5), "Classic F1 Races - Rewatch Discussion", 123)
-        ];
+        var result = await ThreadService.GetThreadsAsync(filter);
+        _threads = result?.Items?.ToList() ?? [];
     }
 }
