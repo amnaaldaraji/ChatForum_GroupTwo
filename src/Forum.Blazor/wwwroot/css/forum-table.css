@@ -3,20 +3,20 @@
 .breadcrumb-trail {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #8b949e;
     margin-bottom: 15px;
     letter-spacing: 0.5px;
 }
 .forum-intro h1 {
     font-size: 34px;
     font-weight: 900;
-    color: #1a1a1a;
+    color: #d1d5db;
     margin: 0;
     letter-spacing: -1.2px;
 }
 .forum-intro p {
     font-size: 14px;
-    color: #666;
+    color: #8b949e;
     margin: 10px 0 30px 0;
     line-height: 1.5;
     max-width: 850px;
@@ -25,75 +25,79 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    border-bottom: 3px solid #1a1a1a;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.1);
 }
 .category-tabs-row { display: flex; gap: 2px; }
 .tab-link {
     border: none;
-    background: #e0e0e0;
+    background: #2d333b;
     padding: 12px 22px;
     font-weight: 900;
     font-size: 12px;
     cursor: pointer;
     border-radius: 3px 3px 0 0;
-    color: #444;
+    color: #8b949e;
     transition: 0.2s;
 }
-.tab-link:hover { background: #d0d0d0; }
-.tab-link.active { background: #1a1a1a; color: #fff; }
+.tab-link:hover { background: #353c45; }
+.tab-link.active { background: #c44040; color: #fff; }
 
-/* Page search (light) */
+/* Page search (dark) */
 .forum-toolbar .forum-search-container { position: relative; margin-bottom: 8px; }
 .forum-toolbar .search-input {
-    border: 1px solid #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #2d333b;
+    color: #d1d5db;
     padding: 8px 10px 8px 30px;
     font-size: 13px;
     width: 250px;
     outline: none;
+    border-radius: 4px;
 }
+.forum-toolbar .search-input::placeholder { color: #8b949e; }
 .forum-toolbar .search-icon {
     position: absolute;
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #999;
+    color: #8b949e;
     font-size: 12px;
 }
 
-.forum-table-container { background: #fff; border: 1px solid #ddd; border-top: none; }
+.forum-table-container { background: #252a31; border: 1px solid rgba(255, 255, 255, 0.06); border-top: none; border-radius: 0 0 8px 8px; }
 .autosport-table { width: 100%; border-collapse: collapse; }
 .autosport-table th {
-    background: #f4f4f4;
+    background: #2d333b;
     padding: 12px 15px;
     font-size: 11px;
     font-weight: 800;
-    color: #777;
-    border-bottom: 1px solid #ddd;
+    color: #8b949e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     text-align: left;
 }
-.topic-row { border-bottom: 1px solid #eee; transition: 0.1s; }
-.topic-row:hover { background: #fcfcfc; }
+.topic-row { border-bottom: 1px solid rgba(255, 255, 255, 0.04); transition: 0.1s; }
+.topic-row:hover { background: rgba(110, 158, 207, 0.04); }
 .topic-row td { padding: 18px 15px; vertical-align: middle; }
 .topic-box { display: flex; align-items: flex-start; gap: 15px; }
-.status-indicator { color: #d0d0d0; font-size: 18px; margin-top: 2px; }
+.status-indicator { color: #555; font-size: 18px; margin-top: 2px; }
 .topic-title {
-    color: #0056b3;
+    color: #6e9ecf;
     font-weight: 700;
     text-decoration: none;
     font-size: 18px;
     line-height: 1.2;
     display: block;
 }
-.topic-title:hover { text-decoration: underline; }
-.topic-subtext { font-size: 12px; color: #888; margin-top: 5px; }
-.author-bold { font-weight: 700; color: #555; }
-.td-stats { width: 120px; border-left: 1px solid #f2f2f2; border-right: 1px solid #f2f2f2; }
+.topic-title:hover { text-decoration: underline; color: #85b1db; }
+.topic-subtext { font-size: 12px; color: #8b949e; margin-top: 5px; }
+.author-bold { font-weight: 700; color: #8b949e; }
+.td-stats { width: 120px; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05); }
 .stat-group { display: flex; flex-direction: column; }
-.stat-count { font-weight: 800; font-size: 16px; color: #333; }
-.stat-label { font-size: 10px; color: #bbb; font-weight: 800; }
+.stat-count { font-weight: 800; font-size: 16px; color: #d1d5db; }
+.stat-label { font-size: 10px; color: #666; font-weight: 800; }
 .text-center { text-align: center; }
 .td-last { width: 220px; padding-left: 20px !important; }
 .last-post-box { display: flex; flex-direction: column; font-size: 13px; line-height: 1.5; }
-.lp-time { font-weight: 700; color: #444; }
-.red-name { color: #e10600; font-weight: 800; }
-.no-results { padding: 60px !important; text-align: center; color: #999; font-style: italic; }
+.lp-time { font-weight: 700; color: #8b949e; }
+.red-name { color: #c44040; font-weight: 800; }
+.no-results { padding: 60px !important; text-align: center; color: #8b949e; font-style: italic; }

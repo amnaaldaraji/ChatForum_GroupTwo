@@ -3,40 +3,40 @@
 
 html, body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    background: #eef1f4;
-    color: #1f2937;
+    background: #1c2026;
+    color: #d1d5db;
 }
 
 a, .btn-link {
-    color: #1f5aa6;
+    color: #6e9ecf;
     text-decoration: none;
 }
 a:hover, .btn-link:hover {
-    color: #163f75;
+    color: #85b1db;
     text-decoration: underline;
 }
 .btn-primary {
     color: #fff;
-    background-color: #1f5aa6;
-    border-color: #1a4d8d;
+    background-color: #4a7299;
+    border-color: #3e6384;
 }
 .btn:focus,
 .btn:active:focus,
 .btn-link.nav-link:focus,
 .form-control:focus,
 .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem #ffffff, 0 0 0 0.25rem rgba(31, 90, 166, .25);
+    box-shadow: 0 0 0 0.1rem rgba(28, 32, 38, 0.5), 0 0 0 0.25rem rgba(110, 158, 207, 0.3);
 }
 .content { padding-top: 1.1rem; }
 h1:focus { outline: none; }
-.valid.modified:not([type=checkbox]) { outline: 1px solid #26b050; }
-.invalid { outline: 1px solid #e50000; }
-.validation-message { color: #e50000; }
-.darker-border-checkbox.form-check-input { border-color: #929292; }
+.valid.modified:not([type=checkbox]) { outline: 1px solid #3d8b5e; }
+.invalid { outline: 1px solid #c44040; }
+.validation-message { color: #c44040; }
+.darker-border-checkbox.form-check-input { border-color: #555; }
 .blazor-error-boundary {
-    background: #b32121;
+    background: #7a2c2c;
     padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
+    color: #d1d5db;
     position: relative;
 }
 .blazor-error-boundary::before {
@@ -73,19 +73,20 @@ h1:focus { outline: none; }
     justify-content: space-between;
 }
 .top-row-black {
-    background: #1a1a1a;
+    background: #15181d;
     padding: 12px 0;
-    color: white;
+    color: #d1d5db;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 .brand a {
     font-size: 30px;
     font-weight: 900;
-    color: white;
+    color: #d1d5db;
     text-decoration: none;
     letter-spacing: -1.5px;
     font-family: 'Arial Black', Gadget, sans-serif;
 }
-.red-text { color: #e10600; }
+.red-text { color: #c44040; }
 .user-actions {
     display: flex;
     align-items: center;
@@ -94,28 +95,29 @@ h1:focus { outline: none; }
 /* Header search (dark) */
 .top-row-black .forum-search-container { position: relative; margin-right: 15px; }
 .top-row-black .search-input {
-    border: 1px solid #444;
-    background: #333;
-    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #2d333b;
+    color: #d1d5db;
     padding: 5px 10px 5px 30px;
     font-size: 12px;
     width: 180px;
     outline: none;
     border-radius: 4px;
 }
+.top-row-black .search-input::placeholder { color: #8b949e; }
 .top-row-black .search-icon {
     position: absolute;
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #999;
+    color: #8b949e;
     font-size: 12px;
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid #444;
-    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #d1d5db;
     padding: 7px 18px;
     font-weight: 700;
     font-size: 11px;
@@ -123,24 +125,26 @@ h1:focus { outline: none; }
     cursor: pointer;
     margin-right: 10px;
     transition: 0.2s;
+    border-radius: 3px;
 }
-.btn-outline:hover { background: #333; }
+.btn-outline:hover { background: rgba(255, 255, 255, 0.06); }
 .btn-red {
-    background: #e10600;
+    background: #c44040;
     border: none;
-    color: white;
+    color: #fff;
     padding: 8px 19px;
     font-weight: 700;
     font-size: 11px;
     text-transform: uppercase;
     cursor: pointer;
     transition: 0.2s;
+    border-radius: 3px;
 }
-.btn-red:hover { background: #b30500; }
+.btn-red:hover { background: #a83535; }
 .sub-nav-white {
-    background: white;
-    border-bottom: 4px solid #e10600;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    background: #252a31;
+    border-bottom: 3px solid #c44040;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 .nav-menu {
     list-style: none;
@@ -151,19 +155,20 @@ h1:focus { outline: none; }
 .nav-menu li a {
     display: block;
     padding: 16px 20px;
-    color: #1a1a1a;
+    color: #d1d5db;
     text-decoration: none;
     font-weight: 800;
     text-transform: uppercase;
     font-size: 13px;
     letter-spacing: 0.5px;
+    transition: color 0.15s;
 }
-.nav-menu li a:hover, .nav-menu li a.active { color: #e10600; }
+.nav-menu li a:hover, .nav-menu li a.active { color: #c44040; text-decoration: none; }
 .main-footer {
-    background: #fff;
-    border-top: 1px solid #ddd;
+    background: #15181d;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 40px 0;
-    color: #888;
+    color: #8b949e;
     font-size: 12px;
 }
 .footer-content {
@@ -171,8 +176,8 @@ h1:focus { outline: none; }
     gap: 10px;
 }
 .footer-links a {
-    color: #888;
+    color: #8b949e;
     text-decoration: none;
     margin: 0 5px;
 }
-.footer-links a:hover { color: #333; }
+.footer-links a:hover { color: #d1d5db; }
