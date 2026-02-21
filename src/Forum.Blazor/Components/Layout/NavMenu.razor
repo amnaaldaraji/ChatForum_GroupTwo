@@ -1,11 +1,47 @@
-<div class="nav-item px-3">
-    <NavLink class="nav-link" href="threads/Formula 1">
-        <span class="bi bi-speedometer2" aria-hidden="true"></span> Formula 1
-    </NavLink>
-</div>
-<div class="nav-item px-3">
-    <NavLink class="nav-link" href="threads/Fotboll">
-        <span class="bi bi-trophy" aria-hidden="true"></span> Fotboll
-    </NavLink>
-</div>
+@rendermode InteractiveServer
+@inject CategoryService CategoryService
 
+<header class="main-header">
+    <div class="top-row-black">
+        <div class="header-container">
+            <div class="brand">
+                <a href="/">SPORT<span class="red-text">FORUM</span></a>
+            </div>
+            <div class="user-actions">
+                <div class="forum-search-container">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search this forum..." />
+                </div>
+                <button class="btn-outline">Log In</button>
+                <button class="btn-red">Register</button>
+            </div>
+        </div>
+    </div>
+    <nav class="sub-nav-white">
+        <div class="header-container">
+            <ul class="nav-menu">
+                @if (_categories != null)
+                {
+                    @foreach (var category in _categories)
+                    {
+                        <li><a href="/category/@category.Name">@category.Name</a></li>
+                    }
+                }
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <li><a href="/admin" class="admin-link">Admin</a></li>
+                    </Authorized>
+                </AuthorizeView>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+@code {
+    private List<CategoryDto>? _categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await CategoryService.GetAllAsync();
+    }
+}
