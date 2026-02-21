@@ -1,5 +1,7 @@
 @page "/create-thread"
-@inject HttpClient Http
+@attribute [Authorize]
+@inject CategoryService CategoryService
+@inject ThreadService ThreadService
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
@@ -22,7 +24,7 @@
         <EditForm Model="@_newThread" OnValidSubmit="@HandleSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
-            
+
             <div class="form-group">
                 <label for="title">title</label>
                 <InputText id="title" @bind-Value="@_newThread.Title" class="form-control" />
@@ -92,20 +94,10 @@
         public CreateThreadDto ToDto() => new(Title, CategoryId, Body);
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadCategories();
-    }
-
-    private void LoadCategories()
-    {
-        // mockup categories since API doesn't exist
-        _categories = [
-            new CategoryDto(1, "Football", 0),
-            new CategoryDto(2, "Basketball", 0),
-            new CategoryDto(3, "Tennis", 0),
-            new CategoryDto(4, "Formula 1", 0)
-        ];
+        var categories = await CategoryService.GetAllAsync();
+        _categories = categories?.ToList();
     }
 
     private async Task HandleSubmit()
@@ -117,8 +109,8 @@
 
         try
         {
-            var response = await Http.PostAsJsonAsync("api/threads", _newThread.ToDto());
-            
+            var response = await ThreadService.CreateAsync(_newThread.ToDto());
+
             if (response.IsSuccessStatusCode)
             {
                 // navigate to threads page on success

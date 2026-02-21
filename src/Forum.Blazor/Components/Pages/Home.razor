@@ -1,5 +1,7 @@
 @page "/"
 @rendermode InteractiveServer
+@inject CategoryService CategoryService
+@inject ThreadService ThreadService
 
 <PageTitle>Sport Forum</PageTitle>
 
@@ -24,9 +26,9 @@
             <div class="category-section">
                 <div class="category-header">
                     <h2>@category.Name</h2>
-                    <a href="/category/@(category.Name.ToLower() == "Fotboll" ? "football" : category.Name.ToLower())" class="view-all-link">View all threads →</a>
+                    <a href="/category/@category.Name" class="view-all-link">View all threads →</a>
                 </div>
-                
+
                 @if (category.RecentThreads == null || !category.RecentThreads.Any())
                 {
                     <div class="no-threads">no threads in this category yet.</div>
@@ -34,15 +36,15 @@
                 else
                 {
                     <div class="recent-threads">
-                        @foreach (var thread in category.RecentThreads.Take(3))
+                        @foreach (var thread in category.RecentThreads)
                         {
                             <div class="thread-item">
                                 <div class="thread-info">
-                                    <a href="/thread/@thread.Id" class="thread-title">@thread.Title</a>
+                                    <a href="/thread/@thread.ThreadId" class="thread-title">@thread.Title</a>
                                     <div class="thread-meta">
-                                        started by <span class="author">@thread.Author</span> • 
-                                        @thread.Created.ToString("MMM dd, yyyy") • 
-                                        @thread.CommentsCount replies
+                                        started by <span class="author">@thread.AuthorUserName</span> •
+                                        @thread.TimeCreated.ToString("MMM dd, yyyy") •
+                                        @thread.CommentCount replies
                                     </div>
                                 </div>
                             </div>
@@ -55,84 +57,34 @@
 </div>
 
 @code {
-    private List<CategoryWithThreadsDto>? _categories;
+    private List<CategoryWithThreads>? _categories;
 
-    // thread dto with requested property names
-    private record ThreadDto(
-        int Id,
-        string Author,
-        DateTime Created,
-        string Title,
-        int CommentsCount
-    );
-
-    // temporary dto for home page
-    private record CategoryWithThreadsDto(
-        string Name,
-        List<ThreadDto> RecentThreads
-    );
-
-    protected override void OnInitialized()
+    private class CategoryWithThreads
     {
-        LoadCategoriesAndThreads();
+        public string Name { get; set; } = string.Empty;
+        public List<ThreadSummaryDto> RecentThreads { get; set; } = [];
     }
 
-    private void LoadCategoriesAndThreads()
+    protected override async Task OnInitializedAsync()
     {
-        // mockup data for all categories
-        _categories = [
-            new("Football", GetFootballThreads().Take(3).ToList()),
-            new("Basketball", GetBasketballThreads().Take(3).ToList()),
-            new("Tennis", GetTennisThreads().Take(3).ToList()),
-            new("Formula 1", GetFormula1Threads().Take(3).ToList())
-        ];
-    }
+        var categories = await CategoryService.GetAllAsync();
+        if (categories == null) return;
 
-    // mockup football threads
-    private List<ThreadDto> GetFootballThreads()
-    {
-        return [
-            new(1, "JohnSmith", DateTime.Now.AddDays(-5), "Manchester United vs Liverpool - Match Discussion", 45),
-            new(2, "FootballFan92", DateTime.Now.AddDays(-3), "Best Premier League Goals This Season", 23),
-            new(3, "SoccerExpert", DateTime.Now.AddDays(-1), "World Cup 2026 Predictions", 67),
-            new(4, "GoalKeeper", DateTime.Now.AddDays(-2), "Messi vs Ronaldo - Final Verdict", 128),
-            new(5, "TacticalMaster", DateTime.Now.AddDays(-4), "4-3-3 vs 3-5-2 Formation Analysis", 34)
-        ];
-    }
-
-    // mockup basketball threads
-    private List<ThreadDto> GetBasketballThreads()
-    {
-        return [
-            new(6, "HoopsFan", DateTime.Now.AddDays(-4), "Lakers vs Celtics - Rivalry Renewed", 89),
-            new(7, "BasketballGuru", DateTime.Now.AddDays(-2), "LeBron James - Greatest of All Time?", 156),
-            new(8, "ThreePointer", DateTime.Now.AddDays(-1), "NBA Playoffs Predictions 2026", 78),
-            new(9, "DunkMaster", DateTime.Now.AddDays(-3), "Best Dunks of the Season So Far", 45),
-            new(10, "PointGuard", DateTime.Now.AddDays(-5), "Stephen Curry's Legacy", 92)
-        ];
-    }
-
-    // mockup tennis threads
-    private List<ThreadDto> GetTennisThreads()
-    {
-        return [
-            new(11, "TennisPro", DateTime.Now.AddDays(-3), "Nadal vs Djokovic - Who Wins?", 203),
-            new(12, "ServeAce", DateTime.Now.AddDays(-1), "Wimbledon 2026 Favorites", 67),
-            new(13, "RacketMaster", DateTime.Now.AddDays(-4), "Best Tennis Rivalries of All Time", 134),
-            new(14, "BaselinePlayer", DateTime.Now.AddDays(-2), "Women's Tennis - New Era", 89),
-            new(15, "NetPlayer", DateTime.Now.AddDays(-5), "Grass vs Clay vs Hard Court", 56)
-        ];
-    }
-
-    // mockup formula 1 threads
-    private List<ThreadDto> GetFormula1Threads()
-    {
-        return [
-            new(16, "F1Expert", DateTime.Now.AddDays(-2), "Verstappen Dominance - Too Much?", 145),
-            new(17, "RacingFan", DateTime.Now.AddDays(-1), "2026 Season Predictions", 98),
-            new(18, "PitStop", DateTime.Now.AddDays(-4), "Best F1 Circuits in the World", 76),
-            new(19, "CheckeredFlag", DateTime.Now.AddDays(-3), "Hamilton's Future at Mercedes", 167),
-            new(20, "GrandPrix", DateTime.Now.AddDays(-5), "Classic F1 Races - Rewatch Discussion", 123)
-        ];
+        _categories = [];
+        foreach (var cat in categories)
+        {
+            var filter = new ThreadFilterParams
+            {
+                CategoryId = cat.CategoryId,
+                PageSize = 3,
+                SortBy = ThreadSortBy.Newest
+            };
+            var result = await ThreadService.GetThreadsAsync(filter);
+            _categories.Add(new CategoryWithThreads
+            {
+                Name = cat.Name,
+                RecentThreads = result?.Items?.ToList() ?? []
+            });
+        }
     }
 }
