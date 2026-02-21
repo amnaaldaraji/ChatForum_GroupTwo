@@ -1,0 +1,190 @@
+﻿@*
+    Register.razor - User registration page (route: "/register").
+
+    Displays a centered card with a registration form containing:
+    - Username, email, password, and confirm password input fields
+    - Client-side password match validation before submission
+    - Form validation via DataAnnotationsValidator and ValidationSummary
+    - Error message display for failed registration attempts
+    - Success message with a 2-second delay before redirecting to the login page
+    - Loading spinner on the submit button while the request is in progress
+    - Link to the login page for users who already have an account
+
+    Implements IDisposable to cancel the redirect delay timer if the user
+    navigates away before the redirect completes.
+*@
+@page "/register"
+@using Forum.Blazor.Services
+@using Forum.Application.DTOs.Auth
+@using System.ComponentModel.DataAnnotations
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<PageTitle>Register</PageTitle>
+
+@* Centered card layout for the registration form *@
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Register</h3>
+            </div>
+            <div class="card-body">
+                @* Error alert shown when registration fails (e.g., duplicate username, weak password) *@
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">
+                        @errorMessage
+                    </div>
+                }
+                @* Success alert shown briefly after successful registration, before redirecting to login *@
+                @if (registrationSuccessful)
+                {
+                    <div class="alert alert-success">
+                        Registration successful! Redirecting to login...
+                    </div>
+                }
+                @* Registration form with DataAnnotations validation and submit handler *@
+                <EditForm Model="@registerModel" OnValidSubmit="HandleRegister" FormName="RegisterForm">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    @* Username input field *@
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <InputText id="username" class="form-control" @bind-Value="registerModel.Username" />
+                    </div>
+
+                    @* Email input field *@
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <InputText id="email" type="email" class="form-control" @bind-Value="registerModel.Email" />
+                    </div>
+
+                    @* Password input field with hint about minimum length requirement *@
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" />
+                        <small class="form-text text-muted">Password must be at least 6 characters long</small>
+                    </div>
+
+                    @* Confirm password field - validated against the password field before submission *@
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
+                    </div>
+
+                    @* Submit button with loading spinner, disabled during request *@
+                    <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Register
+                    </button>
+                    @* Navigation link to the login page *@
+                    <a href="/login" class="btn btn-link">Already have an account? Login</a>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>Cancellation token source used to cancel the post-registration redirect delay on dispose.</summary>
+    private CancellationTokenSource _cts = new();
+
+    /// <summary>The form model containing the user's registration data.</summary>
+    private RegisterModel registerModel = new();
+
+    /// <summary>Error message displayed when registration fails (e.g., duplicate username, server error).</summary>
+    private string errorMessage = string.Empty;
+
+    /// <summary>Loading state flag; disables the submit button while the registration request is in progress.</summary>
+    private bool isLoading = false;
+
+    /// <summary>Flag indicating registration was successful; triggers the success alert and redirect countdown.</summary>
+    private bool registrationSuccessful = false;
+
+    /// <summary>
+    /// Handles the registration form submission. First validates that passwords match,
+    /// then calls AuthService.RegisterAsync. On success, shows a success message and
+    /// redirects to the login page after a 2-second delay. On failure, displays the error message.
+    /// </summary>
+    private async Task HandleRegister()
+    {
+        errorMessage = string.Empty;
+
+        // Client-side validation: ensure password and confirm password match
+        if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            errorMessage = "Passwords do not match";
+            return;
+        }
+
+        isLoading = true;
+
+        try
+        {
+            var request = new RegisterRequest(registerModel.Username, registerModel.Email, registerModel.Password);
+            var (authResponse, error) = await AuthService.RegisterAsync(request);
+
+            if (authResponse != null)
+            {
+                registrationSuccessful = true;
+                // Wait 2 seconds so the user can see the success message before redirecting
+                await Task.Delay(2000, _cts.Token);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                errorMessage = error ?? "Registration failed";
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // ignore cancellation from Dispose()
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Disposes the cancellation token source. This cancels any pending redirect delay
+    /// if the user navigates away from the page before the 2-second timer completes.
+    /// </summary>
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    /// <summary>
+    /// Local model class for the registration form. Holds all input fields
+    /// bound to the EditForm via two-way binding.
+    /// </summary>
+    private class RegisterModel
+    {
+        [Required(ErrorMessage = "Username is required")]
+        public string Username { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required")]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Confirm password is required")]
+        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

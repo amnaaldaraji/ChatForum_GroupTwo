@@ -1,7 +1,34 @@
 @inherits LayoutComponentBase
 
 <div class="site-wrapper">
-    <NavMenu />
+    <header class="main-header">
+        <div class="top-row-black">
+            <div class="header-container">
+                <div class="brand">
+                    <a href="/">SPORT<span class="red-text">FORUM</span></a>
+                </div>
+                <div class="user-actions">
+                    <div class="forum-search-container">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Search this forum..." />
+                    </div>
+                    <button class="btn-outline">Log In</button>
+                    <NavLink class="btn-outline" href="/register">Register</NavLink>
+                    <a class="btn-outline d-none" href="/register">Register (fallback)</a>
+                </div>
+            </div>
+        </div>
+        <nav class="sub-nav-white">
+            <div class="header-container">
+                <ul class="nav-menu">
+                    <li><a href="/" class="active">News</a></li>
+                    <li><a href="/threads">Forums</a></li>
+                    <li><a href="/">Magazine</a></li>
+                    <li><a href="/">Live Results</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
 
     <main class="main-body">
         <div class="header-container">
@@ -13,7 +40,7 @@
         <div class="header-container footer-content">
             <p>&copy; 2026 Sport Forum Digital Media. All rights reserved.</p>
             <div class="footer-links">
-              | <a href="#" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">Back to the top</a> | 
+                <a href="#">About Us</a> | <a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a>
             </div>
         </div>
     </footer>
