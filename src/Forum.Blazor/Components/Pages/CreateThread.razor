@@ -1,13 +1,23 @@
 @page "/create-thread"
-@attribute [Authorize]
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
 
 <PageTitle>Create New Thread</PageTitle>
 
 <link rel="stylesheet" href="/css/create-thread.css" />
+
+<AuthorizeView>
+<NotAuthorized>
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 text-center">
+            <h3>Please log in</h3>
+            <p>You must be logged in to create a thread.</p>
+            <a href="/login" class="btn btn-primary">Log In</a>
+        </div>
+    </div>
+</NotAuthorized>
+<Authorized Context="authContext">
 
 <div class="create-thread-container">
     <div class="form-header">
@@ -56,7 +66,7 @@
                 <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
                     create thread
                 </button>
-                <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/", true))">
+                <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/"))">
                     cancel
                 </button>
             </div>
@@ -68,6 +78,9 @@
         <div class="error-message">@_errorMessage</div>
     }
 </div>
+
+</Authorized>
+</AuthorizeView>
 
 @code {
     private CreateThreadModel _newThread = new();
@@ -117,11 +130,11 @@
                 var selectedCategory = _categories.FirstOrDefault(c => c.CategoryId == _newThread.CategoryId);
                 if (selectedCategory != null)
                 {
-                    NavigationManager.NavigateTo($"/category/{selectedCategory.Name}", true);
+                    NavigationManager.NavigateTo($"/category/{selectedCategory.Name}");
                 }
                 else
                 {
-                    NavigationManager.NavigateTo("/threads", true);
+                    NavigationManager.NavigateTo("/threads");
                 }
             }
             else

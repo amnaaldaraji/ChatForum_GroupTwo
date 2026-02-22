@@ -1,7 +1,6 @@
-﻿@page "/register"
+@page "/register"
 @using Forum.Blazor.Services
-@using Forum.Application.DTOs.Auth
-@inject AuthService AuthService
+@inject IAuthClientService AuthService
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -82,41 +81,27 @@
 
         try
         {
-            var request = new RegisterRequest(
+            if (registerModel.Password != registerModel.ConfirmPassword)
+            {
+                errorMessage = "Passwords do not match.";
+                return;
+            }
+
+            var result = await AuthService.RegisterAsync(
                 registerModel.Username,
                 registerModel.Email,
                 registerModel.Password);
-            var resObj = (object)await AuthService.RegisterAsync(request);
 
-            if (resObj == null)
-            {
-                errorMessage = "Registration failed";
-            }
-            else if (resObj is ValueTuple<AuthResponse?, string?> tuple)
-            {
-                var authResponse = tuple.Item1;
-                var error = tuple.Item2;
-                if (authResponse != null)
-                {
-                    registrationSuccessful = true;
-                    await Task.Delay(2000, _cts.Token);
-                    Navigation.NavigateTo("/login");
-                }
-                else
-                {
-                    errorMessage = error ?? "Registration failed";
-                }
-            }
-            else if (resObj is AuthResponse authResp)
+            if (result.Succeeded)
             {
                 registrationSuccessful = true;
+                StateHasChanged();
                 await Task.Delay(2000, _cts.Token);
                 Navigation.NavigateTo("/login");
             }
             else
             {
-                // fallback for unexpected return shapes
-                errorMessage = "Registration failed";
+                errorMessage = result.ErrorMessage ?? "Registration failed.";
             }
         }
         catch (OperationCanceledException)

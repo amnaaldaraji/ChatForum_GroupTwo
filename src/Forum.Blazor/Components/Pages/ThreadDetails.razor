@@ -1,6 +1,8 @@
 @page "/thread/{Id:int}"
-@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+@using Forum.Application.DTOs.Comment
 @inject ThreadService ThreadService
+@inject CommentService CommentService
 
 <link rel="stylesheet" href="/css/thread-details.css" />
 
@@ -60,10 +62,52 @@ else
                         <div class="comment-body">
                             @comment.Content
                         </div>
+                        <AuthorizeView>
+                            <Authorized Context="replyAuth">
+                                @if (_replyingToCommentId == comment.CommentId)
+                                {
+                                    <div class="reply-form mt-2">
+                                        <textarea class="form-control" rows="2" placeholder="Write a reply to @comment.AuthorUserName..." @bind="_replyContent"></textarea>
+                                        <div class="mt-2">
+                                            <button class="btn btn-primary btn-sm" @onclick="() => SubmitReply(comment.CommentId)" disabled="@_isSubmitting">Reply</button>
+                                            <button class="btn btn-secondary btn-sm ms-1" @onclick="CancelReply">Cancel</button>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-link btn-sm p-0 mt-1" @onclick="() => StartReply(comment.CommentId)">Reply</button>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
                     </div>
                 }
             }
         </div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="add-comment">
+                    @if (!string.IsNullOrEmpty(_commentError))
+                    {
+                        <div class="alert alert-danger">@_commentError</div>
+                    }
+                    <textarea class="form-control" rows="3" placeholder="Write a comment..." @bind="_newCommentContent"></textarea>
+                    <button class="btn btn-primary mt-2" @onclick="SubmitComment" disabled="@_isSubmitting">
+                        @if (_isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Post Comment
+                    </button>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="login-prompt">
+                    <a href="/login">Login</a> or <a href="/register">register</a> to comment.
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 }
 
@@ -73,6 +117,11 @@ else
 
     private ThreadDetailDto? _thread;
     private bool _isLoading = true;
+    private string _newCommentContent = string.Empty;
+    private string _commentError = string.Empty;
+    private bool _isSubmitting;
+    private int? _replyingToCommentId;
+    private string _replyContent = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -93,6 +142,77 @@ else
         finally
         {
             _isLoading = false;
+        }
+    }
+
+    private void StartReply(int commentId)
+    {
+        _replyingToCommentId = commentId;
+        _replyContent = string.Empty;
+    }
+
+    private void CancelReply()
+    {
+        _replyingToCommentId = null;
+        _replyContent = string.Empty;
+    }
+
+    private async Task SubmitReply(int parentCommentId)
+    {
+        if (string.IsNullOrWhiteSpace(_replyContent))
+            return;
+
+        _isSubmitting = true;
+        try
+        {
+            var dto = new CreateCommentDto(_replyContent.Trim(), parentCommentId);
+            var response = await CommentService.CreateAsync(Id, dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _replyingToCommentId = null;
+                _replyContent = string.Empty;
+                await LoadThread();
+            }
+        }
+        catch { }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task SubmitComment()
+    {
+        _commentError = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_newCommentContent))
+        {
+            _commentError = "Comment cannot be empty.";
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            var dto = new CreateCommentDto(_newCommentContent.Trim());
+            var response = await CommentService.CreateAsync(Id, dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _newCommentContent = string.Empty;
+                await LoadThread();
+            }
+            else
+            {
+                _commentError = "Failed to post comment.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _commentError = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
         }
     }
 }
