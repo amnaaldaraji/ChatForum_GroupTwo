@@ -1,0 +1,148 @@
+﻿@page "/register"
+@using Forum.Blazor.Services
+@using Forum.Application.DTOs.Auth
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<PageTitle>Register</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Register</h3>
+            </div>
+            <div class="card-body">
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">
+                        @errorMessage
+                    </div>
+                }
+
+                @if (registrationSuccessful)
+                {
+                    <div class="alert alert-success">
+                        Registration successful! Redirecting to login...
+                    </div>
+                }
+
+                <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <InputText class="form-control" @bind-Value="registerModel.Username" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText type="email" class="form-control" @bind-Value="registerModel.Email" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <InputText type="password" class="form-control" @bind-Value="registerModel.Password" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <InputText type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Register
+                    </button>
+
+                    <a href="/login" class="btn btn-link">Already have an account? Login</a>
+
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private CancellationTokenSource _cts = new();
+    private RegisterModel registerModel = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+    private bool registrationSuccessful = false;
+
+    private async Task HandleRegister()
+    {
+        errorMessage = string.Empty;
+        isLoading = true;
+
+        try
+        {
+            var request = new RegisterRequest(
+                registerModel.Username,
+                registerModel.Email,
+                registerModel.Password);
+            var resObj = (object)await AuthService.RegisterAsync(request);
+
+            if (resObj == null)
+            {
+                errorMessage = "Registration failed";
+            }
+            else if (resObj is ValueTuple<AuthResponse?, string?> tuple)
+            {
+                var authResponse = tuple.Item1;
+                var error = tuple.Item2;
+                if (authResponse != null)
+                {
+                    registrationSuccessful = true;
+                    await Task.Delay(2000, _cts.Token);
+                    Navigation.NavigateTo("/login");
+                }
+                else
+                {
+                    errorMessage = error ?? "Registration failed";
+                }
+            }
+            else if (resObj is AuthResponse authResp)
+            {
+                registrationSuccessful = true;
+                await Task.Delay(2000, _cts.Token);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                // fallback for unexpected return shapes
+                errorMessage = "Registration failed";
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    private class RegisterModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}
