@@ -1,5 +1,6 @@
 using Forum.Application.Common.Models;
 using Forum.Application.DTOs.Comment;
+using Forum.Blazor.Interfaces;
 
 namespace Forum.Blazor.Services;
 
@@ -8,7 +9,7 @@ namespace Forum.Blazor.Services;
 /// </summary>
 public class CommentService : ApiClientBase
 {
-    public CommentService(IHttpClientFactory httpClientFactory, TokenStorageService tokenStorage)
+    public CommentService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenStorage)
         : base(httpClientFactory, tokenStorage)
     {
     }

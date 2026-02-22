@@ -1,0 +1,20 @@
+@page "/logout"
+@using Forum.Blazor.Services
+@inject IAuthClientService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Logging out...</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <p>Logging out...</p>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/");
+    }
+}

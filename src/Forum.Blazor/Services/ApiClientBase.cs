@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Forum.Blazor.Interfaces;
 
 namespace Forum.Blazor.Services;
 
@@ -11,7 +12,7 @@ namespace Forum.Blazor.Services;
 public abstract class ApiClientBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly TokenStorageService _tokenStorage;
+    private readonly ITokenStorageService _tokenStorage;
 
     /// <summary>
     /// Shared JSON options.
@@ -21,7 +22,7 @@ public abstract class ApiClientBase
         PropertyNameCaseInsensitive = true
     };
 
-    protected ApiClientBase(IHttpClientFactory httpClientFactory, TokenStorageService tokenStorage)
+    protected ApiClientBase(IHttpClientFactory httpClientFactory, ITokenStorageService tokenStorage)
     {
         _httpClientFactory = httpClientFactory;
         _tokenStorage = tokenStorage;
