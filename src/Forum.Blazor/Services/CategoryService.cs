@@ -1,4 +1,5 @@
 using Forum.Application.DTOs.Category;
+using Forum.Blazor.Interfaces;
 
 namespace Forum.Blazor.Services;
 
@@ -7,7 +8,7 @@ namespace Forum.Blazor.Services;
 /// </summary>
 public class CategoryService : ApiClientBase
 {
-    public CategoryService(IHttpClientFactory httpClientFactory, TokenStorageService tokenStorage)
+    public CategoryService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenStorage)
         : base(httpClientFactory, tokenStorage)
     {
     }

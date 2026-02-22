@@ -1,6 +1,4 @@
 @page "/admin"
-@rendermode InteractiveServer
-@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
 @inject UserService UserService
@@ -9,6 +7,18 @@
 <PageTitle>Admin Panel - Sport Forum</PageTitle>
 
 <link rel="stylesheet" href="/css/admin.css" />
+
+<AuthorizeView Roles="Admin">
+<NotAuthorized>
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 text-center">
+            <h3>Access Denied</h3>
+            <p>You must be an admin to view this page.</p>
+            <a href="/login" class="btn btn-primary">Log In</a>
+        </div>
+    </div>
+</NotAuthorized>
+<Authorized>
 
 <div class="admin-wrapper">
     <nav class="breadcrumb-trail">
@@ -171,6 +181,9 @@
     }
 </div>
 
+</Authorized>
+</AuthorizeView>
+
 @code {
     private string activeTab = "categories";
     private string statusMessage = "";
@@ -191,11 +204,18 @@
     private string? editingUserId;
     private string editingUserName = "";
 
-    protected override async Task OnInitializedAsync()
+    private bool _loaded;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadCategories();
-        await LoadThreads();
-        await LoadUsers();
+        if (firstRender && !_loaded)
+        {
+            _loaded = true;
+            await LoadCategories();
+            await LoadThreads();
+            await LoadUsers();
+            StateHasChanged();
+        }
     }
 
     private void SetStatus(string message, bool error = false)

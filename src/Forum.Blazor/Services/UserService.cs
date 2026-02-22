@@ -1,4 +1,5 @@
 using Forum.Application.DTOs.User;
+using Forum.Blazor.Interfaces;
 
 namespace Forum.Blazor.Services;
 
@@ -7,7 +8,7 @@ namespace Forum.Blazor.Services;
 /// </summary>
 public class UserService : ApiClientBase
 {
-    public UserService(IHttpClientFactory httpClientFactory, TokenStorageService tokenStorage)
+    public UserService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenStorage)
         : base(httpClientFactory, tokenStorage)
     {
     }

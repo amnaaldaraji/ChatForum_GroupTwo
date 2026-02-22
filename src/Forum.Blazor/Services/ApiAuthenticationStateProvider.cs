@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Forum.Blazor.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Forum.Blazor.Services;
@@ -10,12 +11,12 @@ namespace Forum.Blazor.Services;
 /// </summary>
 public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private readonly TokenStorageService _tokenStorage;
+    private readonly ITokenStorageService _tokenStorage;
 
     // A ClaimsPrincipal with no identity — represents an unauthenticated (anonymous) user.
     private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
-    public ApiAuthenticationStateProvider(TokenStorageService tokenStorage)
+    public ApiAuthenticationStateProvider(ITokenStorageService tokenStorage)
     {
         _tokenStorage = tokenStorage;
     }
@@ -32,18 +33,20 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
         var claims = ParseClaimsFromJwt(token);
         if (claims == null)
+        {
+            await _tokenStorage.RemoveTokenAsync();
             return new AuthenticationState(_anonymous);
+        }
 
-        // "jwt" is the authentication type — passing it makes IsAuthenticated = true
         var identity = new ClaimsIdentity(claims, "jwt");
         return new AuthenticationState(new ClaimsPrincipal(identity));
     }
 
     /// <summary>
     /// Immediately updates the authentication state after a successful login.
-    /// Triggers re-evaluation of all <AuthorizeView> components without a page reload.
+    /// Triggers re-evaluation of all AuthorizeView components without a page reload.
     /// </summary>
-    public void NotifyUserAuthentication(string token)
+    public void MarkUserAsAuthenticated(string token)
     {
         var claims = ParseClaimsFromJwt(token);
         var identity = claims != null
@@ -55,9 +58,9 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
     /// <summary>
     /// Resets the authentication state to anonymous after logout.
-    /// Triggers re-evaluation of all <AuthorizeView> components.
+    /// Triggers re-evaluation of all AuthorizeView components.
     /// </summary>
-    public void NotifyUserLogout()
+    public void MarkUserAsLoggedOut()
     {
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
     }
@@ -76,11 +79,24 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
             if (jwtToken.ValidTo < DateTime.UtcNow)
                 return null;
 
-            return jwtToken.Claims;
+            var claims = new List<Claim>();
+            foreach (var claim in jwtToken.Claims)
+            {
+                var mappedType = claim.Type switch
+                {
+                    "sub" => ClaimTypes.NameIdentifier,
+                    "unique_name" => ClaimTypes.Name,
+                    "email" => ClaimTypes.Email,
+                    "role" => ClaimTypes.Role,
+                    _ => claim.Type
+                };
+                claims.Add(new Claim(mappedType, claim.Value));
+            }
+
+            return claims;
         }
         catch
         {
-            // Incorrect token — treat as unauthenticated
             return null;
         }
     }

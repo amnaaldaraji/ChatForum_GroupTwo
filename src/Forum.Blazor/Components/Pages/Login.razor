@@ -1,7 +1,6 @@
-﻿@page "/login"
-@using Forum.Application.DTOs.Auth
+@page "/login"
 @using Forum.Blazor.Services
-@inject AuthService AuthService
+@inject IAuthClientService AuthService
 @inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
@@ -62,16 +61,15 @@
 
         try
         {
-            var request = new LoginRequest(loginModel.Username, loginModel.Password);
-            var authResponse = await AuthService.LoginAsync(request);
+            var result = await AuthService.LoginAsync(loginModel.Username, loginModel.Password);
 
-            if (authResponse != null)
+            if (result.Succeeded)
             {
                 Navigation.NavigateTo("/");
             }
             else
             {
-                errorMessage = "Invalid username or password";
+                errorMessage = result.ErrorMessage ?? "Invalid username or password.";
             }
         }
         catch (Exception ex)

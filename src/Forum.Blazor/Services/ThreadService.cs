@@ -1,6 +1,7 @@
 using System.Web;
 using Forum.Application.Common.Models;
 using Forum.Application.DTOs.Thread;
+using Forum.Blazor.Interfaces;
 
 namespace Forum.Blazor.Services;
 
@@ -9,7 +10,7 @@ namespace Forum.Blazor.Services;
 /// </summary>
 public class ThreadService : ApiClientBase
 {
-    public ThreadService(IHttpClientFactory httpClientFactory, TokenStorageService tokenStorage)
+    public ThreadService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenStorage)
         : base(httpClientFactory, tokenStorage)
     {
     }

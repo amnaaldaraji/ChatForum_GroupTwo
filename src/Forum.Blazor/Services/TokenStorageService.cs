@@ -1,61 +1,34 @@
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Forum.Blazor.Interfaces;
 
 namespace Forum.Blazor.Services;
 
 /// <summary>
-/// Wraps ProtectedSessionStorage to persist the JWT token across page navigations within the same browser session.
+/// Stores the JWT token in memory for the current circuit/session.
 /// </summary>
-public class TokenStorageService
+public class TokenStorageService : ITokenStorageService
 {
-    private const string TokenKey = "auth_token";
-    private readonly ProtectedSessionStorage _sessionStorage;
+    private string? _token;
 
-    public TokenStorageService(ProtectedSessionStorage sessionStorage)
+    /// <summary>
+    /// Retrieves the stored JWT token, or null if none exists.
+    /// </summary>
+    public Task<string?> GetTokenAsync() => Task.FromResult(_token);
+
+    /// <summary>
+    /// Stores the JWT token. Called after successful login/register.
+    /// </summary>
+    public Task SetTokenAsync(string token)
     {
-        _sessionStorage = sessionStorage;
+        _token = token;
+        return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Retrieves the stored JWT token, or null if none exists or during prerender.
+    /// Removes the JWT token. Called on logout.
     /// </summary>
-    public async Task<string?> GetTokenAsync()
+    public Task RemoveTokenAsync()
     {
-        try
-        {
-            var result = await _sessionStorage.GetAsync<string>(TokenKey);
-            return result.Success ? result.Value : null;
-        }
-        catch (InvalidOperationException)
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// Stores the JWT token in encrypted session storage. Called after successful login/register.
-    /// </summary>
-    public async Task SetTokenAsync(string token)
-    {
-        try
-        {
-            await _sessionStorage.SetAsync(TokenKey, token);
-        }
-        catch (InvalidOperationException)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Removes the JWT token from session storage. Called on logout.
-    /// </summary>
-    public async Task ClearTokenAsync()
-    {
-        try
-        {
-            await _sessionStorage.DeleteAsync(TokenKey);
-        }
-        catch (InvalidOperationException)
-        {
-        }
+        _token = null;
+        return Task.CompletedTask;
     }
 }
