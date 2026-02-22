@@ -83,7 +83,7 @@ public class ForumDbContext : IdentityDbContext<User>
             e.HasOne(x => x.ParentComment)
                 .WithMany(x => x.Replies)
                 .HasForeignKey(x => x.ParentCommentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
