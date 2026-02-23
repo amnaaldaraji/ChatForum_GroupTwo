@@ -34,7 +34,7 @@ public class GetCommentsByThreadHandler : IRequestHandler<GetCommentsByThreadQue
     {
         if (!await _threadRepository.ExistsAsync(t => t.ThreadId == request.ThreadId, cancellationToken))
         {
-            return Result.Failure<PagedResult<CommentDto>>("Thread not found.");
+            return Result.Failure<PagedResult<CommentDto>>("Thread not found.", ErrorType.NotFound);
         }
 
         // Build pagination params from the query parameters

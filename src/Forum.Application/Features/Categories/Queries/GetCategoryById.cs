@@ -34,7 +34,7 @@ public class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuery, Resu
         var category = await _categoryRepository.GetByIdWithThreadsAsync(request.CategoryId, cancellationToken);
         if (category == null)
         {
-            return Result.Failure<CategoryDto>("Category not found.");
+            return Result.Failure<CategoryDto>("Category not found.", ErrorType.NotFound);
         }
 
         return Result.Success(category.ToCategoryDto());

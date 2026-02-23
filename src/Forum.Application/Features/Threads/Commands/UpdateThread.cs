@@ -44,12 +44,12 @@ public class UpdateThreadHandler : IRequestHandler<UpdateThreadCommand, Result<T
         var thread = await _threadRepository.GetByIdWithDetailsAsync(request.ThreadId, cancellationToken);
         if (thread == null)
         {
-            return Result.Failure<ThreadDetailDto>("Thread not found.");
+            return Result.Failure<ThreadDetailDto>("Thread not found.", ErrorType.NotFound);
         }
         
         if (thread.UserId != request.UserId && !request.IsAdmin)
         {
-            return Result.Failure<ThreadDetailDto>("You are not authorized to update this thread.");
+            return Result.Failure<ThreadDetailDto>("You are not authorized to update this thread.", ErrorType.Forbidden);
         }
         
         if (request.Title != null)
@@ -65,7 +65,7 @@ public class UpdateThreadHandler : IRequestHandler<UpdateThreadCommand, Result<T
         {
             if (!await _categoryRepository.ExistsAsync(c => c.CategoryId == request.CategoryId.Value, cancellationToken))
             {
-                return Result.Failure<ThreadDetailDto>("Category not found.");
+                return Result.Failure<ThreadDetailDto>("Category not found.", ErrorType.NotFound);
             }
             thread.CategoryId = request.CategoryId.Value;
         }

@@ -37,17 +37,17 @@ public class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand, Result
         var comment = await _commentRepository.GetByIdWithDetailsAsync(request.CommentId, cancellationToken);
         if (comment == null)
         {
-            return Result.Failure("Comment not found.");
+            return Result.Failure("Comment not found.", ErrorType.NotFound);
         }
         
         if (comment.IsDeleted)
         {
-            return Result.Failure("Comment is already deleted.");
+            return Result.Failure("Comment is already deleted.", ErrorType.Conflict);
         }
         
         if (comment.UserId != request.UserId && !request.IsAdmin)
         {
-            return Result.Failure("You are not authorized to delete this comment.");
+            return Result.Failure("You are not authorized to delete this comment.", ErrorType.Forbidden);
         }
 
         // The first comment in a thread serves as the thread body.
@@ -55,7 +55,7 @@ public class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand, Result
         var firstComment = await _commentRepository.GetFirstCommentByThreadIdAsync(comment.ThreadId, cancellationToken);
         if (firstComment != null && firstComment.CommentId == request.CommentId)
         {
-            return Result.Failure("Cannot delete the thread body comment. Delete the thread instead.");
+            return Result.Failure("Cannot delete the thread body comment. Delete the thread instead.", ErrorType.Conflict);
         }
 
         // Soft-delete: set IsDeleted flag (content will display as "[deleted]", replies are preserved)

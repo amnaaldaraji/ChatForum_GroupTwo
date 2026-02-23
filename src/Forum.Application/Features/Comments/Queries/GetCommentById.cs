@@ -35,7 +35,7 @@ public class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery, Result
         var comment = await _commentRepository.GetByIdWithDetailsAsync(request.CommentId, cancellationToken);
         if (comment == null)
         {
-            return Result.Failure<CommentDto>("Comment not found.");
+            return Result.Failure<CommentDto>("Comment not found.", ErrorType.NotFound);
         }
 
         // Map to DTO (soft-delete display logic applied in mapping: "[deleted]" content, "Deleted User" username)

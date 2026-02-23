@@ -34,12 +34,12 @@ public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Resu
         var category = await _categoryRepository.GetByIdWithThreadsAsync(request.CategoryId, cancellationToken);
         if (category == null)
         {
-            return Result.Failure("Category not found.");
+            return Result.Failure("Category not found.", ErrorType.NotFound);
         }
         
         if (category.Threads?.Count > 0)
         {
-            return Result.Failure("Cannot delete category that contains threads.");
+            return Result.Failure("Cannot delete category that contains threads.", ErrorType.Conflict);
         }
         
         _categoryRepository.Delete(category);

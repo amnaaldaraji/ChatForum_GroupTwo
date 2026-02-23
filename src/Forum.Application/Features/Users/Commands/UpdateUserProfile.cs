@@ -40,18 +40,18 @@ public class UpdateUserProfileHandler : IRequestHandler<UpdateUserProfileCommand
     {
         if (request.UserId != request.RequestingUserId && !request.IsAdmin)
         {
-            return Result.Failure<UserDto>("You are not authorized to update this profile.");
+            return Result.Failure<UserDto>("You are not authorized to update this profile.", ErrorType.Forbidden);
         }
         
         var user = await _userRepository.GetByIdWithDetailsAsync(request.UserId, cancellationToken);
         if (user == null)
         {
-            return Result.Failure<UserDto>("User not found.");
+            return Result.Failure<UserDto>("User not found.", ErrorType.NotFound);
         }
         
         if (user.IsDeleted)
         {
-            return Result.Failure<UserDto>("Cannot update a deleted user.");
+            return Result.Failure<UserDto>("Cannot update a deleted user.", ErrorType.Conflict);
         }
         
         if (request.UserName != null)
@@ -63,7 +63,7 @@ public class UpdateUserProfileHandler : IRequestHandler<UpdateUserProfileCommand
             
             if (await _userRepository.UserNameExistsAsync(request.UserName, request.UserId, cancellationToken))
             {
-                return Result.Failure<UserDto>("Username is already taken.");
+                return Result.Failure<UserDto>("Username is already taken.", ErrorType.Conflict);
             }
             
             user.UserName = request.UserName.Trim();
@@ -79,7 +79,7 @@ public class UpdateUserProfileHandler : IRequestHandler<UpdateUserProfileCommand
             
             if (await _userRepository.EmailExistsAsync(request.Email, request.UserId, cancellationToken))
             {
-                return Result.Failure<UserDto>("Email is already in use.");
+                return Result.Failure<UserDto>("Email is already in use.", ErrorType.Conflict);
             }
             
             user.Email = request.Email.Trim();
