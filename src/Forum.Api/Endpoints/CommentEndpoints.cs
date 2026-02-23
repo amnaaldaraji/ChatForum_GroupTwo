@@ -20,7 +20,7 @@ public static class CommentEndpoints
             var result = await mediator.Send(new GetCommentByIdQuery(id), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.NotFound(new { result.Error });
+                : result.ToProblemDetails();
         })
         .WithName("GetCommentById")
         .AllowAnonymous();
@@ -31,7 +31,7 @@ public static class CommentEndpoints
             var result = await mediator.Send(new GetCommentsByThreadQuery(threadId, pageNumber, pageSize), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         })
         .AllowAnonymous();
 
@@ -44,7 +44,7 @@ public static class CommentEndpoints
             var result = await mediator.Send(new CreateCommentCommand(userId, threadId, dto.Content, dto.ParentCommentId), ct);
             return result.IsSuccess
                 ? Results.Created($"/api/comments/{result.Value!.CommentId}", result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         // update comment
@@ -57,7 +57,7 @@ public static class CommentEndpoints
             var result = await mediator.Send(new UpdateCommentCommand(id, dto.Content, userId, isAdmin), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         // delete comment
@@ -70,7 +70,7 @@ public static class CommentEndpoints
             var result = await mediator.Send(new DeleteCommentCommand(id, userId, isAdmin), ct);
             return result.IsSuccess
                 ? Results.NoContent()
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         return app;

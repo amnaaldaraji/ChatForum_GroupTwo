@@ -22,9 +22,15 @@ public static class AuthEndpoints
         group.MapPost("/register", async (RegisterRequest request, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new RegisterUserCommand(request.Username, request.Email, request.Password), ct);
-            return result.IsSuccess
-                ? Results.Ok(result.Value)
-                : Results.BadRequest(new { Errors = result.Error!.Split("; ") });
+            if (result.IsSuccess)
+                return Results.Ok(result.Value);
+
+            var errors = result.Error!.Split("; ");
+            return Results.Problem(
+                title: "Bad Request",
+                detail: result.Error,
+                statusCode: StatusCodes.Status400BadRequest,
+                extensions: new Dictionary<string, object?> { ["errors"] = errors });
         }).AllowAnonymous();
 
         // POST /api/auth/login
@@ -34,7 +40,10 @@ public static class AuthEndpoints
             var result = await mediator.Send(new LoginUserCommand(request.Username, request.Password), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.Unauthorized();
+                : Results.Problem(
+                    title: "Unauthorized",
+                    detail: result.Error,
+                    statusCode: StatusCodes.Status401Unauthorized);
         }).AllowAnonymous();
 
         // POST /api/auth/logout

@@ -302,7 +302,14 @@
     // ===== Users =====
     private async Task LoadUsers()
     {
-        users = await UserService.GetAllAsync();
+        try
+        {
+            users = await UserService.GetAllAsync();
+        }
+        catch (HttpRequestException)
+        {
+            SetStatus("Failed to load users. You may not have admin permissions.", true);
+        }
     }
 
     private void StartEditUser(string id, string currentName)

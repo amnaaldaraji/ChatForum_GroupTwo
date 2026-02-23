@@ -18,7 +18,7 @@ public static class UserEndpoints
             var result = await mediator.Send(new GetAllUsers(), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization(p => p.RequireRole("Admin"));
 
         // GET a user profile by id using MediatR and return it if found
@@ -28,7 +28,7 @@ public static class UserEndpoints
             var result = await mediator.Send(new GetUserProfileQuery(id), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.NotFound(new { result.Error });
+                : result.ToProblemDetails();
         })
         // Give this endpoint a stable name for its routing.
         // Makes it simpler to reference for later.
@@ -57,11 +57,7 @@ public static class UserEndpoints
             var result = await mediator.Send(new UpdateUserProfileCommand(id, dto.UserName, dto.Email, userId, isAdmin), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                // Made the error response more standardized and cooler looking
-                : Results.Problem(
-                 title: "Request failed",
-                 detail: result.Error,
-                 statusCode: StatusCodes.Status400BadRequest);
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         // DELETE a user account (soft delete), only for the owner or an Admin
@@ -86,10 +82,7 @@ public static class UserEndpoints
             var result = await mediator.Send(new DeleteUserCommand(id, userId, isAdmin), ct);
             return result.IsSuccess
                 ? Results.NoContent()
-                : Results.Problem(
-                  title: "Profile update failed",
-                  detail: result.Error,
-                  statusCode: StatusCodes.Status400BadRequest);
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         return app;
