@@ -1,14 +1,39 @@
 # ChatForum_GroupTwo
 
-A Blazor Server forum application built with .NET 8, Entity Framework Core, and ASP.NET Core Identity.
+A Clean Architecture implementation of a Sports Forum, built with .NET 8, Entity Framwork Core and ASP.NET Core Identity.
+
+## Getting Started
+
+### Prerequisites
+
+- .NET 8 SDK
+
+### Running the Application
+
+Both the API and the Blazor frontend must run simultaneously in separate terminals. Start the API first.
+
+**1. Build the solution:**
+```
+dotnet build Forum.sln
+```
+
+**2. Start the API (terminal 1):**
+```
+dotnet run --project src/Forum.Api/Forum.Api.csproj
+```
+The API starts at `http://localhost:5141`. Swagger UI is available at `http://localhost:5141/swagger`.
+The SQLite database is created and seeded automatically on first run.
+
+**3. Start the Blazor frontend (terminal 2):**
+```
+dotnet run --project src/Forum.Blazor/Forum.Blazor.csproj
+```
+Blazor starts at `http://localhost:5159`.
 
 ## ER Diagram
 
-<img width="950" height="1500" alt="ER_new" src="https://github.com/user-attachments/assets/f2357693-a4bc-4c03-b1e7-c575ce45dff6" />
-<br>
-<br>
-
-**Entities:** User, Category, Thread, Comment
+<img width="500" height="1000" alt="newnew_ER" src="https://github.com/user-attachments/assets/70f22736-ca51-4157-8b88-c976f27011ae" />
+<br><br/>
 
 **Notes:**
 - Admin is a role (via Identity) and not a separate entity.
@@ -17,34 +42,90 @@ A Blazor Server forum application built with .NET 8, Entity Framework Core, and 
 
 **Delete behaviour:**
 - User: Soft-delete (deleting a user does not delete their threads or comments, though should hide their name on them).
-- Category: Cascade (deleting a category should also delete threads within that category).
+- Category: Restricted (cannot delete a category containing threads).
 - Thread: Cascade (deleting a thread should also delete all comments within that thread).
-- Comment: Restricted (or soft-delete?) (deleting a comment should not delete replies to that comment – but replies should refer to it as "deleted").
+- Comment: Soft-delete (deleting a comment should not delete replies to that comment – but replies should refer to it as "deleted").
 
 ## Architecture
 
-<img width="400" height="1000" alt="Arkitekt_excali" src="https://github.com/user-attachments/assets/adf3711e-6d27-418f-8fa2-0a4336bed543" />
+<img width="400" height="1000" alt="newnew_architecture" src="https://github.com/user-attachments/assets/894f04f9-c7c0-4d35-a708-17f5ee7d6b51" />
 
-
+<br>
 
 **Dependency rules:**
 
 ```
-Domain: No dependencies (pure entities).
-Application: Depends on Domain, defines interfaces.
-Api: Depends on Application and Domain.
-Infrastructure: Depends on Application and Domain, implements interfaces.
-Blazor: Depends on Application (DTOs), calls Api via HTTP.
+Dependency rules:
+- Domain has no dependencies (pure entities).
+- Application depends on Domain; defines repository interfaces, DTOs, and CQRS handlers.
+- Infrastructure implements Application interfaces using EF Core and Identity.
+- Api depends on Application (sends MediatR commands/queries).
+- Blazor calls the Api over HTTP and shares Application DTOs.
+
 ```
 
 ## File Structure
 
-<img width="257" height="815" alt="tree" src="https://github.com/user-attachments/assets/50cfecf9-5193-4911-8dcd-61617cb4091e" />
+```
+ChatForum_GroupTwo/
+├── Forum.sln
+├── forum.db                          # SQLite
+└── src/
+    ├── Forum.Domain/
+    │   └── Entities/                 # User, Category, Thread, Comment
+    ├── Forum.Application/
+    │   ├── Common/                   # Result, PagedResult, interfaces
+    │   ├── DTOs/                     # Auth, Category, Thread, Comment, User
+    │   ├── Features/                 # CQRS Commands and Queries (MediatR)
+    │   ├── Interfaces/               # Repository interfaces
+    │   └── Mappings/                 # Entity-to-DTO mapping extensions
+    ├── Forum.Infrastructure/
+    │   ├── Data/                     # ForumDbContext, DbSeeder, Migrations
+    │   ├── Repositories/             # EF Core repository implementations
+    │   └── Services/                 # AuthService (JWT generation)
+    ├── Forum.Api/
+    │   ├── Endpoints/                # Auth, Categories, Threads, Comments, Users
+    │   ├── Extensions/               # ClaimsPrincipal helpers, ProblemDetails mapping
+    │   └── Program.cs                # App bootstrap, DI, JWT config, seeding
+    └── Forum.Blazor/
+        ├── Components/Pages/         # Home, CategoryThreads, ThreadDetails, CreateThread,
+        │                             # Login, Register, Logout, Admin
+        ├── Services/                 # API client services, auth state provider
+        └── wwwroot/                  # Static assets, category images
+```
   
+## Seeded Data
 
-## API Contract Examples
+The database is seeded automatically on first run with the following test data.
 
-### Register
+### Users
+
+| Username     | Password    | Email              | Role  |
+|--------------|-------------|--------------------|-------|
+| `admin`      | `Admin123!` | admin@forum.com    | Admin |
+| `john_doe`   | `User123!`  | john@example.com   | —     |
+| `jane_smith` | `User123!`  | jane@example.com   | —     |
+
+### Categories and Threads (one per category)
+
+| Category   | Thread Title                                          | Author     |
+|------------|-------------------------------------------------------|------------|
+| Formula 1  | 2025 Season Predictions - Who takes the championship? | john_doe   |
+| Football   | Champions League Semi-Finals Discussion               | jane_smith |
+| Basketball | NBA Playoffs - Who's making it out of the West?       | john_doe   |
+| Tennis     | Is Sinner the new GOAT?                               | jane_smith |
+| Hockey     | Stanley Cup contenders this year                      | admin      |
+| Golf       | Masters 2025 - Early favorites?                       | john_doe   |
+| Cycling    | Tour de France route looks insane this year           | jane_smith |
+| Rugby      | Six Nations 2025 - Ireland vs France was incredible   | admin      |
+
+### Comments
+
+Each thread has 2–3 comments. The first comment serves as the thread body. One nested reply is seeded on the Formula 1 thread to demonstrate the reply feature.
+
+## API examples
+
+**Register:**
 ```http
 POST /api/auth/register
 Content-Type: application/json
@@ -55,119 +136,34 @@ Content-Type: application/json
   "password": "SecurePass123!"
 }
 ```
-
-**Response 200 OK**
 ```json
-{
-  "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "username": "johndoe",
-  "email": "john@example.com"
-}
+{ "token": "eyJhbGci...", "userId": "a1b2c3...", "username": "johndoe", "email": "john@example.com" }
 ```
 
-### Login
+**Login:**
 ```http
 POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "john@example.com",
+  "username": "johndoe",
   "password": "SecurePass123!"
 }
 ```
-
-**Response 200 OK**
 ```json
-{
-  "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "username": "johndoe",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
+{ "token": "eyJhbGci...", "userId": "a1b2c3...", "username": "johndoe", "email": "john@example.com" }
 ```
 
-### Create Category
-```http
-POST /api/categories
-Content-Type: application/json
-
-{
-  "name": "Technology"
-}
-```
-
-**Response 201 Created**
-```json
-{
-  "categoryId": 1,
-  "name": "Technology",
-  "threadCount": 0
-}
-```
-
-### Create Thread
+**Create Thread** (the `body` becomes the first comment):
 ```http
 POST /api/threads
+Authorization: Bearer <token>
 Content-Type: application/json
 
 {
   "title": "Discussion about clean architecture",
   "categoryId": 1,
-  "content": "What are your thoughts on..."
+  "body": "What are your thoughts on..."
 }
 ```
 
-**Response 201 Created**
-```json
-{
-  "threadId": 1,
-  "title": "Discussion about clean architecture",
-  "username": "johndoe",
-  "categoryName": "Technology",
-  "timeCreated": "2026-01-28T15:00:00Z"
-}
-```
-
-### Create Comment
-```http
-POST /api/threads/1/comments
-Content-Type: application/json
-
-{
-  "content": "Great topic! I think...",
-  "parentCommentId": null
-}
-```
-
-**Response 201 Created**
-```json
-{
-  "commentId": 2,
-  "content": "Great topic! I think...",
-  "username": "janedoe",
-  "parentCommentId": null,
-  "timeCreated": "2026-01-28T16:30:00Z"
-}
-```
-
-### Reply to Comment
-```http
-POST /api/threads/1/comments
-Content-Type: application/json
-
-{
-  "content": "I agree with your point!",
-  "parentCommentId": 2
-}
-```
-
-**Response 201 Created**
-```json
-{
-  "commentId": 3,
-  "content": "I agree with your point!",
-  "username": "johndoe",
-  "parentCommentId": 2,
-  "parentUsername": "janedoe",
-  "timeCreated": "2026-01-28T17:00:00Z"
-}
-```
