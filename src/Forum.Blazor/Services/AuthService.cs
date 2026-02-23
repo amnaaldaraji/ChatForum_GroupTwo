@@ -100,10 +100,10 @@ public class AuthService : IAuthClientService
         try
         {
             using var doc = JsonDocument.Parse(body);
-            if (doc.RootElement.TryGetProperty("message", out var msg))
-                return msg.GetString();
-            if (doc.RootElement.TryGetProperty("Message", out var msg2))
-                return msg2.GetString();
+            if (doc.RootElement.TryGetProperty("detail", out var detail))
+                return detail.GetString();
+            if (doc.RootElement.TryGetProperty("title", out var title))
+                return title.GetString();
         }
         catch { }
         return null;

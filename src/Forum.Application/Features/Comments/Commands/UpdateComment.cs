@@ -36,17 +36,17 @@ public class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand, Result
         var comment = await _commentRepository.GetByIdWithDetailsAsync(request.CommentId, cancellationToken);
         if (comment == null)
         {
-            return Result.Failure<CommentDto>("Comment not found.");
+            return Result.Failure<CommentDto>("Comment not found.", ErrorType.NotFound);
         }
         
         if (comment.IsDeleted)
         {
-            return Result.Failure<CommentDto>("Cannot update a deleted comment.");
+            return Result.Failure<CommentDto>("Cannot update a deleted comment.", ErrorType.Conflict);
         }
         
         if (comment.UserId != request.UserId && !request.IsAdmin)
         {
-            return Result.Failure<CommentDto>("You are not authorized to update this comment.");
+            return Result.Failure<CommentDto>("You are not authorized to update this comment.", ErrorType.Forbidden);
         }
         
         if (string.IsNullOrWhiteSpace(request.Content))

@@ -35,18 +35,18 @@ public class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Result>
     {
         if (request.UserId != request.RequestingUserId && !request.IsAdmin)
         {
-            return Result.Failure("You are not authorized to delete this user.");
+            return Result.Failure("You are not authorized to delete this user.", ErrorType.Forbidden);
         }
         
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user == null)
         {
-            return Result.Failure("User not found.");
+            return Result.Failure("User not found.", ErrorType.NotFound);
         }
         
         if (user.IsDeleted)
         {
-            return Result.Failure("User is already deleted.");
+            return Result.Failure("User is already deleted.", ErrorType.Conflict);
         }
         
         user.IsDeleted = true;

@@ -47,7 +47,7 @@ public class CreateCommentHandler : IRequestHandler<CreateCommentCommand, Result
         var thread = await _threadRepository.GetByIdAsync(request.ThreadId, cancellationToken);
         if (thread == null)
         {
-            return Result.Failure<CommentDto>("Thread not found.");
+            return Result.Failure<CommentDto>("Thread not found.", ErrorType.NotFound);
         }
 
         // If replying to another comment, validate the parent comment exists and is in the same thread
@@ -56,7 +56,7 @@ public class CreateCommentHandler : IRequestHandler<CreateCommentCommand, Result
             var parentComment = await _commentRepository.GetByIdAsync(request.ParentCommentId.Value, cancellationToken);
             if (parentComment == null)
             {
-                return Result.Failure<CommentDto>("Parent comment not found.");
+                return Result.Failure<CommentDto>("Parent comment not found.", ErrorType.NotFound);
             }
 
             // Prevent cross-thread replies — parent comment must belong to the same thread

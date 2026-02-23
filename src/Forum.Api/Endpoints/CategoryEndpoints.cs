@@ -1,4 +1,5 @@
-﻿using Forum.Application.DTOs.Category;
+﻿using Forum.Api.Extensions;
+using Forum.Application.DTOs.Category;
 using Forum.Application.Features.Categories.Commands;
 using Forum.Application.Features.Categories.Queries;
 using MediatR;
@@ -19,7 +20,7 @@ public static class CategoryEndpoints
             var result = await mediator.Send(new GetAllCategoriesQuery(), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         })
         .AllowAnonymous();
 
@@ -29,7 +30,7 @@ public static class CategoryEndpoints
             var result = await mediator.Send(new GetCategoryByIdQuery(id), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.NotFound(new { result.Error });
+                : result.ToProblemDetails();
         })
         // Added route name so other endpoints (like POST)
         // can reference this route safely using CreatedAtRoute.
@@ -43,7 +44,7 @@ public static class CategoryEndpoints
             var result = await mediator.Send(new CreateCategoryCommand(dto.Name), ct);
             return result.IsSuccess
                 ? Results.Created($"/api/categories/{result.Value!.CategoryId}", result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization(p => p.RequireRole("Admin"));
 
         // PUT to update a category name using MediatR (Admin only)
@@ -52,7 +53,7 @@ public static class CategoryEndpoints
             var result = await mediator.Send(new UpdateCategoryCommand(id, dto.Name), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization(p => p.RequireRole("Admin"));
 
         // DELETE a category using MediatR (Admin only)
@@ -61,7 +62,7 @@ public static class CategoryEndpoints
             var result = await mediator.Send(new DeleteCategoryCommand(id), ct);
             return result.IsSuccess
                 ? Results.NoContent()
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization(p => p.RequireRole("Admin"));
 
         return app;

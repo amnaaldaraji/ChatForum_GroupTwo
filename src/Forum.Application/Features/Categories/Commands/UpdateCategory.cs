@@ -35,7 +35,7 @@ public class UpdateCategoryHandler : IRequestHandler<UpdateCategoryCommand, Resu
         var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
         if (category == null)
         {
-            return Result.Failure<CategoryDto>("Category not found.");
+            return Result.Failure<CategoryDto>("Category not found.", ErrorType.NotFound);
         }
         
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -45,7 +45,7 @@ public class UpdateCategoryHandler : IRequestHandler<UpdateCategoryCommand, Resu
         
         if (await _categoryRepository.NameExistsAsync(request.Name, request.CategoryId, cancellationToken))
         {
-            return Result.Failure<CategoryDto>("A category with this name already exists.");
+            return Result.Failure<CategoryDto>("A category with this name already exists.", ErrorType.Conflict);
         }
         
         category.Name = request.Name.Trim();

@@ -36,7 +36,7 @@ public class GetThreadByIdHandler : IRequestHandler<GetThreadByIdQuery, Result<T
         var thread = await _threadRepository.GetByIdWithCommentsAsync(request.ThreadId, cancellationToken);
         if (thread == null)
         {
-            return Result.Failure<ThreadDetailDto>("Thread not found.");
+            return Result.Failure<ThreadDetailDto>("Thread not found.", ErrorType.NotFound);
         }
         
         var bodyComment = await _commentRepository.GetFirstCommentByThreadIdAsync(request.ThreadId, cancellationToken);

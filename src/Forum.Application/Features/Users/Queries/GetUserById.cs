@@ -33,7 +33,7 @@ public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, Result<UserD
         
         if (user == null)
         {
-            return Result.Failure<UserDto>("User not found.");
+            return Result.Failure<UserDto>("User not found.", ErrorType.NotFound);
         }
         
         return Result.Success(user.ToUserDto());

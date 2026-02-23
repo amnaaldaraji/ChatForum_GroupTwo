@@ -19,7 +19,7 @@ public static class ThreadEndpoints
             var result = await mediator.Send(new GetThreadsQuery(filter), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         })
         .AllowAnonymous();
 
@@ -29,7 +29,7 @@ public static class ThreadEndpoints
             var result = await mediator.Send(new GetThreadByIdQuery(id), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.NotFound(new { result.Error });
+                : result.ToProblemDetails();
         })
         .WithName("GetThreadById")
         .AllowAnonymous();
@@ -43,7 +43,7 @@ public static class ThreadEndpoints
             var result = await mediator.Send(new CreateThreadCommand(userId, dto.Title, dto.CategoryId, dto.Body), ct);
             return result.IsSuccess
                 ? Results.Created($"/api/threads/{result.Value!.ThreadId}", result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         // update thread
@@ -56,7 +56,7 @@ public static class ThreadEndpoints
             var result = await mediator.Send(new UpdateThreadCommand(id, dto.Title, dto.CategoryId, userId, isAdmin), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         // delete thread
@@ -69,7 +69,7 @@ public static class ThreadEndpoints
             var result = await mediator.Send(new DeleteThreadCommand(id, userId, isAdmin), ct);
             return result.IsSuccess
                 ? Results.NoContent()
-                : Results.BadRequest(new { result.Error });
+                : result.ToProblemDetails();
         }).RequireAuthorization();
 
         return app;

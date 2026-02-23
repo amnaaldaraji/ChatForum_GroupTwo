@@ -41,7 +41,7 @@ public class CreateCategoryHandler : IRequestHandler<CreateCategoryCommand, Resu
         
         if (await _categoryRepository.NameExistsAsync(request.Name, cancellationToken: cancellationToken))
         {
-            return Result.Failure<CategoryDto>("A category with this name already exists.");
+            return Result.Failure<CategoryDto>("A category with this name already exists.", ErrorType.Conflict);
         }
         
         var category = new Category

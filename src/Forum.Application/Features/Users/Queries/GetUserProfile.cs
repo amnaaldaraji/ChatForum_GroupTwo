@@ -40,7 +40,7 @@ public class GetUserProfileHandler : IRequestHandler<GetUserProfileQuery, Result
         
         if (user == null)
         {
-            return Result.Failure<UserProfileDto>("User not found.");
+            return Result.Failure<UserProfileDto>("User not found.", ErrorType.NotFound);
         }
         
         var recentThreads = await _threadRepository.GetByUserIdAsync(request.UserId, 5, cancellationToken);

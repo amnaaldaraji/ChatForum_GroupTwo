@@ -35,12 +35,12 @@ public class DeleteThreadHandler : IRequestHandler<DeleteThreadCommand, Result>
         var thread = await _threadRepository.GetByIdWithDetailsAsync(request.ThreadId, cancellationToken);
         if (thread == null)
         {
-            return Result.Failure("Thread not found.");
+            return Result.Failure("Thread not found.", ErrorType.NotFound);
         }
         
         if (thread.UserId != request.UserId && !request.IsAdmin)
         {
-            return Result.Failure("You are not authorized to delete this thread.");
+            return Result.Failure("You are not authorized to delete this thread.", ErrorType.Forbidden);
         }
 
         // Hard delete — EF Core cascade will remove all associated comments

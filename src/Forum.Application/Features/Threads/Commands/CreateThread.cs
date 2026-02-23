@@ -59,7 +59,7 @@ public class CreateThreadHandler : IRequestHandler<CreateThreadCommand, Result<T
         
         if (!await _categoryRepository.ExistsAsync(c => c.CategoryId == request.CategoryId, cancellationToken))
         {
-            return Result.Failure<ThreadDetailDto>("Category not found.");
+            return Result.Failure<ThreadDetailDto>("Category not found.", ErrorType.NotFound);
         }
 
         var now = DateTime.UtcNow;

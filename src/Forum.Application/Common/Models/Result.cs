@@ -1,8 +1,18 @@
 namespace Forum.Application.Common.Models;
 
+public enum ErrorType
+{
+    None,
+    Validation,
+    NotFound,
+    Unauthorized,
+    Forbidden,
+    Conflict
+}
+
 public class Result
 {
-    protected Result(bool isSuccess, string? error)
+    protected Result(bool isSuccess, string? error, ErrorType errorType = ErrorType.None)
     {
         if (isSuccess && error != null)
             throw new InvalidOperationException("Success result cannot have an error.");
@@ -11,16 +21,18 @@ public class Result
 
         IsSuccess = isSuccess;
         Error = error;
+        ErrorType = isSuccess ? ErrorType.None : errorType;
     }
-    
+
     public bool IsSuccess { get; }
     public bool IsFailed => !IsSuccess;
     public string? Error { get; }
-    
+    public ErrorType ErrorType { get; }
+
     public static Result Success() => new (true, null);
-    public static Result Failure(string error) => new (false, error);
+    public static Result Failure(string error, ErrorType errorType = ErrorType.Validation) => new (false, error, errorType);
     public static Result<T> Success<T>(T value) => Result<T>.Success(value);
-    public static Result<T> Failure<T>(string error) => Result<T>.Failure(error);
+    public static Result<T> Failure<T>(string error, ErrorType errorType = ErrorType.Validation) => Result<T>.Failure(error, errorType);
 }
 
 public class Result<T> : Result
@@ -31,8 +43,8 @@ public class Result<T> : Result
     {
         _value = value;
     }
-    
-    private Result(string error) : base(false, error)
+
+    private Result(string error, ErrorType errorType = ErrorType.Validation) : base(false, error, errorType)
     {
         _value = default;
     }
@@ -42,5 +54,5 @@ public class Result<T> : Result
         : throw new InvalidOperationException("Cannot access value of a failed result.");
 
     public new static Result<T> Success(T value) => new(value);
-    public new static Result<T> Failure(string error) => new (error);
+    public new static Result<T> Failure(string error, ErrorType errorType = ErrorType.Validation) => new (error, errorType);
 }
