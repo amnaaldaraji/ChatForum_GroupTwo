@@ -19,9 +19,14 @@ else if (_thread == null)
 else
 {
     <div class="thread-details">
-        <div class="breadcrumb">
-            SPORT FORUM > @_thread.CategoryName.ToUpper() > @_thread.Title
-        </div>
+        @* breadcrumb navigation with links *@
+        <nav class="breadcrumb-trail">
+            <a href="/">Sport Forum</a>
+            <span> &rsaquo; </span>
+            <a href="/category/@_thread.CategoryName">@_thread.CategoryName.ToUpper()</a>
+            <span> &rsaquo; </span>
+            <span class="breadcrumb-current">@_thread.Title</span>
+        </nav>
 
         <div class="thread-header">
             <h1>@_thread.Title</h1>
