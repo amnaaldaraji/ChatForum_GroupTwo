@@ -22,21 +22,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4C419AB6-5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fas2", "fas2", "{E618879A-FE65-4E74-8373-3F729E070360}"
 	ProjectSection(SolutionItems) = preProject
-		docs\fas2\README.md = docs\fas2\README.md
-		docs\fas2\categoryhttp.png = docs\fas2\categoryhttp.png
-		docs\fas2\gate.png = docs\fas2\gate.png
-		docs\fas2\migrations.png = docs\fas2\migrations.png
-		docs\fas2\runningSeeds.png = docs\fas2\runningSeeds.png
-		docs\fas2\registerhttp.png = docs\fas2\registerhttp.png
-		docs\fas2\seed.png = docs\fas2\seed.png
-		docs\fas2\db.png = docs\fas2\db.png
-		docs\fas2\seedUsers.png = docs\fas2\seedUsers.png
 		docs\fas2\adminpanel.png = docs\fas2\adminpanel.png
 		docs\fas2\blazor.png = docs\fas2\blazor.png
-		docs\fas2\ui.png = docs\fas2\ui.png
+		docs\fas2\categoryhttp.png = docs\fas2\categoryhttp.png
 		docs\fas2\commenthttp.png = docs\fas2\commenthttp.png
+		docs\fas2\db.png = docs\fas2\db.png
 		docs\fas2\denied.png = docs\fas2\denied.png
+		docs\fas2\gate.png = docs\fas2\gate.png
+		docs\fas2\migrations.png = docs\fas2\migrations.png
+		docs\fas2\README.md = docs\fas2\README.md
+		docs\fas2\registerhttp.png = docs\fas2\registerhttp.png
+		docs\fas2\runningSeeds.png = docs\fas2\runningSeeds.png
+		docs\fas2\seed.png = docs\fas2\seed.png
 		docs\fas2\seedCategories.png = docs\fas2\seedCategories.png
+		docs\fas2\seedUsers.png = docs\fas2\seedUsers.png
+		docs\fas2\ui.png = docs\fas2\ui.png
 	EndProjectSection
 EndProject
 Global
