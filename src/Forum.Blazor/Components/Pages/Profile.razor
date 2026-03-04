@@ -1,15 +1,14 @@
-﻿@page "/profile"
-@using Forum.Blazor.Services
-@using Microsoft.AspNetCore.Components.Forms
-@inject IAuthClientService AuthService
+@page "/profile"
+@using System.Security.Claims
+@inject UserService UserService
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Profile</PageTitle>
 
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-7">
-            @* Bredare än login/register *@
             <div class="card shadow">
                 <div class="card-header">
                     <h3 class="mb-0">Profile</h3>
@@ -41,7 +40,7 @@
                         <!-- USERNAME (READ ONLY) -->
                         <div class="mb-4">
                             <label class="form-label fw-bold">Username</label>
-                            <InputText class="form-control" @bind-Value="profileModel.Username" disabled />
+                            <input class="form-control" value="@profileModel.Username" disabled />
                         </div>
 
                         <hr />
@@ -102,7 +101,6 @@
                             </button>
                         </EditForm>
                     }
-
                 </div>
             </div>
         </div>
@@ -121,21 +119,32 @@
     private bool isLoading = false;
     private bool isLoadingProfile = true;
 
+    private string? userId;
+
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
         try
         {
-            var profile = await AuthService.GetProfileAsync();
+            var profile = await UserService.GetProfileAsync(userId);
 
-            if (profile.Succeeded)
+            if (profile != null)
             {
-                profileModel.Username = profile.Username;
-                profileModel.Email = profile.Email;
-                emailModel.NewEmail = profile.Email;
+                profileModel.Username = profile.UserName;
+                profileModel.Email = profile.Email ?? string.Empty;
+                emailModel.NewEmail = profile.Email ?? string.Empty;
             }
             else
             {
-                errorMessage = profile.ErrorMessage ?? "Failed to load profile.";
+                errorMessage = "Failed to load profile.";
             }
         }
         catch (Exception ex)
@@ -148,23 +157,92 @@
         }
     }
 
-
-
     private async Task HandleUpdateEmail()
     {
         errorMessage = string.Empty;
         successMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(emailModel.NewEmail))
+        {
+            errorMessage = "Email cannot be empty.";
+            return;
+        }
+
         isLoading = true;
 
-    }
+        try
+        {
+            var response = await UserService.UpdateAsync(userId!, new UpdateUserProfileDto(Email: emailModel.NewEmail));
 
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Email updated successfully.";
+                profileModel.Email = emailModel.NewEmail;
+            }
+            else
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                errorMessage = ApiClientBase.TryExtractError(body) ?? "Failed to update email.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 
     private async Task HandleChangePassword()
     {
         errorMessage = string.Empty;
         successMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(passwordModel.CurrentPassword))
+        {
+            errorMessage = "Current password is required.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(passwordModel.NewPassword))
+        {
+            errorMessage = "New password cannot be empty.";
+            return;
+        }
+
+        if (passwordModel.NewPassword != passwordModel.ConfirmNewPassword)
+        {
+            errorMessage = "New password and confirmation do not match.";
+            return;
+        }
+
         isLoading = true;
 
+        try
+        {
+            var response = await UserService.ChangePasswordAsync(userId!, passwordModel.CurrentPassword, passwordModel.NewPassword);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Password changed successfully.";
+                passwordModel = new ChangePasswordModel();
+            }
+            else
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                errorMessage = ApiClientBase.TryExtractError(body) ?? "Failed to change password.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private class ProfileModel
@@ -184,6 +262,4 @@
         public string NewPassword { get; set; } = string.Empty;
         public string ConfirmNewPassword { get; set; } = string.Empty;
     }
-
-
 }

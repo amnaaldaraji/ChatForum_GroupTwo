@@ -42,7 +42,7 @@ public class AuthService : IAuthClientService
             if (!response.IsSuccessStatusCode)
             {
                 var errorBody = await response.Content.ReadAsStringAsync();
-                return AuthResult.Failure(TryExtractError(errorBody) ?? "Invalid username or password.");
+                return AuthResult.Failure(ApiClientBase.TryExtractError(errorBody) ?? "Invalid username or password.");
             }
 
             var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(JsonOptions);
@@ -73,7 +73,7 @@ public class AuthService : IAuthClientService
             if (!response.IsSuccessStatusCode)
             {
                 var errorBody = await response.Content.ReadAsStringAsync();
-                return AuthResult.Failure(TryExtractError(errorBody) ?? "Registration failed.");
+                return AuthResult.Failure(ApiClientBase.TryExtractError(errorBody) ?? "Registration failed.");
             }
 
             return AuthResult.Success();
@@ -95,17 +95,4 @@ public class AuthService : IAuthClientService
 
     public Task<string?> GetTokenAsync() => _tokenStorage.GetTokenAsync();
 
-    private static string? TryExtractError(string body)
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(body);
-            if (doc.RootElement.TryGetProperty("detail", out var detail))
-                return detail.GetString();
-            if (doc.RootElement.TryGetProperty("title", out var title))
-                return title.GetString();
-        }
-        catch { }
-        return null;
-    }
 }

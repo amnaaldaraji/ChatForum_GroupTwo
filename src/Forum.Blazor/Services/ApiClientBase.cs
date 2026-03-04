@@ -95,4 +95,22 @@ public abstract class ApiClientBase
         var client = await CreateClientAsync();
         return await client.DeleteAsync(url);
     }
+
+    /// <summary>
+    /// Attempts to extract a human-readable error message from an API ProblemDetails JSON response.
+    /// Returns null if the body cannot be parsed or contains neither "detail" nor "title".
+    /// </summary>
+    public static string? TryExtractError(string body)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            if (doc.RootElement.TryGetProperty("detail", out var detail))
+                return detail.GetString();
+            if (doc.RootElement.TryGetProperty("title", out var title))
+                return title.GetString();
+        }
+        catch { }
+        return null;
+    }
 }

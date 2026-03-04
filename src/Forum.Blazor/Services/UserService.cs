@@ -39,6 +39,14 @@ public class UserService : ApiClientBase
     }
 
     /// <summary>
+    /// POST /api/users/{id}/change-password — changes the user's password.
+    /// </summary>
+    public async Task<HttpResponseMessage> ChangePasswordAsync(string id, string currentPassword, string newPassword)
+    {
+        return await PostAsync($"api/users/{id}/change-password", new { CurrentPassword = currentPassword, NewPassword = newPassword });
+    }
+
+    /// <summary>
     /// DELETE /api/users/{id} — soft-deletes the user account.
     /// The user's display name becomes "Deleted User" across all threads and comments.
     /// </summary>

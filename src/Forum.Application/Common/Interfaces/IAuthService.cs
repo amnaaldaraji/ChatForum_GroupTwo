@@ -13,4 +13,5 @@ public interface IAuthService
     Task<Result<object>> RegisterAsync(string username, string email, string password);
     Task<Result<AuthResponse>> LoginAsync(string username, string password);
     Task<Result> LogoutAsync();
+    Task<Result> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
 }

@@ -90,6 +90,25 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
+    /// Changes a user's password after verifying the current password.
+    /// </summary>
+    public async Task<Result> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null || user.IsDeleted)
+            return Result.Failure("User not found.", ErrorType.NotFound);
+
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            return Result.Failure(errors);
+        }
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Generates a JWT for the specified user.
     /// </summary>
     private async Task<string> GenerateJwtToken(User user)
