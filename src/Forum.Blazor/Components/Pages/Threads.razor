@@ -4,8 +4,11 @@
 <link rel="stylesheet" href="/css/forum-table.css" />
 
 <div class="forum-view-wrapper">
+    @* breadcrumb navigation with links *@
     <nav class="breadcrumb-trail">
-        SPORT FORUM > FORUMS > <strong>@(CategoryName?.ToUpper() ?? "ALL")</strong>
+        <a href="/">Sport Forum</a>
+        <span> &rsaquo; </span>
+        <span class="breadcrumb-current">@(CategoryName?.ToUpper() ?? "ALL")</span>
     </nav>
 
     <div class="forum-intro">
