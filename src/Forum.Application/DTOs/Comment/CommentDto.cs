@@ -6,7 +6,7 @@ namespace Forum.Application.DTOs.Comment;
 /// and AuthorUserName shows "Deleted" (applied in MappingExtensions).
 ///
 /// Includes parent comment info to support the flat reply display model
-/// ("replying to @username").
+/// with an inline citation of the parent comment.
 /// </summary>
 public record CommentDto(
     int CommentId,
@@ -16,6 +16,7 @@ public record CommentDto(
     int ThreadId,
     int? ParentCommentId,
     string? ParentCommentAuthorUserName,
+    string? ParentCommentContent,
     DateTime TimeCreated,
     int ReplyCount,
     bool IsDeleted
