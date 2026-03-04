@@ -12,7 +12,7 @@
             <div class="user-actions">
                 <AuthorizeView>
                     <Authorized>
-                        <a href="/profile" class="btn btn-link user-greeting">
+                        <a href="/profile" class="user-greeting">
                             @context.User.Identity?.Name
                         </a>
                         <AuthorizeView Roles="Admin">

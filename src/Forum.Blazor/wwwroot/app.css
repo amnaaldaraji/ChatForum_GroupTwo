@@ -91,6 +91,18 @@ h1:focus { outline: none; }
     display: flex;
     align-items: center;
 }
+.user-greeting {
+    text-transform: none !important;
+    color: #c44040 !important;
+    font-weight: 700;
+    font-size: 18px;
+    text-decoration: none !important;
+    margin-right: 16px;
+}
+.user-greeting:hover {
+    color: #fff !important;
+    text-decoration: none !important;
+}
 
 /* Header search (dark) */
 .top-row-black .forum-search-container { position: relative; margin-right: 15px; }
@@ -127,7 +139,11 @@ h1:focus { outline: none; }
     transition: 0.2s;
     border-radius: 3px;
 }
-.btn-outline:hover { background: rgba(255, 255, 255, 0.06); }
+.btn-outline:hover { background: rgba(255, 255, 255, 0.06); text-decoration: none; }
+a.btn-outline { text-decoration: none; }
+a.btn-outline:hover { text-decoration: none; }
+a.btn-red { text-decoration: none; }
+a.btn-red:hover { text-decoration: none; }
 .btn-red {
     background: #c44040;
     border: none;
