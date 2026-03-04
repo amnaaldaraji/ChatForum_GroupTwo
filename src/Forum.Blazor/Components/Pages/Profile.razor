@@ -120,7 +120,7 @@
 
     private bool isLoading = false;
     private bool isLoadingProfile = true;
-    
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -147,7 +147,7 @@
             isLoadingProfile = false;
         }
     }
-    
+
 
 
     private async Task HandleUpdateEmail()
@@ -155,16 +155,16 @@
         errorMessage = string.Empty;
         successMessage = string.Empty;
         isLoading = true;
-        
+
     }
-    
+
 
     private async Task HandleChangePassword()
     {
         errorMessage = string.Empty;
         successMessage = string.Empty;
         isLoading = true;
-        
+
     }
 
     private class ProfileModel
@@ -184,4 +184,6 @@
         public string NewPassword { get; set; } = string.Empty;
         public string ConfirmNewPassword { get; set; } = string.Empty;
     }
+
+
 }
