@@ -120,7 +120,7 @@
 
     private bool isLoading = false;
     private bool isLoadingProfile = true;
-
+    
     protected override async Task OnInitializedAsync()
     {
         try
@@ -147,6 +147,7 @@
             isLoadingProfile = false;
         }
     }
+    
 
 
     private async Task HandleUpdateEmail()
@@ -154,67 +155,16 @@
         errorMessage = string.Empty;
         successMessage = string.Empty;
         isLoading = true;
-
-        try
-        {
-            var result = await AuthService.UpdateEmailAsync(emailModel.NewEmail);
-
-            if (result.Succeeded)
-            {
-                successMessage = "Email updated successfully.";
-                profileModel.Email = emailModel.NewEmail;
-            }
-            else
-            {
-                errorMessage = result.ErrorMessage ?? "Failed to update email.";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        
     }
+    
 
     private async Task HandleChangePassword()
     {
         errorMessage = string.Empty;
         successMessage = string.Empty;
         isLoading = true;
-
-        try
-        {
-            if (passwordModel.NewPassword != passwordModel.ConfirmNewPassword)
-            {
-                errorMessage = "New passwords do not match.";
-                return;
-            }
-
-            var result = await AuthService.ChangePasswordAsync(
-                passwordModel.CurrentPassword,
-                passwordModel.NewPassword);
-
-            if (result.Succeeded)
-            {
-                successMessage = "Password changed successfully.";
-                passwordModel = new();
-            }
-            else
-            {
-                errorMessage = result.ErrorMessage ?? "Failed to change password.";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        
     }
 
     private class ProfileModel
