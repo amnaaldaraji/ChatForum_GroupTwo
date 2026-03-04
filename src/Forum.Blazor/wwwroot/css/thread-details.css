@@ -110,6 +110,29 @@
     font-style: italic;
 }
 
+.reply-citation {
+    background: #1e2228;
+    border-left: 3px solid #6e9ecf;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.reply-citation-author {
+    color: #6e9ecf;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+}
+
+.reply-citation-content {
+    color: #8b949e;
+    display: block;
+}
+
 .comment-body {
     line-height: 1.5;
     color: #d1d5db;

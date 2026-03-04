@@ -108,11 +108,16 @@ public static class MappingExtensions
                 ? DeletedUserName
                 : comment.User?.UserName ?? string.Empty;
 
-        // Resolve parent comment author name for "replying to @username" display
+        // Resolve parent comment author name for reply citation display
         // Also handles the case where the parent comment's author has been soft-deleted
         var parentAuthorUserName = comment.ParentComment?.User?.IsDeleted == true
             ? DeletedUserName
             : comment.ParentComment?.User?.UserName;
+
+        // Resolve parent comment content for the inline citation box
+        var parentCommentContent = comment.ParentComment?.IsDeleted == true
+            ? DeletedCommentContent
+            : comment.ParentComment?.Content;
 
         return new CommentDto(
             comment.CommentId,
@@ -122,6 +127,7 @@ public static class MappingExtensions
             comment.ThreadId,
             comment.ParentCommentId,
             parentAuthorUserName,
+            parentCommentContent,
             comment.TimeCreated,
             comment.Replies?.Count ?? 0, // Count of direct replies
             isDeleted
