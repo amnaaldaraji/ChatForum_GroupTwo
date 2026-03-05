@@ -41,7 +41,7 @@
     @* ===== CATEGORIES TAB ===== *@
     @if (activeTab == "categories")
     {
-        <div class="panel-section">
+        <div class="panel-section panel-section-narrow">
             <h2>Manage Categories</h2>
 
             <div class="panel-add-form">
@@ -49,6 +49,7 @@
                 <button class="btn-red" @onclick="AddCategory" disabled="@isLoading">Add Category</button>
             </div>
 
+            <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
                     <tr>
@@ -77,6 +78,7 @@
                     }
                 </tbody>
             </table>
+            </div>
         </div>
     }
 
@@ -86,6 +88,7 @@
         <div class="panel-section">
             <h2>Manage Threads</h2>
 
+            <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
                     <tr>
@@ -116,6 +119,7 @@
                     }
                 </tbody>
             </table>
+            </div>
 
             @if (threadsPaged != null && threadsPaged.TotalPages > 1)
             {
@@ -134,6 +138,7 @@
         <div class="panel-section">
             <h2>Manage Users</h2>
 
+            <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
                     <tr>
@@ -182,6 +187,7 @@
                     }
                 </tbody>
             </table>
+            </div>
         </div>
     }
 

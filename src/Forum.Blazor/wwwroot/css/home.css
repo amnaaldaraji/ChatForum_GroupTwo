@@ -79,17 +79,24 @@
 
 .cat-name {
     color: #e2e6eb;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 2.5px;
     font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.cat-name:hover {
+    color: #85b1db;
+    text-decoration: none;
 }
 
 .view-all-link {
     color: #8b949e;
     text-decoration: none;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     transition: color 0.15s;
 }
@@ -124,7 +131,7 @@
     color: #b8cfe0;
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
     display: block;
     white-space: nowrap;
     overflow: hidden;
@@ -147,12 +154,12 @@
 
 .author {
     font-weight: 700;
-    font-size: 12px;
+    font-size: 13px;
     color: #5a8ab8;
 }
 
-.dot { color: #2e3440; font-size: 12px; }
-.date { font-size: 12px; color: #424957; }
+.dot { color: #2e3440; font-size: 13px; }
+.date { font-size: 13px; color: #424957; }
 
 .thread-right {
     display: flex;
@@ -163,7 +170,7 @@
 }
 
 .reply-count {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 800;
     color: #8b949e;
     line-height: 1;
@@ -171,7 +178,7 @@
 }
 
 .reply-label {
-    font-size: 10px;
+    font-size: 11px;
     color: #424957;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -180,7 +187,7 @@
 
 /* ===== CATEGORY HEADER EXTRAS ===== */
 .cat-count {
-    font-size: 12px;
+    font-size: 13px;
     color: #555d6b;
     font-weight: 600;
     font-family: 'DM Sans', sans-serif;
@@ -191,7 +198,7 @@
 /* ===== SECTION HEADERS & POPULAR THREADS ===== */
 .section-title {
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -226,7 +233,7 @@
 
 .popular-title {
     flex: 1;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #b8cfe0;
     font-family: 'DM Sans', sans-serif;
@@ -239,18 +246,18 @@
     display: flex;
     gap: 5px;
     align-items: center;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .popular-category {
     color: #555d6b;
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .popular-replies {
-    font-size: 13px;
+    font-size: 14px;
     color: #8b949e;
     font-weight: 700;
     font-family: 'DM Sans', sans-serif;

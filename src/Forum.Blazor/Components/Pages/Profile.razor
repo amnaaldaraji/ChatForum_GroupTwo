@@ -36,7 +36,7 @@
     @* ===== ACCOUNT SETTINGS TAB ===== *@
     @if (activeTab == "account")
     {
-        <div class="panel-section">
+        <div class="panel-section panel-section-narrow">
             @if (isLoadingProfile)
             {
                 <div class="text-center">
@@ -115,6 +115,7 @@
         <div class="panel-section">
             <h2>My Threads</h2>
 
+            <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
                     <tr>
@@ -139,6 +140,7 @@
                     }
                 </tbody>
             </table>
+            </div>
 
             @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
             {
@@ -157,6 +159,7 @@
         <div class="panel-section">
             <h2>My Comments</h2>
 
+            <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
                     <tr>
@@ -171,7 +174,7 @@
                         @foreach (var c in myComments)
                         {
                             <tr>
-                                <td>@(c.Content.Length > 100 ? c.Content[..100] + "..." : c.Content)</td>
+                                <td><span class="comment-preview" title="@c.Content">@c.Content</span></td>
                                 <td><a href="/thread/@c.ThreadId">View Thread</a></td>
                                 <td>@c.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
                             </tr>
@@ -179,6 +182,7 @@
                     }
                 </tbody>
             </table>
+            </div>
 
             @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
             {

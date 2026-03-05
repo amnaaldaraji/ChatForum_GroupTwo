@@ -115,8 +115,14 @@ else
                 </div>
             </Authorized>
             <NotAuthorized>
-                <div class="login-prompt">
-                    <a href="/login">Login</a> or <a href="/register">register</a> to comment.
+                <div class="auth-prompt">
+                    <span class="auth-prompt-icon">💬</span>
+                    <p>Want to join the conversation?</p>
+                    <div class="auth-prompt-links">
+                        <a href="/login" class="auth-link">Log in</a>
+                        <span>or</span>
+                        <a href="/register" class="auth-link">Register</a>
+                    </div>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
