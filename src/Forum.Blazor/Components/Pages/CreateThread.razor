@@ -1,4 +1,5 @@
 @page "/create-thread"
+@page "/create-thread/{CategoryName}"
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
 @inject NavigationManager NavigationManager
@@ -42,18 +43,14 @@
             </div>
 
             <div class="form-group">
-                <label for="category">category</label>
-                <select id="category" class="form-control" @bind="@_newThread.CategoryIdString">
-                    <option value="">select a category</option>
-                    @if (_categories != null)
-                    {
-                        @foreach (var category in _categories)
+                <label>category</label>
+
+               @if (_categories != null)
                         {
-                            <option value="@category.CategoryId">@category.Name</option>
-                        }
-                    }
-                </select>
-                <ValidationMessage For="@(() => _newThread.CategoryIdString)" />
+                   var selected = _categories.FirstOrDefault(c => c.CategoryId == _newThread.CategoryId);
+
+                    <input class="form-control" style="color:#343a40;"value="@selected?.Name" disabled />
+                }
             </div>
 
             <div class="form-group">
@@ -83,6 +80,9 @@
 </AuthorizeView>
 
 @code {
+    [Parameter]
+    public string? CategoryName { get; set; }
+
     private CreateThreadModel _newThread = new();
     private List<CategoryDto>? _categories;
     private bool _isSubmitting;
@@ -111,6 +111,17 @@
     {
         var categories = await CategoryService.GetAllAsync();
         _categories = categories?.ToList();
+
+        if (!string.IsNullOrEmpty(CategoryName) && _categories != null)
+        {
+            var selectedCategory = _categories
+                .FirstOrDefault(c => c.Name.Equals(CategoryName, StringComparison.OrdinalIgnoreCase));
+
+            if (selectedCategory != null)
+            {
+                _newThread.CategoryIdString = selectedCategory.CategoryId.ToString();
+            }
+        }
     }
 
     private async Task HandleSubmit()
