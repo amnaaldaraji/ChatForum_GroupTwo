@@ -1,12 +1,15 @@
 @page "/admin"
+@using System.Security.Claims
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
+@inject CommentService CommentService
 @inject UserService UserService
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 
 <PageTitle>Admin Panel - Sport Forum</PageTitle>
 
-<link rel="stylesheet" href="/css/admin.css" />
+<link rel="stylesheet" href="/css/panel.css" />
 
 <AuthorizeView Roles="Admin">
 <NotAuthorized>
@@ -20,36 +23,38 @@
 </NotAuthorized>
 <Authorized>
 
-<div class="admin-wrapper">
+<div class="panel-wrapper">
     <nav class="breadcrumb-trail">
         SPORT FORUM > <strong>ADMIN PANEL</strong>
     </nav>
 
-    <h1 class="admin-title">Admin Panel</h1>
+    <h1 class="panel-title">Admin Panel</h1>
 
-    <div class="admin-tabs">
-        <button class="admin-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
-        <button class="admin-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
-        <button class="admin-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
+    <div class="panel-tabs">
+        <button class="panel-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
+        <button class="panel-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
+        <button class="panel-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
+        <button class="panel-tab @(activeTab == "mythreads" ? "active" : "")" @onclick="ActivateMyThreads">My Threads</button>
+        <button class="panel-tab @(activeTab == "mycomments" ? "active" : "")" @onclick="ActivateMyComments">My Comments</button>
     </div>
 
     @if (!string.IsNullOrEmpty(statusMessage))
     {
-        <div class="admin-status @(isError ? "error" : "success")">@statusMessage</div>
+        <div class="panel-status @(isError ? "error" : "success")">@statusMessage</div>
     }
 
     @* ===== CATEGORIES TAB ===== *@
     @if (activeTab == "categories")
     {
-        <div class="admin-section">
+        <div class="panel-section">
             <h2>Manage Categories</h2>
 
-            <div class="admin-add-form">
-                <input type="text" class="admin-input" placeholder="New category name..." @bind="newCategoryName" />
+            <div class="panel-add-form">
+                <input type="text" class="panel-input" placeholder="New category name..." @bind="newCategoryName" />
                 <button class="btn-red" @onclick="AddCategory" disabled="@isLoading">Add Category</button>
             </div>
 
-            <table class="admin-table">
+            <table class="panel-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -78,10 +83,10 @@
     @* ===== THREADS TAB ===== *@
     @if (activeTab == "threads")
     {
-        <div class="admin-section">
+        <div class="panel-section">
             <h2>Manage Threads</h2>
 
-            <table class="admin-table">
+            <table class="panel-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -114,7 +119,7 @@
 
             @if (threadsPaged != null && threadsPaged.TotalPages > 1)
             {
-                <div class="admin-pagination">
+                <div class="panel-pagination">
                     <button class="btn-outline-sm" disabled="@(threadsPage <= 1)" @onclick="PrevThreadsPage">Previous</button>
                     <span>Page @threadsPage of @threadsPaged.TotalPages</span>
                     <button class="btn-outline-sm" disabled="@(threadsPage >= threadsPaged.TotalPages)" @onclick="NextThreadsPage">Next</button>
@@ -126,10 +131,10 @@
     @* ===== USERS TAB ===== *@
     @if (activeTab == "users")
     {
-        <div class="admin-section">
+        <div class="panel-section">
             <h2>Manage Users</h2>
 
-            <table class="admin-table">
+            <table class="panel-table">
                 <thead>
                     <tr>
                         <th>Username</th>
@@ -147,7 +152,7 @@
                             <td>
                                 @if (editingUserId == user.Id)
                                 {
-                                    <input type="text" class="admin-input-inline" @bind="editingUserName" />
+                                    <input type="text" class="panel-input-inline" @bind="editingUserName" />
                                 }
                                 else
                                 {
@@ -158,7 +163,7 @@
                             <td>@user.ThreadCount</td>
                             <td>@user.CommentCount</td>
                             <td>@(user.IsDeleted ? "Deleted" : "Active")</td>
-                            <td class="admin-actions">
+                            <td class="panel-actions">
                                 @if (!user.IsDeleted)
                                 {
                                     @if (editingUserId == user.Id)
@@ -177,6 +182,88 @@
                     }
                 </tbody>
             </table>
+        </div>
+    }
+
+    @* ===== MY THREADS TAB ===== *@
+    @if (activeTab == "mythreads")
+    {
+        <div class="panel-section">
+            <h2>My Threads</h2>
+
+            <table class="panel-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Comments</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (myThreads != null)
+                    {
+                        @foreach (var t in myThreads)
+                        {
+                            <tr>
+                                <td><a href="/thread/@t.ThreadId">@t.Title</a></td>
+                                <td>@t.CategoryName</td>
+                                <td>@t.CommentCount</td>
+                                <td>@t.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
+            {
+                <div class="panel-pagination">
+                    <button class="btn-outline-sm" disabled="@(myThreadsPage <= 1)" @onclick="PrevMyThreadsPage">Previous</button>
+                    <span>Page @myThreadsPage of @myThreadsPaged.TotalPages</span>
+                    <button class="btn-outline-sm" disabled="@(myThreadsPage >= myThreadsPaged.TotalPages)" @onclick="NextMyThreadsPage">Next</button>
+                </div>
+            }
+        </div>
+    }
+
+    @* ===== MY COMMENTS TAB ===== *@
+    @if (activeTab == "mycomments")
+    {
+        <div class="panel-section">
+            <h2>My Comments</h2>
+
+            <table class="panel-table">
+                <thead>
+                    <tr>
+                        <th>Content</th>
+                        <th>Thread</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (myComments != null)
+                    {
+                        @foreach (var c in myComments)
+                        {
+                            <tr>
+                                <td>@(c.Content.Length > 100 ? c.Content[..100] + "..." : c.Content)</td>
+                                <td><a href="/thread/@c.ThreadId">View Thread</a></td>
+                                <td>@c.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
+            {
+                <div class="panel-pagination">
+                    <button class="btn-outline-sm" disabled="@(myCommentsPage <= 1)" @onclick="PrevMyCommentsPage">Previous</button>
+                    <span>Page @myCommentsPage of @myCommentsPaged.TotalPages</span>
+                    <button class="btn-outline-sm" disabled="@(myCommentsPage >= myCommentsPaged.TotalPages)" @onclick="NextMyCommentsPage">Next</button>
+                </div>
+            }
         </div>
     }
 </div>
@@ -204,6 +291,19 @@
     private string? editingUserId;
     private string editingUserName = "";
 
+    // My Threads
+    private List<ThreadSummaryDto> myThreads = [];
+    private PagedResult<ThreadSummaryDto>? myThreadsPaged;
+    private int myThreadsPage = 1;
+    private bool myThreadsLoaded;
+
+    // My Comments
+    private List<CommentDto> myComments = [];
+    private PagedResult<CommentDto>? myCommentsPaged;
+    private int myCommentsPage = 1;
+    private bool myCommentsLoaded;
+
+    private string? currentUserId;
     private bool _loaded;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -357,5 +457,76 @@
         {
             SetStatus("Failed to delete user.", true);
         }
+    }
+
+    // ===== My Threads =====
+    private async Task EnsureUserId()
+    {
+        if (currentUserId != null) return;
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
+
+    private async Task ActivateMyThreads()
+    {
+        activeTab = "mythreads";
+        if (!myThreadsLoaded)
+        {
+            await EnsureUserId();
+            await LoadMyThreads();
+            myThreadsLoaded = true;
+        }
+    }
+
+    private async Task LoadMyThreads()
+    {
+        if (currentUserId == null) return;
+        myThreadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams
+        {
+            AuthorId = currentUserId,
+            SortBy = ThreadSortBy.Newest,
+            PageNumber = myThreadsPage,
+            PageSize = 20
+        });
+        myThreads = myThreadsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task PrevMyThreadsPage()
+    {
+        if (myThreadsPage > 1) { myThreadsPage--; await LoadMyThreads(); }
+    }
+
+    private async Task NextMyThreadsPage()
+    {
+        if (myThreadsPaged != null && myThreadsPage < myThreadsPaged.TotalPages) { myThreadsPage++; await LoadMyThreads(); }
+    }
+
+    // ===== My Comments =====
+    private async Task ActivateMyComments()
+    {
+        activeTab = "mycomments";
+        if (!myCommentsLoaded)
+        {
+            await EnsureUserId();
+            await LoadMyComments();
+            myCommentsLoaded = true;
+        }
+    }
+
+    private async Task LoadMyComments()
+    {
+        if (currentUserId == null) return;
+        myCommentsPaged = await CommentService.GetByAuthorAsync(currentUserId, myCommentsPage, 20);
+        myComments = myCommentsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task PrevMyCommentsPage()
+    {
+        if (myCommentsPage > 1) { myCommentsPage--; await LoadMyComments(); }
+    }
+
+    private async Task NextMyCommentsPage()
+    {
+        if (myCommentsPaged != null && myCommentsPage < myCommentsPaged.TotalPages) { myCommentsPage++; await LoadMyComments(); }
     }
 }
