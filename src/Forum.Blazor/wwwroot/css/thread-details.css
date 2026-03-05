@@ -162,3 +162,45 @@
     background: #2d333b;
     border-radius: 8px;
 }
+
+.auth-prompt {
+    text-align: center;
+    padding: 24px 20px;
+    margin-top: 20px;
+    background: #252a31;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.auth-prompt-icon {
+    font-size: 1.5em;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.auth-prompt p {
+    color: #8b949e;
+    margin: 0 0 12px 0;
+    font-size: 15px;
+}
+
+.auth-prompt-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #8b949e;
+    font-size: 14px;
+}
+
+.auth-prompt-links .auth-link {
+    color: #6e9ecf;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-prompt-links .auth-link:hover {
+    color: #85b1db;
+    text-decoration: underline;
+}
