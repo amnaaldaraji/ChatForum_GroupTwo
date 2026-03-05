@@ -5,8 +5,6 @@ html, body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     background: #1c2026;
     color: #d1d5db;
-    margin: 0;
-    padding: 0;
 }
 
 a, .btn-link {
@@ -56,29 +54,16 @@ h1:focus { outline: none; }
 }
 .blazor-error-boundary::after { content: "An error has occurred."; }
 
-/* ===== SITE LAYOUT ===== */
+/* ===== SITE LAYOUT (MainLayout) ===== */
 .site-wrapper {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    width: 100%;
-    overflow-x: hidden;
 }
-
-/* main-body har ingen padding – hero får ta full bredd */
 .main-body {
     flex: 1;
-    padding: 0;
-    width: 100%;
+    padding: 40px 0;
 }
-
-/* ===== NAVBAR ===== */
-.main-header {
-    width: 100%;
-    display: block;
-}
-
-/* används i navbar och footer – INTE i hero */
 .header-container {
     max-width: 1140px;
     margin: 0 auto;
@@ -86,16 +71,12 @@ h1:focus { outline: none; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
-    box-sizing: border-box;
 }
-
 .top-row-black {
     background: #15181d;
     padding: 12px 0;
     color: #d1d5db;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    width: 100%;
 }
 .brand a {
     font-size: 30px;
@@ -110,6 +91,41 @@ h1:focus { outline: none; }
     display: flex;
     align-items: center;
 }
+.user-greeting {
+    text-transform: none !important;
+    color: #c44040 !important;
+    font-weight: 700;
+    font-size: 18px;
+    text-decoration: none !important;
+    margin-right: 16px;
+}
+.user-greeting:hover {
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+/* Header search (dark) */
+.top-row-black .forum-search-container { position: relative; margin-right: 15px; }
+.top-row-black .search-input {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #2d333b;
+    color: #d1d5db;
+    padding: 5px 10px 5px 30px;
+    font-size: 12px;
+    width: 180px;
+    outline: none;
+    border-radius: 4px;
+}
+.top-row-black .search-input::placeholder { color: #8b949e; }
+.top-row-black .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8b949e;
+    font-size: 12px;
+}
+
 .btn-outline {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -123,7 +139,11 @@ h1:focus { outline: none; }
     transition: 0.2s;
     border-radius: 3px;
 }
-.btn-outline:hover { background: rgba(255, 255, 255, 0.06); }
+.btn-outline:hover { background: rgba(255, 255, 255, 0.06); text-decoration: none; }
+a.btn-outline { text-decoration: none; }
+a.btn-outline:hover { text-decoration: none; }
+a.btn-red { text-decoration: none; }
+a.btn-red:hover { text-decoration: none; }
 .btn-red {
     background: #c44040;
     border: none;
@@ -141,7 +161,6 @@ h1:focus { outline: none; }
     background: #252a31;
     border-bottom: 3px solid #c44040;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    width: 100%;
 }
 .nav-menu {
     list-style: none;
@@ -161,15 +180,12 @@ h1:focus { outline: none; }
     transition: color 0.15s;
 }
 .nav-menu li a:hover, .nav-menu li a.active { color: #c44040; text-decoration: none; }
-
-/* ===== FOOTER ===== */
 .main-footer {
     background: #15181d;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 40px 0;
     color: #8b949e;
     font-size: 12px;
-    width: 100%;
 }
 .footer-content {
     flex-direction: column;

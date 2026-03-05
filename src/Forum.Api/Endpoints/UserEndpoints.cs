@@ -60,6 +60,23 @@ public static class UserEndpoints
                 : result.ToProblemDetails();
         }).RequireAuthorization();
 
+        // POST change password for a user, only allowed for the owner or an Admin
+        group.MapPost("/{id}/change-password", async (string id, ChangePasswordDto dto, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
+        {
+            var userId = httpContext.User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Results.Unauthorized();
+
+            var isAdmin = httpContext.User.IsAdmin();
+            if (userId != id && !isAdmin)
+                return Results.Forbid();
+
+            var result = await mediator.Send(new ChangePasswordCommand(id, dto.CurrentPassword, dto.NewPassword, userId, isAdmin), ct);
+            return result.IsSuccess
+                ? Results.Ok(new { Message = "Password changed successfully." })
+                : result.ToProblemDetails();
+        }).RequireAuthorization();
+
         // DELETE a user account (soft delete), only for the owner or an Admin
         group.MapDelete("/{id}", async (string id, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
         {

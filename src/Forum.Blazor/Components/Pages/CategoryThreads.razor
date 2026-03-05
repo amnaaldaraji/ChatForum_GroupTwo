@@ -68,7 +68,7 @@
 
     private List<ThreadSummaryDto>? _threads;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         await LoadCategoryThreads();
     }

@@ -64,6 +64,13 @@ else
                                 <span class="reply-info">replying to @comment.ParentCommentAuthorUserName</span>
                             }
                         </div>
+                        @if (!string.IsNullOrEmpty(comment.ParentCommentContent))
+                        {
+                            <div class="reply-citation">
+                                <span class="reply-citation-author">@comment.ParentCommentAuthorUserName</span>
+                                <span class="reply-citation-content">@TruncateContent(comment.ParentCommentContent, 200)</span>
+                            </div>
+                        }
                         <div class="comment-body">
                             @comment.Content
                         </div>
@@ -184,6 +191,13 @@ else
         {
             _isSubmitting = false;
         }
+    }
+
+    private static string TruncateContent(string content, int maxLength)
+    {
+        if (content.Length <= maxLength)
+            return content;
+        return content[..maxLength] + "...";
     }
 
     private async Task SubmitComment()
