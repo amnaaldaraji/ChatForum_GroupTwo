@@ -6,7 +6,7 @@
 
 <PageTitle>Admin Panel - Sport Forum</PageTitle>
 
-<link rel="stylesheet" href="/css/admin.css" />
+<link rel="stylesheet" href="/css/panel.css" />
 
 <AuthorizeView Roles="Admin">
 <NotAuthorized>
@@ -20,36 +20,36 @@
 </NotAuthorized>
 <Authorized>
 
-<div class="admin-wrapper">
+<div class="panel-wrapper">
     <nav class="breadcrumb-trail">
         SPORT FORUM > <strong>ADMIN PANEL</strong>
     </nav>
 
-    <h1 class="admin-title">Admin Panel</h1>
+    <h1 class="panel-title">Admin Panel</h1>
 
-    <div class="admin-tabs">
-        <button class="admin-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
-        <button class="admin-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
-        <button class="admin-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
+    <div class="panel-tabs">
+        <button class="panel-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
+        <button class="panel-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
+        <button class="panel-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
     </div>
 
     @if (!string.IsNullOrEmpty(statusMessage))
     {
-        <div class="admin-status @(isError ? "error" : "success")">@statusMessage</div>
+        <div class="panel-status @(isError ? "error" : "success")">@statusMessage</div>
     }
 
     @* ===== CATEGORIES TAB ===== *@
     @if (activeTab == "categories")
     {
-        <div class="admin-section">
+        <div class="panel-section">
             <h2>Manage Categories</h2>
 
-            <div class="admin-add-form">
-                <input type="text" class="admin-input" placeholder="New category name..." @bind="newCategoryName" />
+            <div class="panel-add-form">
+                <input type="text" class="panel-input" placeholder="New category name..." @bind="newCategoryName" />
                 <button class="btn-red" @onclick="AddCategory" disabled="@isLoading">Add Category</button>
             </div>
 
-            <table class="admin-table">
+            <table class="panel-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -66,7 +66,6 @@
                             <td>@cat.Name</td>
                             <td>@cat.ThreadCount</td>
                             <td>
-                                @* Disabled if category has threads *@
                                 <button class="btn-danger-sm"
                                         @onclick="() => DeleteCategory(cat.CategoryId, cat.Name)"
                                         disabled="@(cat.ThreadCount > 0)"
@@ -84,10 +83,10 @@
     @* ===== THREADS TAB ===== *@
     @if (activeTab == "threads")
     {
-        <div class="admin-section">
+        <div class="panel-section">
             <h2>Manage Threads</h2>
 
-            <table class="admin-table">
+            <table class="panel-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -120,7 +119,7 @@
 
             @if (threadsPaged != null && threadsPaged.TotalPages > 1)
             {
-                <div class="admin-pagination">
+                <div class="panel-pagination">
                     <button class="btn-outline-sm" disabled="@(threadsPage <= 1)" @onclick="PrevThreadsPage">Previous</button>
                     <span>Page @threadsPage of @threadsPaged.TotalPages</span>
                     <button class="btn-outline-sm" disabled="@(threadsPage >= threadsPaged.TotalPages)" @onclick="NextThreadsPage">Next</button>
@@ -132,10 +131,10 @@
     @* ===== USERS TAB ===== *@
     @if (activeTab == "users")
     {
-        <div class="admin-section">
+        <div class="panel-section">
             <h2>Manage Users</h2>
 
-            <table class="admin-table">
+            <table class="panel-table">
                 <thead>
                     <tr>
                         <th>Username</th>
@@ -153,7 +152,7 @@
                             <td>
                                 @if (editingUserId == user.Id)
                                 {
-                                    <input type="text" class="admin-input-inline" @bind="editingUserName" />
+                                    <input type="text" class="panel-input-inline" @bind="editingUserName" />
                                 }
                                 else
                                 {
@@ -164,7 +163,7 @@
                             <td>@user.ThreadCount</td>
                             <td>@user.CommentCount</td>
                             <td>@(user.IsDeleted ? "Deleted" : "Active")</td>
-                            <td class="admin-actions">
+                            <td class="panel-actions">
                                 @if (!user.IsDeleted)
                                 {
                                     @if (editingUserId == user.Id)
@@ -185,6 +184,7 @@
             </table>
         </div>
     }
+
 </div>
 
 </Authorized>
@@ -364,4 +364,5 @@
             SetStatus("Failed to delete user.", true);
         }
     }
+
 }

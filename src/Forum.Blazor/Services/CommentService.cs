@@ -26,6 +26,16 @@ public class CommentService : ApiClientBase
     }
 
     /// <summary>
+    /// GET /api/comments?authorId=...&pageNumber=...&pageSize=...
+    /// Returns paginated comments filtered by author.
+    /// </summary>
+    public async Task<PagedResult<CommentDto>?> GetByAuthorAsync(string authorId, int pageNumber = 1, int pageSize = 20)
+    {
+        return await GetAsync<PagedResult<CommentDto>>(
+            $"api/comments?authorId={authorId}&pageNumber={pageNumber}&pageSize={pageSize}");
+    }
+
+    /// <summary>
     /// GET /api/comments/{id} — returns a single comment by ID.
     /// </summary>
     public async Task<CommentDto?> GetByIdAsync(int id)

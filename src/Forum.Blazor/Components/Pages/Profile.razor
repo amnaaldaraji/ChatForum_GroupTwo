@@ -1,113 +1,199 @@
 @page "/profile"
 @using System.Security.Claims
 @inject UserService UserService
+@inject ThreadService ThreadService
+@inject CommentService CommentService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Profile</PageTitle>
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-7">
-            <div class="card shadow">
-                <div class="card-header">
-                    <h3 class="mb-0">Profile</h3>
-                </div>
-                <div class="card-body">
+<link rel="stylesheet" href="/css/panel.css" />
 
-                    @if (!string.IsNullOrEmpty(successMessage))
-                    {
-                        <div class="alert alert-success">
-                            @successMessage
-                        </div>
-                    }
+<div class="panel-wrapper">
+    <nav class="breadcrumb-trail">
+        SPORT FORUM > <strong>PROFILE</strong>
+    </nav>
 
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger">
-                            @errorMessage
-                        </div>
-                    }
+    <h1 class="panel-title">Profile</h1>
 
-                    @if (isLoadingProfile)
-                    {
-                        <div class="text-center">
-                            <div class="spinner-border"></div>
-                        </div>
-                    }
-                    else
-                    {
-                        <!-- USERNAME (READ ONLY) -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Username</label>
-                            <input class="form-control" value="@profileModel.Username" disabled />
-                        </div>
-
-                        <hr />
-
-                        <!-- UPDATE EMAIL -->
-                        <EditForm Model="@emailModel" OnValidSubmit="HandleUpdateEmail">
-                            <h5 class="mt-3">Change Email</h5>
-
-                            <div class="mb-3">
-                                <label class="form-label">New Email</label>
-                                <InputText type="email"
-                                           class="form-control"
-                                           @bind-Value="emailModel.NewEmail" />
-                            </div>
-
-                            <button type="submit" class="btn btn-primary" disabled="@isLoading">
-                                @if (isLoading)
-                                {
-                                    <span class="spinner-border spinner-border-sm me-2"></span>
-                                }
-                                Update Email
-                            </button>
-                        </EditForm>
-
-                        <hr class="my-4" />
-
-                        <!-- CHANGE PASSWORD -->
-                        <EditForm Model="@passwordModel" OnValidSubmit="HandleChangePassword">
-                            <h5>Change Password</h5>
-
-                            <div class="mb-3">
-                                <label class="form-label">Current Password</label>
-                                <InputText type="password"
-                                           class="form-control"
-                                           @bind-Value="passwordModel.CurrentPassword" />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">New Password</label>
-                                <InputText type="password"
-                                           class="form-control"
-                                           @bind-Value="passwordModel.NewPassword" />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Confirm New Password</label>
-                                <InputText type="password"
-                                           class="form-control"
-                                           @bind-Value="passwordModel.ConfirmNewPassword" />
-                            </div>
-
-                            <button type="submit" class="btn btn-warning" disabled="@isLoading">
-                                @if (isLoading)
-                                {
-                                    <span class="spinner-border spinner-border-sm me-2"></span>
-                                }
-                                Change Password
-                            </button>
-                        </EditForm>
-                    }
-                </div>
-            </div>
-        </div>
+    <div class="panel-tabs">
+        <button class="panel-tab @(activeTab == "account" ? "active" : "")" @onclick='() => activeTab = "account"'>Account Settings</button>
+        <button class="panel-tab @(activeTab == "mythreads" ? "active" : "")" @onclick="ActivateMyThreads">My Threads</button>
+        <button class="panel-tab @(activeTab == "mycomments" ? "active" : "")" @onclick="ActivateMyComments">My Comments</button>
     </div>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="panel-status success">@successMessage</div>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="panel-status error">@errorMessage</div>
+    }
+
+    @* ===== ACCOUNT SETTINGS TAB ===== *@
+    @if (activeTab == "account")
+    {
+        <div class="panel-section">
+            @if (isLoadingProfile)
+            {
+                <div class="text-center">
+                    <div class="spinner-border"></div>
+                </div>
+            }
+            else
+            {
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Username</label>
+                    <input class="form-control" value="@profileModel.Username" disabled />
+                </div>
+
+                <hr />
+
+                <EditForm Model="@emailModel" OnValidSubmit="HandleUpdateEmail">
+                    <h5 class="mt-3">Change Email</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label">New Email</label>
+                        <InputText type="email"
+                                   class="form-control"
+                                   @bind-Value="emailModel.NewEmail" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Update Email
+                    </button>
+                </EditForm>
+
+                <hr class="my-4" />
+
+                <EditForm Model="@passwordModel" OnValidSubmit="HandleChangePassword">
+                    <h5>Change Password</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <InputText type="password"
+                                   class="form-control"
+                                   @bind-Value="passwordModel.CurrentPassword" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <InputText type="password"
+                                   class="form-control"
+                                   @bind-Value="passwordModel.NewPassword" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <InputText type="password"
+                                   class="form-control"
+                                   @bind-Value="passwordModel.ConfirmNewPassword" />
+                    </div>
+
+                    <button type="submit" class="btn btn-warning" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Change Password
+                    </button>
+                </EditForm>
+            }
+        </div>
+    }
+
+    @* ===== MY THREADS TAB ===== *@
+    @if (activeTab == "mythreads")
+    {
+        <div class="panel-section">
+            <h2>My Threads</h2>
+
+            <table class="panel-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Comments</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (myThreads != null)
+                    {
+                        @foreach (var t in myThreads)
+                        {
+                            <tr>
+                                <td><a href="/thread/@t.ThreadId">@t.Title</a></td>
+                                <td>@t.CategoryName</td>
+                                <td>@t.CommentCount</td>
+                                <td>@t.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
+            {
+                <div class="panel-pagination">
+                    <button class="btn-outline-sm" disabled="@(myThreadsPage <= 1)" @onclick="PrevMyThreadsPage">Previous</button>
+                    <span>Page @myThreadsPage of @myThreadsPaged.TotalPages</span>
+                    <button class="btn-outline-sm" disabled="@(myThreadsPage >= myThreadsPaged.TotalPages)" @onclick="NextMyThreadsPage">Next</button>
+                </div>
+            }
+        </div>
+    }
+
+    @* ===== MY COMMENTS TAB ===== *@
+    @if (activeTab == "mycomments")
+    {
+        <div class="panel-section">
+            <h2>My Comments</h2>
+
+            <table class="panel-table">
+                <thead>
+                    <tr>
+                        <th>Content</th>
+                        <th>Thread</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (myComments != null)
+                    {
+                        @foreach (var c in myComments)
+                        {
+                            <tr>
+                                <td>@(c.Content.Length > 100 ? c.Content[..100] + "..." : c.Content)</td>
+                                <td><a href="/thread/@c.ThreadId">View Thread</a></td>
+                                <td>@c.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
+            {
+                <div class="panel-pagination">
+                    <button class="btn-outline-sm" disabled="@(myCommentsPage <= 1)" @onclick="PrevMyCommentsPage">Previous</button>
+                    <span>Page @myCommentsPage of @myCommentsPaged.TotalPages</span>
+                    <button class="btn-outline-sm" disabled="@(myCommentsPage >= myCommentsPaged.TotalPages)" @onclick="NextMyCommentsPage">Next</button>
+                </div>
+            }
+        </div>
+    }
 </div>
 
 @code {
+    private string activeTab = "account";
 
     private ProfileModel profileModel = new();
     private UpdateEmailModel emailModel = new();
@@ -120,6 +206,18 @@
     private bool isLoadingProfile = true;
 
     private string? userId;
+
+    // My Threads
+    private List<ThreadSummaryDto> myThreads = [];
+    private PagedResult<ThreadSummaryDto>? myThreadsPaged;
+    private int myThreadsPage = 1;
+    private bool myThreadsLoaded;
+
+    // My Comments
+    private List<CommentDto> myComments = [];
+    private PagedResult<CommentDto>? myCommentsPaged;
+    private int myCommentsPage = 1;
+    private bool myCommentsLoaded;
 
     protected override async Task OnInitializedAsync()
     {
@@ -243,6 +341,68 @@
         {
             isLoading = false;
         }
+    }
+
+    // ===== My Threads =====
+    private async Task ActivateMyThreads()
+    {
+        activeTab = "mythreads";
+        if (!myThreadsLoaded)
+        {
+            await LoadMyThreads();
+            myThreadsLoaded = true;
+        }
+    }
+
+    private async Task LoadMyThreads()
+    {
+        if (userId == null) return;
+        myThreadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams
+        {
+            AuthorId = userId,
+            SortBy = ThreadSortBy.Newest,
+            PageNumber = myThreadsPage,
+            PageSize = 20
+        });
+        myThreads = myThreadsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task PrevMyThreadsPage()
+    {
+        if (myThreadsPage > 1) { myThreadsPage--; await LoadMyThreads(); }
+    }
+
+    private async Task NextMyThreadsPage()
+    {
+        if (myThreadsPaged != null && myThreadsPage < myThreadsPaged.TotalPages) { myThreadsPage++; await LoadMyThreads(); }
+    }
+
+    // ===== My Comments =====
+    private async Task ActivateMyComments()
+    {
+        activeTab = "mycomments";
+        if (!myCommentsLoaded)
+        {
+            await LoadMyComments();
+            myCommentsLoaded = true;
+        }
+    }
+
+    private async Task LoadMyComments()
+    {
+        if (userId == null) return;
+        myCommentsPaged = await CommentService.GetByAuthorAsync(userId, myCommentsPage, 20);
+        myComments = myCommentsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task PrevMyCommentsPage()
+    {
+        if (myCommentsPage > 1) { myCommentsPage--; await LoadMyComments(); }
+    }
+
+    private async Task NextMyCommentsPage()
+    {
+        if (myCommentsPaged != null && myCommentsPage < myCommentsPaged.TotalPages) { myCommentsPage++; await LoadMyComments(); }
     }
 
     private class ProfileModel
