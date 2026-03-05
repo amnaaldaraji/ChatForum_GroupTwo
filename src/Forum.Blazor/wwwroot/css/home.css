@@ -84,6 +84,13 @@
     text-transform: uppercase;
     letter-spacing: 2.5px;
     font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.cat-name:hover {
+    color: #85b1db;
+    text-decoration: none;
 }
 
 .view-all-link {
