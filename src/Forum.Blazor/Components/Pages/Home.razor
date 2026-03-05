@@ -9,101 +9,97 @@
 <div class="home-wrapper">
     <div class="home-overlay">
 
-        <div class="home-header">
-            <h1 class="hero-title">OVER<span class="hero-red">TIME</span></h1>
-            <p class="hero-sub">Debates on current affairs and recent past of motorsport and all sports.</p>
-        </div>
-
         <div class="home-content">
 
-            @* vänster kolumn – senaste kommentarer *@
-            <div class="side-panel left-panel">
-                <div class="side-title">Latest Activity</div>
-                @if (_recentComments != null)
+            @if (_popularThreads == null)
+            {
+                <div class="loading">loading...</div>
+            }
+            else
+            {
+                @if (_popularThreads.Any())
                 {
-                    @foreach (var comment in _recentComments)
-                    {
-                        <div class="activity-card">
-                            <div class="activity-author">@comment.AuthorUserName</div>
-                            <div class="activity-thread">@comment.ThreadTitle</div>
-                            <div class="activity-preview">@comment.Content</div>
-                            <div class="activity-time">@comment.TimeCreated.ToString("MMM dd, yyyy")</div>
+                    <div class="popular-section">
+                        <div class="section-title">Popular Threads</div>
+                        <div class="popular-list">
+                            @foreach (var thread in _popularThreads)
+                            {
+                                <a href="/thread/@thread.ThreadId" class="popular-item">
+                                    <span class="popular-title">@thread.Title</span>
+                                    <span class="popular-meta">
+                                        <span class="author">@thread.AuthorUserName</span>
+                                        <span class="dot">&bull;</span>
+                                        <span class="popular-category">@thread.CategoryName</span>
+                                    </span>
+                                    <span class="popular-replies">@thread.CommentCount replies</span>
+                                </a>
+                            }
                         </div>
-                    }
-                }
-            </div>
-
-            @* mitten – kategorilista *@
-            <div class="forum-home">
-                @if (_categories == null)
-                {
-                    <div class="loading">loading categories...</div>
-                }
-                else
-                {
-                    <div class="categories-list">
-                        @foreach (var category in _categories)
-                        {
-                            <div class="category-card">
-                                <div class="category-header">
-                                    <span class="cat-name">@category.Name</span>
-                                    <a href="/category/@category.Name" class="view-all-link">View all &rarr;</a>
-                                </div>
-
-                                @if (category.RecentThreads == null || !category.RecentThreads.Any())
-                                {
-                                    <div class="no-threads">no threads yet.</div>
-                                }
-                                else
-                                {
-                                    <div class="recent-threads">
-                                        @foreach (var thread in category.RecentThreads)
-                                        {
-                                            <div class="thread-item">
-                                                <div class="thread-left">
-                                                    <a href="/thread/@thread.ThreadId" class="thread-title">@thread.Title</a>
-                                                    <div class="thread-meta">
-                                                        <span class="author">@thread.AuthorUserName</span>
-                                                        <span class="dot">&bull;</span>
-                                                        <span class="date">@thread.TimeCreated.ToString("MMM dd, yyyy")</span>
-                                                    </div>
-                                                </div>
-                                                <div class="thread-right">
-                                                    <span class="reply-count">@thread.CommentCount</span>
-                                                    <span class="reply-label">replies</span>
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        }
                     </div>
                 }
-            </div>
+
+                @if (_popularCategories != null && _popularCategories.Any())
+                {
+                    <div class="categories-section">
+                        <div class="section-title">Popular Categories</div>
+                        <div class="categories-grid">
+                            @foreach (var category in _popularCategories)
+                            {
+                                <div class="category-card">
+                                    <div class="category-header">
+                                        <span class="cat-name">@category.Name</span>
+                                        <span class="cat-count">@category.ThreadCount threads</span>
+                                        <a href="/category/@category.Name" class="view-all-link">View all &rarr;</a>
+                                    </div>
+
+                                    @if (category.RecentThreads == null || !category.RecentThreads.Any())
+                                    {
+                                        <div class="no-threads">no threads yet.</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="recent-threads">
+                                            @foreach (var thread in category.RecentThreads)
+                                            {
+                                                <div class="thread-item">
+                                                    <div class="thread-left">
+                                                        <a href="/thread/@thread.ThreadId" class="thread-title">@thread.Title</a>
+                                                        <div class="thread-meta">
+                                                            <span class="author">@thread.AuthorUserName</span>
+                                                            <span class="dot">&bull;</span>
+                                                            <span class="date">@thread.TimeCreated.ToString("MMM dd, yyyy")</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="thread-right">
+                                                        <span class="reply-count">@thread.CommentCount</span>
+                                                        <span class="reply-label">replies</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
 
         </div>
     </div>
 </div>
 
 @code {
-    private List<CategoryWithThreads>? _categories;
-    private List<RecentCommentItem>? _recentComments;
     private List<PopularThreadItem>? _popularThreads;
+    private List<CategoryWithThreads>? _popularCategories;
 
     private class CategoryWithThreads
     {
         public string Name { get; set; } = string.Empty;
         public int CategoryId { get; set; }
+        public int ThreadCount { get; set; }
+        public DateTime LatestActivity { get; set; }
         public List<ThreadSummaryDto> RecentThreads { get; set; } = [];
-    }
-
-    private class RecentCommentItem
-    {
-        public string AuthorUserName { get; set; } = string.Empty;
-        public string ThreadTitle { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
-        public DateTime TimeCreated { get; set; }
     }
 
     private class PopularThreadItem
@@ -120,29 +116,34 @@
         var categories = await CategoryService.GetAllAsync();
         if (categories == null) return;
 
-        _categories = [];
+        var allCategories = new List<CategoryWithThreads>();
         _popularThreads = [];
 
         foreach (var cat in categories)
         {
-            // load 3 most recent threads per category
             var filter = new ThreadFilterParams
             {
                 CategoryId = cat.CategoryId,
                 PageSize = 3,
-                SortBy = ThreadSortBy.Newest
+                SortBy = ThreadSortBy.RecentlyUpdated
             };
             var result = await ThreadService.GetThreadsAsync(filter);
             var threads = result?.Items?.ToList() ?? [];
 
-            _categories.Add(new CategoryWithThreads
+            var latestActivity = threads
+                .Select(t => t.LastCommentTime ?? t.TimeUpdated)
+                .DefaultIfEmpty(DateTime.MinValue)
+                .Max();
+
+            allCategories.Add(new CategoryWithThreads
             {
                 Name = cat.Name,
                 CategoryId = cat.CategoryId,
-                RecentThreads = threads
+                ThreadCount = cat.ThreadCount,
+                LatestActivity = latestActivity,
+                RecentThreads = threads.Take(2).ToList()
             });
 
-            // samla populära trådar från alla kategorier
             foreach (var t in threads)
             {
                 _popularThreads.Add(new PopularThreadItem
@@ -156,23 +157,14 @@
             }
         }
 
-        // sortera på mest kommentarer och ta top 6
         _popularThreads = _popularThreads
             .OrderByDescending(t => t.CommentCount)
             .Take(6)
             .ToList();
 
-        // bygg senaste aktivitet från nyaste trådar
-        _recentComments = _categories
-            .SelectMany(c => c.RecentThreads.Select(t => new RecentCommentItem
-            {
-                AuthorUserName = t.AuthorUserName,
-                ThreadTitle = t.Title,
-                Content = c.Name,
-                TimeCreated = t.TimeCreated
-            }))
-            .OrderByDescending(x => x.TimeCreated)
-            .Take(6)
+        _popularCategories = allCategories
+            .OrderByDescending(c => c.LatestActivity)
+            .Take(4)
             .ToList();
     }
 }

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
 /* ===== BASE RESET ===== */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -63,6 +65,11 @@ h1:focus { outline: none; }
 .main-body {
     flex: 1;
     padding: 40px 0;
+    display: flex;
+    flex-direction: column;
+}
+.main-body:has(.home-wrapper) {
+    padding: 0;
 }
 .header-container {
     max-width: 1140px;
@@ -91,6 +98,22 @@ h1:focus { outline: none; }
 }
 
 .red-text { color: #c44040; }
+.brand-tagline {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    color: #8b949e;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    padding: 0 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .brand-tagline { display: none; }
+}
 .user-actions {
     display: flex;
     align-items: center;
