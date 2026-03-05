@@ -4,17 +4,27 @@
     <NavMenu />
 
     <main class="main-body">
-        <div class="header-container">
-            @Body
-        </div>
+        @Body
     </main>
 
-    <footer class="main-footer">
-        <div class="header-container footer-content">
-            <p>&copy; 2026 Sport Forum Digital Media. All rights reserved.</p>
-            <div class="footer-links">
-              | <a href="#" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">Back to the top</a> | 
+    @if (!IsHomePage)
+    {
+        <footer class="main-footer">
+            <div class="header-container footer-content">
+                <p>&copy; 2026 Overtime Digital Media. All rights reserved.</p>
+                <div class="footer-links">
+                    | <a href="#" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">Back to the top</a> |
+                </div>
             </div>
-        </div>
-    </footer>
+        </footer>
+    }
 </div>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private bool IsHomePage => NavigationManager.Uri.TrimEnd('/') == NavigationManager.BaseUri.TrimEnd('/');
+
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+}

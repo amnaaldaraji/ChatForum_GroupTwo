@@ -78,14 +78,18 @@ h1:focus { outline: none; }
     color: #d1d5db;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
+
+/* ===== BRAND (Overtime) ===== */
 .brand a {
-    font-size: 30px;
+    font-family: 'DM Sans', 'Arial Black', sans-serif;
+    font-size: 24px;
     font-weight: 900;
     color: #d1d5db;
     text-decoration: none;
-    letter-spacing: -1.5px;
-    font-family: 'Arial Black', Gadget, sans-serif;
+    letter-spacing: 10px;
+    text-transform: uppercase;
 }
+
 .red-text { color: #c44040; }
 .user-actions {
     display: flex;
