@@ -2,7 +2,7 @@
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
 
-<PageTitle>Sport Forum</PageTitle>
+<PageTitle>Overtime</PageTitle>
 
 <link rel="stylesheet" href="/css/home.css" />
 
@@ -10,7 +10,7 @@
     <div class="home-overlay">
 
         <div class="home-header">
-            <h1 class="hero-title">SPORT<span class="hero-red">FORUM</span></h1>
+            <h1 class="hero-title">OVER<span class="hero-red">TIME</span></h1>
             <p class="hero-sub">Debates on current affairs and recent past of motorsport and all sports.</p>
         </div>
 
@@ -79,25 +79,6 @@
                             </div>
                         }
                     </div>
-                }
-            </div>
-
-            @* höger kolumn – populära trådar *@
-            <div class="side-panel right-panel">
-                <div class="side-title">Most Active</div>
-                @if (_popularThreads != null)
-                {
-                    @foreach (var thread in _popularThreads)
-                    {
-                        <div class="activity-card">
-                            <div class="activity-category">@thread.CategoryName</div>
-                            <a href="/thread/@thread.ThreadId" class="activity-thread-link">@thread.Title</a>
-                            <div class="activity-stats">
-                                <span class="activity-author">@thread.AuthorUserName</span>
-                                <span class="activity-replies">@thread.CommentCount replies</span>
-                            </div>
-                        </div>
-                    }
                 }
             </div>
 
