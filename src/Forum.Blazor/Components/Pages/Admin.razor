@@ -1,10 +1,7 @@
 @page "/admin"
-@using System.Security.Claims
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
-@inject CommentService CommentService
 @inject UserService UserService
-@inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 
 <PageTitle>Admin Panel - Sport Forum</PageTitle>
@@ -34,8 +31,6 @@
         <button class="panel-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
         <button class="panel-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
         <button class="panel-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
-        <button class="panel-tab @(activeTab == "mythreads" ? "active" : "")" @onclick="ActivateMyThreads">My Threads</button>
-        <button class="panel-tab @(activeTab == "mycomments" ? "active" : "")" @onclick="ActivateMyComments">My Comments</button>
     </div>
 
     @if (!string.IsNullOrEmpty(statusMessage))
@@ -185,87 +180,6 @@
         </div>
     }
 
-    @* ===== MY THREADS TAB ===== *@
-    @if (activeTab == "mythreads")
-    {
-        <div class="panel-section">
-            <h2>My Threads</h2>
-
-            <table class="panel-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Comments</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (myThreads != null)
-                    {
-                        @foreach (var t in myThreads)
-                        {
-                            <tr>
-                                <td><a href="/thread/@t.ThreadId">@t.Title</a></td>
-                                <td>@t.CategoryName</td>
-                                <td>@t.CommentCount</td>
-                                <td>@t.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-
-            @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
-            {
-                <div class="panel-pagination">
-                    <button class="btn-outline-sm" disabled="@(myThreadsPage <= 1)" @onclick="PrevMyThreadsPage">Previous</button>
-                    <span>Page @myThreadsPage of @myThreadsPaged.TotalPages</span>
-                    <button class="btn-outline-sm" disabled="@(myThreadsPage >= myThreadsPaged.TotalPages)" @onclick="NextMyThreadsPage">Next</button>
-                </div>
-            }
-        </div>
-    }
-
-    @* ===== MY COMMENTS TAB ===== *@
-    @if (activeTab == "mycomments")
-    {
-        <div class="panel-section">
-            <h2>My Comments</h2>
-
-            <table class="panel-table">
-                <thead>
-                    <tr>
-                        <th>Content</th>
-                        <th>Thread</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (myComments != null)
-                    {
-                        @foreach (var c in myComments)
-                        {
-                            <tr>
-                                <td>@(c.Content.Length > 100 ? c.Content[..100] + "..." : c.Content)</td>
-                                <td><a href="/thread/@c.ThreadId">View Thread</a></td>
-                                <td>@c.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-
-            @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
-            {
-                <div class="panel-pagination">
-                    <button class="btn-outline-sm" disabled="@(myCommentsPage <= 1)" @onclick="PrevMyCommentsPage">Previous</button>
-                    <span>Page @myCommentsPage of @myCommentsPaged.TotalPages</span>
-                    <button class="btn-outline-sm" disabled="@(myCommentsPage >= myCommentsPaged.TotalPages)" @onclick="NextMyCommentsPage">Next</button>
-                </div>
-            }
-        </div>
-    }
 </div>
 
 </Authorized>
@@ -291,19 +205,6 @@
     private string? editingUserId;
     private string editingUserName = "";
 
-    // My Threads
-    private List<ThreadSummaryDto> myThreads = [];
-    private PagedResult<ThreadSummaryDto>? myThreadsPaged;
-    private int myThreadsPage = 1;
-    private bool myThreadsLoaded;
-
-    // My Comments
-    private List<CommentDto> myComments = [];
-    private PagedResult<CommentDto>? myCommentsPaged;
-    private int myCommentsPage = 1;
-    private bool myCommentsLoaded;
-
-    private string? currentUserId;
     private bool _loaded;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -459,74 +360,4 @@
         }
     }
 
-    // ===== My Threads =====
-    private async Task EnsureUserId()
-    {
-        if (currentUserId != null) return;
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    }
-
-    private async Task ActivateMyThreads()
-    {
-        activeTab = "mythreads";
-        if (!myThreadsLoaded)
-        {
-            await EnsureUserId();
-            await LoadMyThreads();
-            myThreadsLoaded = true;
-        }
-    }
-
-    private async Task LoadMyThreads()
-    {
-        if (currentUserId == null) return;
-        myThreadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams
-        {
-            AuthorId = currentUserId,
-            SortBy = ThreadSortBy.Newest,
-            PageNumber = myThreadsPage,
-            PageSize = 20
-        });
-        myThreads = myThreadsPaged?.Items?.ToList() ?? [];
-    }
-
-    private async Task PrevMyThreadsPage()
-    {
-        if (myThreadsPage > 1) { myThreadsPage--; await LoadMyThreads(); }
-    }
-
-    private async Task NextMyThreadsPage()
-    {
-        if (myThreadsPaged != null && myThreadsPage < myThreadsPaged.TotalPages) { myThreadsPage++; await LoadMyThreads(); }
-    }
-
-    // ===== My Comments =====
-    private async Task ActivateMyComments()
-    {
-        activeTab = "mycomments";
-        if (!myCommentsLoaded)
-        {
-            await EnsureUserId();
-            await LoadMyComments();
-            myCommentsLoaded = true;
-        }
-    }
-
-    private async Task LoadMyComments()
-    {
-        if (currentUserId == null) return;
-        myCommentsPaged = await CommentService.GetByAuthorAsync(currentUserId, myCommentsPage, 20);
-        myComments = myCommentsPaged?.Items?.ToList() ?? [];
-    }
-
-    private async Task PrevMyCommentsPage()
-    {
-        if (myCommentsPage > 1) { myCommentsPage--; await LoadMyComments(); }
-    }
-
-    private async Task NextMyCommentsPage()
-    {
-        if (myCommentsPaged != null && myCommentsPage < myCommentsPaged.TotalPages) { myCommentsPage++; await LoadMyComments(); }
-    }
 }
