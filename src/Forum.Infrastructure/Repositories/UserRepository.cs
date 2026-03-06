@@ -1,3 +1,4 @@
+using Forum.Application.Common.Models;
 using Forum.Application.Repositories;
 using Forum.Domain.Entities;
 using Forum.Infrastructure.Data;
@@ -73,13 +74,36 @@ public class UserRepository : Repository<User>, IUserRepository
     public async Task<bool> EmailExistsAsync(string email, string? excludeUserId = null, CancellationToken cancellationToken = default)
     {
         var query = DbSet.Where(u => u.Email == email);
-        
+
         if (!string.IsNullOrWhiteSpace(excludeUserId))
         {
             query = query.Where(u => u.Id != excludeUserId);
         }
 
         return await query.AnyAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieves a paginated list of users with their threads and comments eagerly loaded.
+    /// Ordered by username ascending.
+    /// </summary>
+    public async Task<(IReadOnlyList<User> Items, int TotalCount)> GetPagedAsync(
+        PaginationParams paginationParams,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet
+            .Include(u => u.Threads)
+            .Include(u => u.Comments)
+            .OrderBy(u => u.UserName);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+            .Take(paginationParams.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 }
 

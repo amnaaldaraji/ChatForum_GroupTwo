@@ -1,3 +1,4 @@
+using Forum.Application.Common.Models;
 using Forum.Domain.Entities;
 
 namespace Forum.Application.Repositories;
@@ -11,4 +12,5 @@ public interface IUserRepository : IRepository<User>
     Task<User?> GetByUserNameAsync(string userName, CancellationToken cancellationToken = default);
     Task<bool> UserNameExistsAsync(string userName, string? excludeUserId = null, CancellationToken cancellationToken = default);
     Task<bool> EmailExistsAsync(string email, string? excludeUserId = null, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<User> Items, int TotalCount)> GetPagedAsync(PaginationParams paginationParams, CancellationToken cancellationToken = default);
 }

@@ -1,3 +1,4 @@
+using Forum.Application.Common.Models;
 using Forum.Application.DTOs.User;
 using Forum.Blazor.Interfaces;
 
@@ -14,11 +15,12 @@ public class UserService : ApiClientBase
     }
 
     /// <summary>
-    /// GET /api/users — returns all users (admin only).
+    /// GET /api/users?pageNumber=...&pageSize=... — returns paginated users (admin only).
     /// </summary>
-    public async Task<List<UserDto>> GetAllAsync()
+    public async Task<PagedResult<UserDto>?> GetPagedAsync(int pageNumber = 1, int pageSize = 10)
     {
-        return await GetAuthenticatedAsync<List<UserDto>>("api/users") ?? [];
+        return await GetAuthenticatedAsync<PagedResult<UserDto>>(
+            $"api/users?pageNumber={pageNumber}&pageSize={pageSize}");
     }
 
     /// <summary>
