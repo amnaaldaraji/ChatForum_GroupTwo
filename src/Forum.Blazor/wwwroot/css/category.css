@@ -17,33 +17,77 @@
     margin-bottom: 16px;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
     width: 100%;
+    background-color: #1a1f26;
 }
 
+
+/* Sport icon decoration */
+.category-hero::after {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 110px;
+    opacity: 0.7;
+    z-index: 0;
+    line-height: 1;
+}
+
+/* Category-specific accent gradients and icons */
 .category-hero.football {
-    background: url('../images/football.jpg') center/cover no-repeat;
+    background: linear-gradient(135deg, #2e4238 0%, #345040 50%, #3a5a48 100%);
+}
+.category-hero.football::after {
+    content: '⚽';
 }
 
 .category-hero.basketball {
-    background: url('../images/basket.png') center/cover no-repeat;
+    background: linear-gradient(135deg, #3a3428 0%, #4a3c24 50%, #5a4228 100%);
+}
+.category-hero.basketball::after {
+    content: '🏀';
 }
 
 .category-hero.tennis {
-    background: url('../images/tennis.jpg') center/cover no-repeat;
+    background: linear-gradient(135deg, #36382a 0%, #424028 50%, #4e4a26 100%);
+}
+.category-hero.tennis::after {
+    content: '🎾';
 }
 
 .category-hero.formula1 {
-    background: url('../images/formula1.png') center/cover no-repeat;
+    background: linear-gradient(135deg, #3a2e30 0%, #4a3234 50%, #583838 100%);
+}
+.category-hero.formula1::after {
+    content: '🏎️';
 }
 
-.category-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.15));
-    z-index: 1;
+.category-hero.hockey {
+    background: linear-gradient(135deg, #2e3640 0%, #323c4e 50%, #38465e 100%);
+}
+.category-hero.hockey::after {
+    content: '🏒';
+}
+
+.category-hero.golf {
+    background: linear-gradient(135deg, #2e3a32 0%, #344840 50%, #3a5445 100%);
+}
+.category-hero.golf::after {
+    content: '⛳';
+}
+
+.category-hero.cycling {
+    background: linear-gradient(135deg, #322e3a 0%, #3c3648 50%, #483e5c 100%);
+}
+.category-hero.cycling::after {
+    content: '🚴';
+}
+
+.category-hero.rugby {
+    background: linear-gradient(135deg, #38322a 0%, #443a28 50%, #504030 100%);
+}
+.category-hero.rugby::after {
+    content: '🏉';
 }
 
 .hero-content {
