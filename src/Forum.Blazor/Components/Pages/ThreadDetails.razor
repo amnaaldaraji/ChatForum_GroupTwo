@@ -1,6 +1,7 @@
 @page "/thread/{Id:int}"
 @using Microsoft.AspNetCore.Components.Authorization
 @using Forum.Application.DTOs.Comment
+@using Forum.Application.Common.Models
 @inject ThreadService ThreadService
 @inject CommentService CommentService
 
@@ -45,15 +46,49 @@ else
         }
 
         <div class="comments-section">
-            <h3>comments (@(_thread.Comments?.Count ?? 0))</h3>
+            <h3>comments (@(_commentsPage?.TotalCount ?? 0))</h3>
 
-            @if (_thread.Comments == null || !_thread.Comments.Any())
+            <div class="d-flex align-items-center mb-2">
+                <label class="me-2 mb-0">Comments per page:</label>
+                <select class="form-select form-select-sm w-auto" value="@_pageSize" @onchange="OnPageSizeChanged">
+                    @for (int i = 1; i <= 10; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+
+                <div class="ms-auto">
+                    @if (_commentsPage != null && _commentsPage.TotalPages > 1)
+                    {
+                        <nav aria-label="Comment pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item @( _pageNumber == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="PrevPage">Prev</button>
+                                </li>
+
+                                @for (var p = 1; p <= _commentsPage.TotalPages; p++)
+                                {
+                                    <li class="page-item @(p == _pageNumber ? "active" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(p)">@p</button>
+                                    </li>
+                                }
+
+                                <li class="page-item @( _pageNumber == _commentsPage.TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="NextPage">Next</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+
+            @if (_commentsPage?.Items == null || !_commentsPage.Items.Any())
             {
                 <div class="no-comments">no comments yet.</div>
             }
             else
             {
-                @foreach (var comment in _thread.Comments)
+                @foreach (var comment in _commentsPage.Items)
                 {
                     <div class="comment">
                         <div class="comment-header">
@@ -135,6 +170,11 @@ else
 
     private ThreadDetailDto? _thread;
     private bool _isLoading = true;
+
+    private PagedResult<CommentDto>? _commentsPage;
+    private int _pageNumber = 1;
+    private int _pageSize = 5;
+
     private string _newCommentContent = string.Empty;
     private string _commentError = string.Empty;
     private bool _isSubmitting;
@@ -152,6 +192,8 @@ else
         try
         {
             _thread = await ThreadService.GetByIdAsync(Id);
+
+            await LoadComments();
         }
         catch
         {
@@ -161,6 +203,35 @@ else
         {
             _isLoading = false;
         }
+    }
+
+    private async Task LoadComments(int? page = null)
+    {
+        var pageToLoad = page ?? _pageNumber;
+        try
+        {
+            _commentsPage = await CommentService.GetByThreadAsync(Id, pageToLoad, _pageSize);
+            if (_commentsPage != null)
+            {
+                _pageNumber = _commentsPage.PageNumber;
+            }
+        }
+        catch
+        {
+            _commentsPage = null;
+        }
+        StateHasChanged();
+    }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
+        if (newSize == _pageSize) return;
+
+        _pageSize = newSize;
+        _pageNumber = 1;
+        await LoadComments(_pageNumber);
     }
 
     private void StartReply(int commentId)
@@ -189,7 +260,7 @@ else
             {
                 _replyingToCommentId = null;
                 _replyContent = string.Empty;
-                await LoadThread();
+                await LoadComments(_pageNumber);
             }
         }
         catch { }
@@ -224,7 +295,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 _newCommentContent = string.Empty;
-                await LoadThread();
+                await LoadComments(_pageNumber);
             }
             else
             {
@@ -239,5 +310,27 @@ else
         {
             _isSubmitting = false;
         }
+    }
+
+    private async Task PrevPage()
+    {
+        if (_commentsPage is null || !_commentsPage.HasPreviousPage) return;
+        _pageNumber = Math.Max(1, _pageNumber - 1);
+        await LoadComments(_pageNumber);
+    }
+
+    private async Task NextPage()
+    {
+        if (_commentsPage is null || !_commentsPage.HasNextPage) return;
+        _pageNumber = Math.Min(_commentsPage.TotalPages, _pageNumber + 1);
+        await LoadComments(_pageNumber);
+    }
+
+    private async Task GoToPage(int p)
+    {
+        if (_commentsPage is null) return;
+        if (p < 1 || p > _commentsPage.TotalPages) return;
+        _pageNumber = p;
+        await LoadComments(_pageNumber);
     }
 }
