@@ -314,7 +314,7 @@ a.btn-red:hover { text-decoration: none; }
 .main-footer {
     background: var(--bg-header);
     border-top: 1px solid var(--border-subtle);
-    padding: 40px 0;
+    padding: 24px 0;
     color: var(--text-secondary);
     font-size: 12px;
 }

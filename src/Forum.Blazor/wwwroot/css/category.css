@@ -3,18 +3,18 @@
 .category-page {
     max-width: 960px;
     margin: 0 auto;
-    padding: 28px 20px;
+    padding: 16px 20px;
 }
 
 .category-hero {
     position: relative;
-    height: 260px;
+    height: 180px;
     border-radius: 10px;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 28px;
+    margin-bottom: 16px;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
     width: 100%;
 }
@@ -51,7 +51,7 @@
     z-index: 2;
     text-align: center;
     color: #d1d5db;
-    padding: 32px 48px;
+    padding: 20px 40px;
     background: rgba(28, 32, 38, 0.9);
     backdrop-filter: blur(10px);
     border-radius: 10px;
@@ -73,9 +73,9 @@
 }
 
 .category-title {
-    font-size: 1.8em;
+    font-size: 1.5em;
     font-weight: 800;
-    margin-bottom: 8px;
+    margin-bottom: 0;
     text-transform: uppercase;
     letter-spacing: 3px;
     color: #d1d5db;
@@ -98,8 +98,8 @@
     overflow: visible;
     box-shadow: none;
     border: none;
-    margin-bottom: 20px;
-    padding: 16px 0;
+    margin-bottom: 0;
+    padding: 8px 0;
     width: 100%;
 }
 
@@ -182,7 +182,7 @@
 }
 
 .create-thread-section {
-    margin-top: 20px;
+    margin-top: 12px;
     text-align: center;
 }
 
