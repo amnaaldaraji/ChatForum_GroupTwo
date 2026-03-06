@@ -82,6 +82,37 @@ a:hover, .btn-link:hover {
     border: 1px solid var(--border-input);
 }
 
+/* ===== Pagination dark theme (global) ===== */
+.page-link {
+    background: var(--bg-elevated);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+.page-link:hover {
+    background: #373e47;
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.page-item.active .page-link {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #ffffff;
+}
+
+.page-item.disabled .page-link {
+    background: #1e2228;
+    border-color: var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+.form-select {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
 .btn:focus,
 .btn:active:focus,
 .btn-link.nav-link:focus,

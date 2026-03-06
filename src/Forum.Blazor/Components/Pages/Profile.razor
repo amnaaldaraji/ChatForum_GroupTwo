@@ -115,6 +115,58 @@
         <div class="panel-section">
             <h2>My Threads</h2>
 
+            <div class="d-flex align-items-center mb-2">
+                <label class="me-2 mb-0" style="color: #8b949e;">Threads per page:</label>
+                <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myThreadsPageSize" @onchange="OnMyThreadsPageSizeChanged">
+                    @foreach (var size in new[] { 5, 10, 15, 20 })
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </select>
+
+                <div class="ms-auto">
+                    @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
+                    {
+                        <nav aria-label="My threads pagination">
+                            <ul class="pagination pagination-sm mb-0 panel-pagination-nav">
+                                <li class="page-item @(myThreadsPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="PrevMyThreadsPage">Prev</button>
+                                </li>
+
+                                @{
+                                    var ttPages = myThreadsPaged.TotalPages;
+                                    var ttShow = new SortedSet<int>();
+                                    ttShow.Add(1);
+                                    ttShow.Add(ttPages);
+                                    if (myThreadsPage > 1) ttShow.Add(myThreadsPage - 1);
+                                    ttShow.Add(myThreadsPage);
+                                    if (myThreadsPage < ttPages) ttShow.Add(myThreadsPage + 1);
+
+                                    int? ttLast = null;
+                                    foreach (var pageNum in ttShow)
+                                    {
+                                        if (ttLast.HasValue && pageNum - ttLast.Value > 1)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        }
+                                        <li class="page-item @(pageNum == myThreadsPage ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToMyThreadsPage(pageNum)">@pageNum</button>
+                                        </li>
+                                        ttLast = pageNum;
+                                    }
+                                }
+
+                                <li class="page-item @(myThreadsPage == myThreadsPaged.TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="NextMyThreadsPage">Next</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+
             <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
@@ -141,15 +193,6 @@
                 </tbody>
             </table>
             </div>
-
-            @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
-            {
-                <div class="panel-pagination">
-                    <button class="btn-outline-sm" disabled="@(myThreadsPage <= 1)" @onclick="PrevMyThreadsPage">Previous</button>
-                    <span>Page @myThreadsPage of @myThreadsPaged.TotalPages</span>
-                    <button class="btn-outline-sm" disabled="@(myThreadsPage >= myThreadsPaged.TotalPages)" @onclick="NextMyThreadsPage">Next</button>
-                </div>
-            }
         </div>
     }
 
@@ -158,6 +201,58 @@
     {
         <div class="panel-section">
             <h2>My Comments</h2>
+
+            <div class="d-flex align-items-center mb-2">
+                <label class="me-2 mb-0" style="color: #8b949e;">Comments per page:</label>
+                <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myCommentsPageSize" @onchange="OnMyCommentsPageSizeChanged">
+                    @foreach (var size in new[] { 5, 10, 15, 20 })
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </select>
+
+                <div class="ms-auto">
+                    @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
+                    {
+                        <nav aria-label="My comments pagination">
+                            <ul class="pagination pagination-sm mb-0 panel-pagination-nav">
+                                <li class="page-item @(myCommentsPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="PrevMyCommentsPage">Prev</button>
+                                </li>
+
+                                @{
+                                    var ccPages = myCommentsPaged.TotalPages;
+                                    var ccShow = new SortedSet<int>();
+                                    ccShow.Add(1);
+                                    ccShow.Add(ccPages);
+                                    if (myCommentsPage > 1) ccShow.Add(myCommentsPage - 1);
+                                    ccShow.Add(myCommentsPage);
+                                    if (myCommentsPage < ccPages) ccShow.Add(myCommentsPage + 1);
+
+                                    int? ccLast = null;
+                                    foreach (var pageNum in ccShow)
+                                    {
+                                        if (ccLast.HasValue && pageNum - ccLast.Value > 1)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        }
+                                        <li class="page-item @(pageNum == myCommentsPage ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToMyCommentsPage(pageNum)">@pageNum</button>
+                                        </li>
+                                        ccLast = pageNum;
+                                    }
+                                }
+
+                                <li class="page-item @(myCommentsPage == myCommentsPaged.TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="NextMyCommentsPage">Next</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
 
             <div class="panel-table-wrap">
             <table class="panel-table">
@@ -183,15 +278,6 @@
                 </tbody>
             </table>
             </div>
-
-            @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
-            {
-                <div class="panel-pagination">
-                    <button class="btn-outline-sm" disabled="@(myCommentsPage <= 1)" @onclick="PrevMyCommentsPage">Previous</button>
-                    <span>Page @myCommentsPage of @myCommentsPaged.TotalPages</span>
-                    <button class="btn-outline-sm" disabled="@(myCommentsPage >= myCommentsPaged.TotalPages)" @onclick="NextMyCommentsPage">Next</button>
-                </div>
-            }
         </div>
     }
 </div>
@@ -215,12 +301,14 @@
     private List<ThreadSummaryDto> myThreads = [];
     private PagedResult<ThreadSummaryDto>? myThreadsPaged;
     private int myThreadsPage = 1;
+    private int myThreadsPageSize = 5;
     private bool myThreadsLoaded;
 
     // My Comments
     private List<CommentDto> myComments = [];
     private PagedResult<CommentDto>? myCommentsPaged;
     private int myCommentsPage = 1;
+    private int myCommentsPageSize = 5;
     private bool myCommentsLoaded;
 
     protected override async Task OnInitializedAsync()
@@ -366,9 +454,19 @@
             AuthorId = userId,
             SortBy = ThreadSortBy.Newest,
             PageNumber = myThreadsPage,
-            PageSize = 20
+            PageSize = myThreadsPageSize
         });
         myThreads = myThreadsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task OnMyThreadsPageSizeChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
+        if (newSize == myThreadsPageSize) return;
+        myThreadsPageSize = newSize;
+        myThreadsPage = 1;
+        await LoadMyThreads();
     }
 
     private async Task PrevMyThreadsPage()
@@ -379,6 +477,13 @@
     private async Task NextMyThreadsPage()
     {
         if (myThreadsPaged != null && myThreadsPage < myThreadsPaged.TotalPages) { myThreadsPage++; await LoadMyThreads(); }
+    }
+
+    private async Task GoToMyThreadsPage(int p)
+    {
+        if (myThreadsPaged == null || p < 1 || p > myThreadsPaged.TotalPages) return;
+        myThreadsPage = p;
+        await LoadMyThreads();
     }
 
     // ===== My Comments =====
@@ -395,8 +500,18 @@
     private async Task LoadMyComments()
     {
         if (userId == null) return;
-        myCommentsPaged = await CommentService.GetByAuthorAsync(userId, myCommentsPage, 20);
+        myCommentsPaged = await CommentService.GetByAuthorAsync(userId, myCommentsPage, myCommentsPageSize);
         myComments = myCommentsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task OnMyCommentsPageSizeChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
+        if (newSize == myCommentsPageSize) return;
+        myCommentsPageSize = newSize;
+        myCommentsPage = 1;
+        await LoadMyComments();
     }
 
     private async Task PrevMyCommentsPage()
@@ -407,6 +522,13 @@
     private async Task NextMyCommentsPage()
     {
         if (myCommentsPaged != null && myCommentsPage < myCommentsPaged.TotalPages) { myCommentsPage++; await LoadMyComments(); }
+    }
+
+    private async Task GoToMyCommentsPage(int p)
+    {
+        if (myCommentsPaged == null || p < 1 || p > myCommentsPaged.TotalPages) return;
+        myCommentsPage = p;
+        await LoadMyComments();
     }
 
     private class ProfileModel
