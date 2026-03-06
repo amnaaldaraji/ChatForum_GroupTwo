@@ -1,7 +1,4 @@
 @page "/thread/{Id:int}"
-@using Microsoft.AspNetCore.Components.Authorization
-@using Forum.Application.DTOs.Comment
-@using Forum.Application.Common.Models
 @inject ThreadService ThreadService
 @inject CommentService CommentService
 
@@ -66,12 +63,29 @@ else
                                     <button class="page-link" @onclick="PrevPage">Prev</button>
                                 </li>
 
-                                @for (var p = 1; p <= _commentsPage.TotalPages; p++)
-                                {
-                                    var pageNum = p;
-                                    <li class="page-item @(pageNum == _pageNumber ? "active" : "")">
-                                        <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
-                                    </li>
+                                @{
+                                    var totalPages = _commentsPage.TotalPages;
+                                    var pagesToShow = new SortedSet<int>();
+                                    pagesToShow.Add(1);
+                                    pagesToShow.Add(totalPages);
+                                    if (_pageNumber > 1) pagesToShow.Add(_pageNumber - 1);
+                                    pagesToShow.Add(_pageNumber);
+                                    if (_pageNumber < totalPages) pagesToShow.Add(_pageNumber + 1);
+
+                                    int? lastShown = null;
+                                    foreach (var pageNum in pagesToShow)
+                                    {
+                                        if (lastShown.HasValue && pageNum - lastShown.Value > 1)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        }
+                                        <li class="page-item @(pageNum == _pageNumber ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                        </li>
+                                        lastShown = pageNum;
+                                    }
                                 }
 
                                 <li class="page-item @( _pageNumber == _commentsPage.TotalPages ? "disabled" : "")">
