@@ -228,6 +228,11 @@
 .btn-outline-sm:hover { background: rgba(255, 255, 255, 0.05); }
 .btn-outline-sm:disabled { color: #555e68; cursor: not-allowed; }
 
+/* ===== Page Size Label ===== */
+.panel-page-size-label {
+    color: #8b949e;
+}
+
 /* ===== Pagination ===== */
 .panel-pagination {
     display: flex;

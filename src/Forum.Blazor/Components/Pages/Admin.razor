@@ -88,6 +88,58 @@
         <div class="panel-section">
             <h2>Manage Threads</h2>
 
+            <div class="d-flex align-items-center mb-2">
+                <label class="me-2 mb-0 panel-page-size-label">Threads per page:</label>
+                <select class="form-select form-select-sm w-auto" value="@threadsPageSize" @onchange="OnThreadsPageSizeChanged">
+                    @foreach (var size in new[] { 5, 10, 15, 20 })
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </select>
+
+                <div class="ms-auto">
+                    @if (threadsPaged != null && threadsPaged.TotalPages > 1)
+                    {
+                        <nav aria-label="Threads pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item @(threadsPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="PrevThreadsPage">Prev</button>
+                                </li>
+
+                                @{
+                                    var ttPages = threadsPaged.TotalPages;
+                                    var ttShow = new SortedSet<int>();
+                                    ttShow.Add(1);
+                                    ttShow.Add(ttPages);
+                                    if (threadsPage > 1) ttShow.Add(threadsPage - 1);
+                                    ttShow.Add(threadsPage);
+                                    if (threadsPage < ttPages) ttShow.Add(threadsPage + 1);
+
+                                    int? ttLast = null;
+                                    foreach (var pageNum in ttShow)
+                                    {
+                                        if (ttLast.HasValue && pageNum - ttLast.Value > 1)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        }
+                                        <li class="page-item @(pageNum == threadsPage ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToThreadsPage(pageNum)">@pageNum</button>
+                                        </li>
+                                        ttLast = pageNum;
+                                    }
+                                }
+
+                                <li class="page-item @(threadsPage == threadsPaged.TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="NextThreadsPage">Next</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+
             <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
@@ -120,15 +172,6 @@
                 </tbody>
             </table>
             </div>
-
-            @if (threadsPaged != null && threadsPaged.TotalPages > 1)
-            {
-                <div class="panel-pagination">
-                    <button class="btn-outline-sm" disabled="@(threadsPage <= 1)" @onclick="PrevThreadsPage">Previous</button>
-                    <span>Page @threadsPage of @threadsPaged.TotalPages</span>
-                    <button class="btn-outline-sm" disabled="@(threadsPage >= threadsPaged.TotalPages)" @onclick="NextThreadsPage">Next</button>
-                </div>
-            }
         </div>
     }
 
@@ -137,6 +180,58 @@
     {
         <div class="panel-section">
             <h2>Manage Users</h2>
+
+            <div class="d-flex align-items-center mb-2">
+                <label class="me-2 mb-0 panel-page-size-label">Users per page:</label>
+                <select class="form-select form-select-sm w-auto" value="@usersPageSize" @onchange="OnUsersPageSizeChanged">
+                    @foreach (var size in new[] { 5, 10, 15, 20 })
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </select>
+
+                <div class="ms-auto">
+                    @if (usersPaged != null && usersPaged.TotalPages > 1)
+                    {
+                        <nav aria-label="Users pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item @(usersPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="PrevUsersPage">Prev</button>
+                                </li>
+
+                                @{
+                                    var uuPages = usersPaged.TotalPages;
+                                    var uuShow = new SortedSet<int>();
+                                    uuShow.Add(1);
+                                    uuShow.Add(uuPages);
+                                    if (usersPage > 1) uuShow.Add(usersPage - 1);
+                                    uuShow.Add(usersPage);
+                                    if (usersPage < uuPages) uuShow.Add(usersPage + 1);
+
+                                    int? uuLast = null;
+                                    foreach (var pageNum in uuShow)
+                                    {
+                                        if (uuLast.HasValue && pageNum - uuLast.Value > 1)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        }
+                                        <li class="page-item @(pageNum == usersPage ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToUsersPage(pageNum)">@pageNum</button>
+                                        </li>
+                                        uuLast = pageNum;
+                                    }
+                                }
+
+                                <li class="page-item @(usersPage == usersPaged.TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="NextUsersPage">Next</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
 
             <div class="panel-table-wrap">
             <table class="panel-table">
@@ -151,39 +246,42 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var user in users)
+                    @if (users != null)
                     {
-                        <tr>
-                            <td>
-                                @if (editingUserId == user.Id)
-                                {
-                                    <input type="text" class="panel-input-inline" @bind="editingUserName" />
-                                }
-                                else
-                                {
-                                    @user.UserName
-                                }
-                            </td>
-                            <td>@(user.Email ?? "—")</td>
-                            <td>@user.ThreadCount</td>
-                            <td>@user.CommentCount</td>
-                            <td>@(user.IsDeleted ? "Deleted" : "Active")</td>
-                            <td class="panel-actions">
-                                @if (!user.IsDeleted)
-                                {
+                        @foreach (var user in users)
+                        {
+                            <tr>
+                                <td>
                                     @if (editingUserId == user.Id)
                                     {
-                                        <button class="btn-success-sm" @onclick="() => SaveUserName(user.Id)">Save</button>
-                                        <button class="btn-outline-sm" @onclick="CancelEditUser">Cancel</button>
+                                        <input type="text" class="panel-input-inline" @bind="editingUserName" />
                                     }
                                     else
                                     {
-                                        <button class="btn-outline-sm" @onclick="() => StartEditUser(user.Id, user.UserName)">Rename</button>
-                                        <button class="btn-danger-sm" @onclick="() => DeleteUser(user.Id, user.UserName)">Delete</button>
+                                        @user.UserName
                                     }
-                                }
-                            </td>
-                        </tr>
+                                </td>
+                                <td>@(user.Email ?? "—")</td>
+                                <td>@user.ThreadCount</td>
+                                <td>@user.CommentCount</td>
+                                <td>@(user.IsDeleted ? "Deleted" : "Active")</td>
+                                <td class="panel-actions">
+                                    @if (!user.IsDeleted)
+                                    {
+                                        @if (editingUserId == user.Id)
+                                        {
+                                            <button class="btn-success-sm" @onclick="() => SaveUserName(user.Id)">Save</button>
+                                            <button class="btn-outline-sm" @onclick="CancelEditUser">Cancel</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn-outline-sm" @onclick="() => StartEditUser(user.Id, user.UserName)">Rename</button>
+                                            <button class="btn-danger-sm" @onclick="() => DeleteUser(user.Id, user.UserName)">Delete</button>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
@@ -210,9 +308,13 @@
     private List<ThreadSummaryDto> threads = [];
     private PagedResult<ThreadSummaryDto>? threadsPaged;
     private int threadsPage = 1;
+    private int threadsPageSize = 5;
 
     // Users
     private List<UserDto> users = [];
+    private PagedResult<UserDto>? usersPaged;
+    private int usersPage = 1;
+    private int usersPageSize = 5;
     private string? editingUserId;
     private string editingUserName = "";
 
@@ -280,7 +382,7 @@
     // ===== Threads =====
     private async Task LoadThreads()
     {
-        threadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams { PageNumber = threadsPage, PageSize = 20 });
+        threadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams { PageNumber = threadsPage, PageSize = threadsPageSize });
         threads = threadsPaged?.Items?.ToList() ?? [];
     }
 
@@ -301,6 +403,16 @@
         }
     }
 
+    private async Task OnThreadsPageSizeChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
+        if (newSize == threadsPageSize) return;
+        threadsPageSize = newSize;
+        threadsPage = 1;
+        await LoadThreads();
+    }
+
     private async Task PrevThreadsPage()
     {
         if (threadsPage > 1) { threadsPage--; await LoadThreads(); }
@@ -311,17 +423,52 @@
         if (threadsPaged != null && threadsPage < threadsPaged.TotalPages) { threadsPage++; await LoadThreads(); }
     }
 
+    private async Task GoToThreadsPage(int p)
+    {
+        if (threadsPaged == null || p < 1 || p > threadsPaged.TotalPages) return;
+        threadsPage = p;
+        await LoadThreads();
+    }
+
     // ===== Users =====
     private async Task LoadUsers()
     {
         try
         {
-            users = await UserService.GetAllAsync();
+            usersPaged = await UserService.GetPagedAsync(usersPage, usersPageSize);
+            users = usersPaged?.Items?.ToList() ?? [];
         }
         catch (HttpRequestException)
         {
             SetStatus("Failed to load users. You may not have admin permissions.", true);
         }
+    }
+
+    private async Task OnUsersPageSizeChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
+        if (newSize == usersPageSize) return;
+        usersPageSize = newSize;
+        usersPage = 1;
+        await LoadUsers();
+    }
+
+    private async Task PrevUsersPage()
+    {
+        if (usersPage > 1) { usersPage--; await LoadUsers(); }
+    }
+
+    private async Task NextUsersPage()
+    {
+        if (usersPaged != null && usersPage < usersPaged.TotalPages) { usersPage++; await LoadUsers(); }
+    }
+
+    private async Task GoToUsersPage(int p)
+    {
+        if (usersPaged == null || p < 1 || p > usersPaged.TotalPages) return;
+        usersPage = p;
+        await LoadUsers();
     }
 
     private void StartEditUser(string id, string currentName)

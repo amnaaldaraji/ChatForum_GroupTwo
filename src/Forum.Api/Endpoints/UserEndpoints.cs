@@ -12,10 +12,10 @@ public static class UserEndpoints
     {
         var group = app.MapGroup("/api/users").WithTags("Users");
 
-        // GET all users (Admin only)
-        group.MapGet("/", async (IMediator mediator, CancellationToken ct) =>
+        // GET paged users (Admin only)
+        group.MapGet("/", async (IMediator mediator, CancellationToken ct, int pageNumber = 1, int pageSize = 10) =>
         {
-            var result = await mediator.Send(new GetAllUsers(), ct);
+            var result = await mediator.Send(new GetPagedUsersQuery(pageNumber, pageSize), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
