@@ -187,6 +187,37 @@
 }
 
 
+/* Pagination dark theme */
+.category-pagination .page-link {
+    background: #2d333b;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d1d5db;
+}
+
+.category-pagination .page-link:hover {
+    background: #373e47;
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.category-pagination .page-item.active .page-link {
+    background: #6e9ecf;
+    border-color: #6e9ecf;
+    color: #ffffff;
+}
+
+.category-pagination .page-item.disabled .page-link {
+    background: #1e2228;
+    border-color: rgba(255, 255, 255, 0.06);
+    color: #8b949e;
+}
+
+.category-pagination-select {
+    background-color: #2d333b;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d1d5db;
+}
+
 .auth-prompt {
     text-align: center;
     padding: 24px 20px;
