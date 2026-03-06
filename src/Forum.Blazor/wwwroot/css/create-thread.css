@@ -151,3 +151,9 @@
     color: #e0a0a0;
     border: 1px solid rgba(196, 64, 64, 0.3);
 }
+
+.category-display:disabled {
+    color: white;
+    -webkit-text-fill-color: white;
+    opacity: 1;
+}
