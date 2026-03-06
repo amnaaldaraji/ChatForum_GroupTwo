@@ -155,7 +155,7 @@ else
                         <div class="alert alert-danger">@_commentError</div>
                     }
                     <textarea class="form-control" rows="3" placeholder="Write a comment..." @bind="_newCommentContent"></textarea>
-                    <button class="btn btn-primary mt-2" @onclick="SubmitComment" disabled="@_isSubmitting">
+                    <button class="btn btn-primary mt-3" @onclick="SubmitComment" disabled="@_isSubmitting">
                         @if (_isSubmitting)
                         {
                             <span class="spinner-border spinner-border-sm me-2"></span>
