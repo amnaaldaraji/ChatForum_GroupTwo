@@ -10,7 +10,7 @@
                 <a href="/">OVER<span class="red-text">TIME</span></a>
             </div>
             <span class="brand-tagline">Debates on current affairs and recent past of your favourite sports.</span>
-            <div class="user-actions">
+            <div class="user-actions desktop-only">
                 <AuthorizeView>
                     <Authorized>
                         <a href="/profile" class="user-greeting">
@@ -29,9 +29,15 @@
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
+            <button class="mobile-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenuCollapse" aria-controls="navMenuCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </div>
-    <nav class="sub-nav-white">
+
+    <nav class="sub-nav-white desktop-only">
         <div class="header-container">
             <ul class="nav-menu">
                 @if (_categories != null)
@@ -44,6 +50,35 @@
             </ul>
         </div>
     </nav>
+
+    <div class="collapse" id="navMenuCollapse">
+        <div class="mobile-nav-menu">
+            @if (_categories != null)
+            {
+                @foreach (var category in _categories)
+                {
+                    <a href="/category/@category.Name" class="mobile-nav-link">@category.Name</a>
+                }
+            }
+            <div class="mobile-nav-auth">
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="/profile" class="mobile-nav-link">@context.User.Identity?.Name</a>
+                        <AuthorizeView Roles="Admin">
+                            <Authorized Context="adminCtx">
+                                <a href="/admin" class="mobile-nav-link">Admin</a>
+                            </Authorized>
+                        </AuthorizeView>
+                        <button class="mobile-nav-link mobile-nav-btn" @onclick="HandleLogout">Log Out</button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login" class="mobile-nav-link">Log In</a>
+                        <a href="/register" class="mobile-nav-link">Register</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
 </header>
 
 @code {
