@@ -51,9 +51,9 @@ else
             <div class="d-flex align-items-center mb-2">
                 <label class="me-2 mb-0">Comments per page:</label>
                 <select class="form-select form-select-sm w-auto" value="@_pageSize" @onchange="OnPageSizeChanged">
-                    @for (int i = 1; i <= 10; i++)
+                    @foreach (var size in new[] { 5, 10, 15, 20 })
                     {
-                        <option value="@i">@i</option>
+                        <option value="@size">@size</option>
                     }
                 </select>
 
@@ -68,8 +68,9 @@ else
 
                                 @for (var p = 1; p <= _commentsPage.TotalPages; p++)
                                 {
-                                    <li class="page-item @(p == _pageNumber ? "active" : "")">
-                                        <button class="page-link" @onclick="() => GoToPage(p)">@p</button>
+                                    var pageNum = p;
+                                    <li class="page-item @(pageNum == _pageNumber ? "active" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
                                     </li>
                                 }
 
@@ -173,7 +174,7 @@ else
 
     private PagedResult<CommentDto>? _commentsPage;
     private int _pageNumber = 1;
-    private int _pageSize = 5;
+    private int _pageSize = 10;
 
     private string _newCommentContent = string.Empty;
     private string _commentError = string.Empty;
