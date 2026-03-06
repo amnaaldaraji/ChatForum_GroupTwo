@@ -9,7 +9,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h3>Login</h3>
+                <h3 style="color:#343a40;">Login</h3>
             </div>
             <div class="card-body">
 
@@ -23,12 +23,12 @@
                 <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
 
                     <div class="mb-3">
-                        <label class="form-label">Username</label>
+                        <label class="form-label" style="color:#343a40;">Username</label>
                         <InputText class="form-control" @bind-Value="loginModel.Username" />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Password</label>
+                        <label class="form-label" style="color:#343a40;">Password</label>
                         <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
                     </div>
 

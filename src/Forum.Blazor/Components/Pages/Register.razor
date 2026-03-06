@@ -10,7 +10,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h3>Register</h3>
+                <h3 style="color:#343a40;">Register</h3>
             </div>
             <div class="card-body">
 
@@ -31,22 +31,22 @@
                 <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
 
                     <div class="mb-3">
-                        <label class="form-label">Username</label>
+                        <label class="form-label" style="color:#343a40;">Username</label>
                         <InputText class="form-control" @bind-Value="registerModel.Username" />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
+                        <label class="form-label" style="color:#343a40;">Email</label>
                         <InputText type="email" class="form-control" @bind-Value="registerModel.Email" />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Password</label>
+                        <label class="form-label" style="color:#343a40;">Password</label>
                         <InputText type="password" class="form-control" @bind-Value="registerModel.Password" />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Confirm Password</label>
+                        <label class="form-label" style="color:#343a40;">Confirm Password</label>
                         <InputText type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
                     </div>
 
@@ -58,7 +58,7 @@
                         Register
                     </button>
 
-                    <a href="/login" class="btn btn-link">Already have an account? Login</a>
+                    <a href="/login" class="btn btn-link" style="color:#343a40;">Already have an account? Login</a>
 
                 </EditForm>
             </div>
