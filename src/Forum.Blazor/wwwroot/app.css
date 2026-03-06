@@ -130,7 +130,7 @@ h1:focus { outline: none; }
 }
 .main-body {
     flex: 1;
-    padding: 40px 0;
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -181,9 +181,6 @@ h1:focus { outline: none; }
     text-overflow: ellipsis;
 }
 
-@media (max-width: 768px) {
-    .brand-tagline { display: none; }
-}
 .user-actions {
     display: flex;
     align-items: center;
@@ -264,10 +261,16 @@ a.btn-red:hover { text-decoration: none; }
     display: flex;
     margin: 0;
     padding: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
 }
+.nav-menu::-webkit-scrollbar { display: none; }
+.nav-menu li { flex-shrink: 0; }
 .nav-menu li a {
     display: block;
     padding: 16px 20px;
+    white-space: nowrap;
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 800;
@@ -294,3 +297,92 @@ a.btn-red:hover { text-decoration: none; }
     margin: 0 5px;
 }
 .footer-links a:hover { color: var(--text-primary); }
+
+/* ===== MOBILE HAMBURGER TOGGLER ===== */
+.mobile-toggler {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 7px 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.mobile-toggler span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 1px;
+}
+.mobile-toggler:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* ===== MOBILE COLLAPSED MENU ===== */
+#navMenuCollapse {
+    display: none;
+    overflow: hidden;
+}
+@media (max-width: 991.98px) {
+    #navMenuCollapse.show,
+    #navMenuCollapse.collapsing {
+        display: block;
+    }
+}
+
+.mobile-nav-menu {
+    background: var(--bg-card);
+    border-bottom: 3px solid var(--accent-red);
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-nav-link {
+    display: block;
+    padding: 14px 20px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: color 0.15s;
+}
+
+.mobile-nav-link:hover {
+    color: var(--accent-red);
+    text-decoration: none;
+}
+
+.mobile-nav-btn {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border-subtle);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+}
+
+.mobile-nav-auth {
+    background: rgba(74, 114, 153, 0.15);
+    border-top: 1px solid rgba(110, 158, 207, 0.2);
+}
+
+/* ===== RESPONSIVE BREAKPOINT ===== */
+.desktop-only { display: flex; }
+
+@media (max-width: 991.98px) {
+    .desktop-only { display: none !important; }
+    .mobile-toggler { display: flex; }
+    .brand-tagline { display: none; }
+    .brand { flex: 1; text-align: center; }
+    .brand a { font-size: 20px; letter-spacing: 6px; }
+}
+

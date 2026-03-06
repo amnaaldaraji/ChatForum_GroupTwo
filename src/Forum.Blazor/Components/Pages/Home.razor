@@ -159,7 +159,7 @@
 
         _popularThreads = _popularThreads
             .OrderByDescending(t => t.CommentCount)
-            .Take(6)
+            .Take(5)
             .ToList();
 
         _popularCategories = allCategories

@@ -1,22 +1,21 @@
 /* Category Page Styles */
 
 .category-page {
-    max-width: 1400px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 30px;
-    min-height: 100vh;
+    padding: 28px 20px;
 }
 
 .category-hero {
     position: relative;
-    height: 400px;
-    border-radius: 20px;
+    height: 260px;
+    border-radius: 10px;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 40px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    margin-bottom: 28px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
     width: 100%;
 }
 
@@ -52,14 +51,14 @@
     z-index: 2;
     text-align: center;
     color: #d1d5db;
-    padding: 60px 80px;
+    padding: 32px 48px;
     background: rgba(28, 32, 38, 0.9);
     backdrop-filter: blur(10px);
-    border-radius: 20px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    max-width: 1000px;
+    max-width: 600px;
     animation: fadeInUp 1s ease-out;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes fadeInUp {
@@ -74,9 +73,9 @@
 }
 
 .category-title {
-    font-size: 3.5em;
+    font-size: 1.8em;
     font-weight: 800;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 3px;
     color: #d1d5db;
@@ -85,21 +84,22 @@
 }
 
 .category-description {
-    font-size: 1.2em;
+    font-size: 1em;
     opacity: 0.85;
-    line-height: 1.6;
+    line-height: 1.5;
     font-weight: 300;
     color: #8b949e;
 }
 
-.forum-view-wrapper {
+.category-page .forum-view-wrapper {
+    max-width: none;
     background: transparent;
     border-radius: 0;
     overflow: visible;
     box-shadow: none;
     border: none;
-    margin-bottom: 30px;
-    padding: 30px 0;
+    margin-bottom: 20px;
+    padding: 16px 0;
     width: 100%;
 }
 
@@ -115,17 +115,17 @@
 .threads-table th {
     background: #252a31;
     color: #8b949e;
-    padding: 20px;
+    padding: 12px 15px;
     text-align: left;
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 1px;
     border-bottom: none;
 }
 
 .threads-table td {
-    padding: 20px;
+    padding: 14px 15px;
     border-bottom: none;
 }
 
@@ -141,7 +141,7 @@
     color: #6e9ecf;
     text-decoration: none;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .thread-title:hover {
@@ -182,7 +182,7 @@
 }
 
 .create-thread-section {
-    margin-top: 30px;
+    margin-top: 20px;
     text-align: center;
 }
 
