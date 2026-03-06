@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/css/forum-table.css" />
 
 <div class="category-page">
-    <div class="category-hero @(CategoryName?.ToLower())">
+    <div class="category-hero @(CategoryName?.ToLower().Replace(" ", ""))">
         <div class="hero-content">
             <h1 class="category-title">@CategoryName?.ToUpper()</h1>
         </div>
