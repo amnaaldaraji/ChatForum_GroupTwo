@@ -4,46 +4,45 @@
 @inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
+<link rel="stylesheet" href="/css/auth.css" />
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 style="color:#343a40;">Login</h3>
-            </div>
-            <div class="card-body">
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <h3>Login</h3>
+        </div>
+        <div class="auth-card-body">
 
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert alert-danger">
-                        @errorMessage
-                    </div>
-                }
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">
+                    @errorMessage
+                </div>
+            }
 
-                <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
 
-                    <div class="mb-3">
-                        <label class="form-label" style="color:#343a40;">Username</label>
-                        <InputText class="form-control" @bind-Value="loginModel.Username" />
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <InputText class="form-control" @bind-Value="loginModel.Username" />
+                </div>
 
-                    <div class="mb-3">
-                        <label class="form-label" style="color:#343a40;">Password</label>
-                        <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
+                </div>
 
-                    <button type="submit" class="btn btn-primary" disabled="@isLoading">
-                        @if (isLoading)
-                        {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                        }
-                        Login
-                    </button>
+                <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Login
+                </button>
 
-                    <a href="/register" class="btn btn-link">Don't have an account? Register</a>
+                <a href="/register" class="auth-link">Don't have an account? Register</a>
 
-                </EditForm>
-            </div>
+            </EditForm>
         </div>
     </div>
 </div>

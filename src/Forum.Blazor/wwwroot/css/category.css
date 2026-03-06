@@ -186,33 +186,6 @@
     text-align: center;
 }
 
-.btn {
-    padding: 15px 30px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.btn-primary {
-    background: #4a7299;
-    color: white;
-    box-shadow: 0 4px 15px rgba(74, 114, 153, 0.25);
-}
-
-.btn-primary:hover {
-    background: #5a84ab;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(74, 114, 153, 0.35);
-    text-decoration: none;
-    color: white;
-}
 
 .auth-prompt {
     text-align: center;
