@@ -14,17 +14,69 @@
         </div>
     </div>
 
-    @if (_threads == null)
+    @if (_threadsPage == null)
     {
         <div class="loading">loading threads...</div>
     }
-    else if (!_threads.Any())
+    else if (!_threadsPage.Items.Any())
     {
         <div class="no-threads">no threads in @CategoryName yet. be the first to start a discussion!</div>
     }
     else
     {
         <div class="forum-view-wrapper">
+            <div class="d-flex align-items-center mb-2">
+                <label class="me-2 mb-0" style="color: #8b949e;">Threads per page:</label>
+                <select class="form-select form-select-sm w-auto category-pagination-select" value="@_pageSize" @onchange="OnPageSizeChanged">
+                    @foreach (var size in new[] { 5, 10, 15, 20 })
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </select>
+
+                <div class="ms-auto">
+                    @if (_threadsPage.TotalPages > 1)
+                    {
+                        <nav aria-label="Thread pagination">
+                            <ul class="pagination pagination-sm mb-0 category-pagination">
+                                <li class="page-item @(_pageNumber == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="PrevPage">Prev</button>
+                                </li>
+
+                                @{
+                                    var totalPages = _threadsPage.TotalPages;
+                                    var pagesToShow = new SortedSet<int>();
+                                    pagesToShow.Add(1);
+                                    pagesToShow.Add(totalPages);
+                                    if (_pageNumber > 1) pagesToShow.Add(_pageNumber - 1);
+                                    pagesToShow.Add(_pageNumber);
+                                    if (_pageNumber < totalPages) pagesToShow.Add(_pageNumber + 1);
+
+                                    int? lastShown = null;
+                                    foreach (var pageNum in pagesToShow)
+                                    {
+                                        if (lastShown.HasValue && pageNum - lastShown.Value > 1)
+                                        {
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        }
+                                        <li class="page-item @(pageNum == _pageNumber ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                        </li>
+                                        lastShown = pageNum;
+                                    }
+                                }
+
+                                <li class="page-item @(_pageNumber == _threadsPage.TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="NextPage">Next</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+
             <div class="autosport-table">
                 <table class="threads-table">
                     <thead>
@@ -36,7 +88,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var thread in _threads)
+                        @foreach (var thread in _threadsPage.Items)
                         {
                             <tr class="thread-row">
                                 <td class="thread-title-cell">
@@ -79,32 +131,76 @@
     [Parameter]
     public string CategoryName { get; set; } = string.Empty;
 
-    private List<ThreadSummaryDto>? _threads;
+    private PagedResult<ThreadSummaryDto>? _threadsPage;
+    private int _pageNumber = 1;
+    private int _pageSize = 5;
+    private int? _categoryId;
 
     protected override async Task OnParametersSetAsync()
-    {
-        await LoadCategoryThreads();
-    }
-
-    private async Task LoadCategoryThreads()
     {
         var categories = await CategoryService.GetAllAsync();
         var category = categories?.FirstOrDefault(c =>
             string.Equals(c.Name, CategoryName, StringComparison.OrdinalIgnoreCase));
 
-        if (category == null)
+        _categoryId = category?.CategoryId;
+        _pageNumber = 1;
+        await LoadThreads();
+    }
+
+    private async Task LoadThreads(int? page = null)
+    {
+        var pageToLoad = page ?? _pageNumber;
+
+        if (_categoryId == null)
         {
-            _threads = [];
+            _threadsPage = PagedResult<ThreadSummaryDto>.Create([], 0, 1, _pageSize);
             return;
         }
 
         var filter = new ThreadFilterParams
         {
-            CategoryId = category.CategoryId,
-            PageSize = 20,
+            CategoryId = _categoryId,
+            PageNumber = pageToLoad,
+            PageSize = _pageSize,
             SortBy = ThreadSortBy.Newest
         };
+
         var result = await ThreadService.GetThreadsAsync(filter);
-        _threads = result?.Items?.ToList() ?? [];
+        _threadsPage = result ?? PagedResult<ThreadSummaryDto>.Create([], 0, pageToLoad, _pageSize);
+        _pageNumber = _threadsPage.PageNumber;
+        StateHasChanged();
+    }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
+        if (newSize == _pageSize) return;
+
+        _pageSize = newSize;
+        _pageNumber = 1;
+        await LoadThreads(_pageNumber);
+    }
+
+    private async Task PrevPage()
+    {
+        if (_threadsPage is null || !_threadsPage.HasPreviousPage) return;
+        _pageNumber = Math.Max(1, _pageNumber - 1);
+        await LoadThreads(_pageNumber);
+    }
+
+    private async Task NextPage()
+    {
+        if (_threadsPage is null || !_threadsPage.HasNextPage) return;
+        _pageNumber = Math.Min(_threadsPage.TotalPages, _pageNumber + 1);
+        await LoadThreads(_pageNumber);
+    }
+
+    private async Task GoToPage(int p)
+    {
+        if (_threadsPage is null) return;
+        if (p < 1 || p > _threadsPage.TotalPages) return;
+        _pageNumber = p;
+        await LoadThreads(_pageNumber);
     }
 }
