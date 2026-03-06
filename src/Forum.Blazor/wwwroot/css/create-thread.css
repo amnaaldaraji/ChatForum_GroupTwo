@@ -1,13 +1,11 @@
 /* Create Thread Page Styles */
 
 .create-thread-container {
-    max-width: 800px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 40px 20px;
-    min-height: 100vh;
+    padding: 28px 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
 }
 
 .form-header {
@@ -23,7 +21,7 @@
 .form-header h1 {
     margin-bottom: 10px;
     color: #d1d5db;
-    font-size: 2em;
+    font-size: 1.6em;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;

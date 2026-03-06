@@ -2,18 +2,18 @@
 
 /* ===== Layout Containers ===== */
 .panel-wrapper {
-    padding: 40px 20px;
-    width: 860px;
+    padding: 28px 20px;
+    width: 960px;
     max-width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
 .panel-title {
-    font-size: 26px;
+    font-size: 1.6em;
     font-weight: 800;
     color: #d1d5db;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     letter-spacing: 0.5px;
 }
 
