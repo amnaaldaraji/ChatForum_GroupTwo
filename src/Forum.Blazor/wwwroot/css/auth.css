@@ -1,0 +1,80 @@
+/* Auth Pages (Login & Register) */
+
+.auth-container {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.auth-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+}
+
+.auth-card-header {
+    padding: 24px 30px 0;
+    text-align: center;
+}
+
+.auth-card-header h3 {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+    font-size: 1.6em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.auth-card-body {
+    padding: 30px;
+}
+
+.auth-card-body .form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.auth-card-body .form-control {
+    border-radius: 8px;
+}
+
+.auth-card-body .btn-primary {
+    width: 100%;
+}
+
+.auth-card-body .alert-danger {
+    background: rgba(196, 64, 64, 0.2);
+    color: #e0a0a0;
+    border: 1px solid rgba(196, 64, 64, 0.3);
+    border-radius: 8px;
+}
+
+.auth-card-body .alert-success {
+    background: rgba(64, 156, 64, 0.2);
+    color: #a0e0a0;
+    border: 1px solid rgba(64, 156, 64, 0.3);
+    border-radius: 8px;
+}
+
+.auth-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.auth-link:hover {
+    color: var(--accent-blue-hover);
+    text-decoration: underline;
+}
