@@ -4,7 +4,7 @@
 
 <link rel="stylesheet" href="/css/thread-details.css" />
 
-<PageTitle>Thread Details</PageTitle>
+<PageTitle>Thread Details - Overtime</PageTitle>
 
 @if (_isLoading)
 {
@@ -17,9 +17,8 @@ else if (_thread == null)
 else
 {
     <div class="thread-details">
-        @* breadcrumb navigation with links *@
         <nav class="breadcrumb-trail">
-            <a href="/">Sport Forum</a>
+            <a href="/">Overtime</a>
             <span> &rsaquo; </span>
             <a href="/category/@_thread.CategoryName">@_thread.CategoryName.ToUpper()</a>
             <span> &rsaquo; </span>
@@ -59,10 +58,9 @@ else
                     {
                         <nav aria-label="Comment pagination">
                             <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item @( _pageNumber == 1 ? "disabled" : "")">
+                                <li class="page-item @(_pageNumber == 1 ? "disabled" : "")">
                                     <button class="page-link" @onclick="PrevPage">Prev</button>
                                 </li>
-
                                 @{
                                     var totalPages = _commentsPage.TotalPages;
                                     var pagesToShow = new SortedSet<int>();
@@ -77,9 +75,7 @@ else
                                     {
                                         if (lastShown.HasValue && pageNum - lastShown.Value > 1)
                                         {
-                                            <li class="page-item disabled">
-                                                <span class="page-link">...</span>
-                                            </li>
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
                                         }
                                         <li class="page-item @(pageNum == _pageNumber ? "active" : "")">
                                             <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
@@ -87,8 +83,7 @@ else
                                         lastShown = pageNum;
                                     }
                                 }
-
-                                <li class="page-item @( _pageNumber == _commentsPage.TotalPages ? "disabled" : "")">
+                                <li class="page-item @(_pageNumber == _commentsPage.TotalPages ? "disabled" : "")">
                                     <button class="page-link" @onclick="NextPage">Next</button>
                                 </li>
                             </ul>
@@ -121,27 +116,52 @@ else
                                 <span class="reply-citation-content">@TruncateContent(comment.ParentCommentContent, 200)</span>
                             </div>
                         }
-                        <div class="comment-body">
-                            @comment.Content
-                        </div>
-                        <AuthorizeView>
-                            <Authorized Context="replyAuth">
-                                @if (_replyingToCommentId == comment.CommentId)
-                                {
-                                    <div class="reply-form mt-2">
-                                        <textarea class="form-control" rows="2" placeholder="Write a reply to @comment.AuthorUserName..." @bind="_replyContent"></textarea>
-                                        <div class="mt-2">
-                                            <button class="btn btn-primary btn-sm" @onclick="() => SubmitReply(comment.CommentId)" disabled="@_isSubmitting">Reply</button>
-                                            <button class="btn btn-secondary btn-sm ms-1" @onclick="CancelReply">Cancel</button>
-                                        </div>
+                        <div class="comment-body">@comment.Content</div>
+
+                        <div class="comment-footer">
+                            @* ===== Vote buttons ===== *@
+                            <AuthorizeView>
+                                <Authorized>
+                                    <div class="vote-bar">
+                                        <button class="vote-btn upvote @(GetUserVote(comment.CommentId) == 1 ? "active-up" : "")"
+                                                @onclick="() => Vote(comment.CommentId, 1)"
+                                                title="Upvote">▲</button>
+                                        <span class="vote-score @(GetScore(comment.CommentId) > 0 ? "score-positive" : GetScore(comment.CommentId) < 0 ? "score-negative" : "score-zero")">
+                                            @GetScore(comment.CommentId)
+                                        </span>
+                                        <button class="vote-btn downvote @(GetUserVote(comment.CommentId) == -1 ? "active-down" : "")"
+                                                @onclick="() => Vote(comment.CommentId, -1)"
+                                                title="Downvote">▼</button>
                                     </div>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-link btn-sm p-0 mt-1" @onclick="() => StartReply(comment.CommentId)">Reply</button>
-                                }
-                            </Authorized>
-                        </AuthorizeView>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <div class="vote-bar vote-bar-locked" title="Log in to vote">
+                                        <button class="vote-btn upvote locked" disabled>▲</button>
+                                        <span class="vote-score score-zero">@GetScore(comment.CommentId)</span>
+                                        <button class="vote-btn downvote locked" disabled>▼</button>
+                                    </div>
+                                </NotAuthorized>
+                            </AuthorizeView>
+
+                            <AuthorizeView>
+                                <Authorized Context="replyAuth">
+                                    @if (_replyingToCommentId == comment.CommentId)
+                                    {
+                                        <div class="reply-form mt-2">
+                                            <textarea class="form-control" rows="2" placeholder="Write a reply to @comment.AuthorUserName..." @bind="_replyContent"></textarea>
+                                            <div class="mt-2">
+                                                <button class="btn btn-primary btn-sm" @onclick="() => SubmitReply(comment.CommentId)" disabled="@_isSubmitting">Reply</button>
+                                                <button class="btn btn-secondary btn-sm ms-1" @onclick="CancelReply">Cancel</button>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-link btn-sm p-0 mt-1" @onclick="() => StartReply(comment.CommentId)">Reply</button>
+                                    }
+                                </Authorized>
+                            </AuthorizeView>
+                        </div>
                     </div>
                 }
             }
@@ -196,6 +216,11 @@ else
     private int? _replyingToCommentId;
     private string _replyContent = string.Empty;
 
+    // Mock vote scores per commentId
+    private Dictionary<int, int> _voteScores = [];
+    // User's current vote per commentId: 1 = upvote, -1 = downvote, 0 = none
+    private Dictionary<int, int> _userVotes = [];
+
     protected override async Task OnParametersSetAsync()
     {
         await LoadThread();
@@ -207,7 +232,6 @@ else
         try
         {
             _thread = await ThreadService.GetByIdAsync(Id);
-
             await LoadComments();
         }
         catch
@@ -229,6 +253,7 @@ else
             if (_commentsPage != null)
             {
                 _pageNumber = _commentsPage.PageNumber;
+                SeedMockVotes();
             }
         }
         catch
@@ -238,12 +263,51 @@ else
         StateHasChanged();
     }
 
+    private void SeedMockVotes()
+    {
+        if (_commentsPage?.Items == null) return;
+        var mockScores = new[] { 42, 15, 7, -3, 28, 1, 63, -8, 11, 5, 19, -1, 34, 2, 88 };
+        var i = 0;
+        foreach (var comment in _commentsPage.Items)
+        {
+            if (!_voteScores.ContainsKey(comment.CommentId))
+                _voteScores[comment.CommentId] = mockScores[i % mockScores.Length];
+            if (!_userVotes.ContainsKey(comment.CommentId))
+                _userVotes[comment.CommentId] = 0;
+            i++;
+        }
+    }
+
+    private int GetScore(int commentId) =>
+        _voteScores.TryGetValue(commentId, out var s) ? s : 0;
+
+    private int GetUserVote(int commentId) =>
+        _userVotes.TryGetValue(commentId, out var v) ? v : 0;
+
+    private void Vote(int commentId, int direction)
+    {
+        var current = GetUserVote(commentId);
+
+        if (current == direction)
+        {
+            // clicking same vote removes it
+            _voteScores[commentId] = GetScore(commentId) - direction;
+            _userVotes[commentId] = 0;
+        }
+        else if (current == 0)
+        {
+            // first time voting
+            _voteScores[commentId] = GetScore(commentId) + direction;
+            _userVotes[commentId] = direction;
+        }
+        // if voted the other way, must undo first — do nothing
+    }
+
     private async Task OnPageSizeChanged(ChangeEventArgs e)
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
         if (newSize == _pageSize) return;
-
         _pageSize = newSize;
         _pageNumber = 1;
         await LoadComments(_pageNumber);
@@ -263,9 +327,7 @@ else
 
     private async Task SubmitReply(int parentCommentId)
     {
-        if (string.IsNullOrWhiteSpace(_replyContent))
-            return;
-
+        if (string.IsNullOrWhiteSpace(_replyContent)) return;
         _isSubmitting = true;
         try
         {
@@ -279,29 +341,23 @@ else
             }
         }
         catch { }
-        finally
-        {
-            _isSubmitting = false;
-        }
+        finally { _isSubmitting = false; }
     }
 
     private static string TruncateContent(string content, int maxLength)
     {
-        if (content.Length <= maxLength)
-            return content;
+        if (content.Length <= maxLength) return content;
         return content[..maxLength] + "...";
     }
 
     private async Task SubmitComment()
     {
         _commentError = string.Empty;
-
         if (string.IsNullOrWhiteSpace(_newCommentContent))
         {
             _commentError = "Comment cannot be empty.";
             return;
         }
-
         _isSubmitting = true;
         try
         {
@@ -321,10 +377,7 @@ else
         {
             _commentError = ex.Message;
         }
-        finally
-        {
-            _isSubmitting = false;
-        }
+        finally { _isSubmitting = false; }
     }
 
     private async Task PrevPage()
