@@ -24,8 +24,8 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=forum.db";
-        
+                               ?? "Data Source=forum.db";
+
         services.AddDbContext<ForumDbContext>(options =>
             options.UseSqlite(connectionString));
 
@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IThreadRepository, ThreadRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IVoteRepository, VoteRepository>();
 
         // Register the Unit of Work for coordinating transactional saves across repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();

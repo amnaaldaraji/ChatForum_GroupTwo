@@ -9,6 +9,8 @@ public class ForumDbContext : IdentityDbContext<User>
     public ForumDbContext(DbContextOptions<ForumDbContext> options) : base(options) { }
 
     public DbSet<Category> Categories => Set<Category>();
+
+    // (for some reason I have to include full name here)
     public DbSet<Forum.Domain.Entities.Thread> Threads => Set<Forum.Domain.Entities.Thread>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Vote> Votes => Set<Vote>();
@@ -17,12 +19,14 @@ public class ForumDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(builder);
 
+        // CATEGORY
         builder.Entity<Category>(e =>
         {
             e.HasKey(x => x.CategoryId);
             e.Property(x => x.Name).IsRequired().HasMaxLength(100);
         });
 
+        // THREAD
         builder.Entity<Forum.Domain.Entities.Thread>(e =>
         {
             e.HasKey(x => x.ThreadId);
@@ -41,6 +45,7 @@ public class ForumDbContext : IdentityDbContext<User>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        // COMMENT
         builder.Entity<Comment>(e =>
         {
             e.HasKey(x => x.CommentId);
@@ -57,12 +62,14 @@ public class ForumDbContext : IdentityDbContext<User>
                 .HasForeignKey(x => x.ThreadId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // per parent comment has many replies
             e.HasOne(x => x.ParentComment)
                 .WithMany(x => x.Replies)
                 .HasForeignKey(x => x.ParentCommentId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
+        // VOTE
         builder.Entity<Vote>(e =>
         {
             e.HasKey(x => x.VoteId);
@@ -78,7 +85,7 @@ public class ForumDbContext : IdentityDbContext<User>
                 .HasForeignKey(x => x.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // One vote per user per comment
+            // one vote per user per comment
             e.HasIndex(x => new { x.UserId, x.CommentId }).IsUnique();
         });
     }
