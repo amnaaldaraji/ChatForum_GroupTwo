@@ -17,4 +17,7 @@ public class Comment
     public Thread Thread { get; set; } = null!;
     public Comment? ParentComment { get; set; }
     public ICollection<Comment> Replies { get; set; } = new List<Comment>();
+    
+    public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+
 }
