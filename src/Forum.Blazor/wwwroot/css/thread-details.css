@@ -255,7 +255,6 @@
     text-decoration: underline;
 }
 
-/* ===== VOTE BAR ===== */
 .comment-footer {
     display: flex;
     align-items: center;
@@ -298,3 +297,7 @@
 .score-positive { color: #3d8b5e; }
 .score-negative { color: #c44040; }
 .score-zero     { color: #555e68; }
+
+.vote-bar-locked { cursor: default; }
+.vote-btn.locked { opacity: 0.3; cursor: not-allowed; }
+.vote-bar-locked:hover .vote-btn.locked { color: #555e68; background: none; }

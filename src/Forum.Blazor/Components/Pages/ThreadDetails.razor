@@ -120,17 +120,28 @@ else
 
                         <div class="comment-footer">
                             @* ===== Vote buttons ===== *@
-                            <div class="vote-bar">
-                                <button class="vote-btn upvote @(GetUserVote(comment.CommentId) == 1 ? "active-up" : "")"
-                                        @onclick="() => Vote(comment.CommentId, 1)"
-                                        title="Upvote">▲</button>
-                                <span class="vote-score @(GetScore(comment.CommentId) > 0 ? "score-positive" : GetScore(comment.CommentId) < 0 ? "score-negative" : "score-zero")">
-                                    @GetScore(comment.CommentId)
-                                </span>
-                                <button class="vote-btn downvote @(GetUserVote(comment.CommentId) == -1 ? "active-down" : "")"
-                                        @onclick="() => Vote(comment.CommentId, -1)"
-                                        title="Downvote">▼</button>
-                            </div>
+                            <AuthorizeView>
+                                <Authorized>
+                                    <div class="vote-bar">
+                                        <button class="vote-btn upvote @(GetUserVote(comment.CommentId) == 1 ? "active-up" : "")"
+                                                @onclick="() => Vote(comment.CommentId, 1)"
+                                                title="Upvote">▲</button>
+                                        <span class="vote-score @(GetScore(comment.CommentId) > 0 ? "score-positive" : GetScore(comment.CommentId) < 0 ? "score-negative" : "score-zero")">
+                                            @GetScore(comment.CommentId)
+                                        </span>
+                                        <button class="vote-btn downvote @(GetUserVote(comment.CommentId) == -1 ? "active-down" : "")"
+                                                @onclick="() => Vote(comment.CommentId, -1)"
+                                                title="Downvote">▼</button>
+                                    </div>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <div class="vote-bar vote-bar-locked" title="Log in to vote">
+                                        <button class="vote-btn upvote locked" disabled>▲</button>
+                                        <span class="vote-score score-zero">@GetScore(comment.CommentId)</span>
+                                        <button class="vote-btn downvote locked" disabled>▼</button>
+                                    </div>
+                                </NotAuthorized>
+                            </AuthorizeView>
 
                             <AuthorizeView>
                                 <Authorized Context="replyAuth">
@@ -252,7 +263,6 @@ else
         StateHasChanged();
     }
 
-    // Seeds realistic-looking mock scores for comments that don't have a score yet
     private void SeedMockVotes()
     {
         if (_commentsPage?.Items == null) return;
