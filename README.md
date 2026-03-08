@@ -168,15 +168,12 @@ Content-Type: application/json
 
 ## VG Track: Voting (Track 1)
 
-Users can upvote (▲) or downvote (▼) comments in the thread view. The score is shown between the arrows, coloured green (positive), red (negative) or grey (zero). A vote can be undone by clicking the same arrow again, but you cannot switch directly from up to down without undoing first. Guests see the arrows but cannot vote — hovering shows *"Log in to vote"*.
+Logged-in users can upvote (▲) or downvote (▼) comments. The score is shown between the arrows, coloured green (positive), red (negative) or grey (zero). Clicking the same arrow undoes the vote; clicking the opposite switches it. Guests see the arrows but cannot interact since you need to be logged in.
 
-### User Scenarios
+The feature spans all layers: 
+- `Vote` entity and `IVoteRepository` in Domain/Application
+- `CastVoteCommand` handler, a `POST /api/comments/{commentId}/votes`
+- Endpoint
+- Vote state loaded per-user when fetching comments.
+- An EF Core migration (`AddVoteEntity`) adds the Votes table with a unique index on `(UserId, CommentId)`.
 
-**1. Logged-in user votes on a comment**
-Log in as `john_doe`, open any thread, click ▲ on a comment — score increases and arrow turns green. Click ▲ again to undo.
-
-**2. Guest tries to vote**
-Visit a thread without logging in. Arrows are visible but disabled. Hovering shows *"Log in to vote"*.
-
-**3. User posts a comment then votes**
-Log in, post a new comment, then upvote or downvote any comment in the thread — score updates instantly without page reload.
