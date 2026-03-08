@@ -1,4 +1,5 @@
 @page "/category/{CategoryName}"
+@using Forum.Application.DTOs.Thread
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
 
@@ -32,6 +33,14 @@
                     {
                         <option value="@size">@size</option>
                     }
+                </select>
+
+                <label class="ms-3 me-2 mb-0" style="color: #8b949e;">Sort:</label>
+                <select class="form-select form-select-sm w-auto category-sort-select" value="@_sortByString" @onchange="OnSortChanged">
+                    <option value="@ThreadSortBy.Newest.ToString()">Newest</option>
+                    <option value="@ThreadSortBy.Oldest.ToString()">Oldest</option>
+                    <option value="@ThreadSortBy.MostComments.ToString()">Most comments</option>
+                    <option value="@ThreadSortBy.RecentlyUpdated.ToString()">Last commented</option>
                 </select>
 
                 <div class="ms-auto">
@@ -96,7 +105,7 @@
                                 </td>
                                 <td class="author-cell">@thread.AuthorUserName</td>
                                 <td class="replies-cell">@thread.CommentCount</td>
-                                <td class="activity-cell">@thread.TimeCreated.ToString("MMM dd, yyyy")</td>
+                                <td class="activity-cell">@FormatLastActivity(thread)</td>
                             </tr>
                         }
                     </tbody>
@@ -136,6 +145,9 @@
     private int _pageSize = 5;
     private int? _categoryId;
 
+    private ThreadSortBy _sortBy = ThreadSortBy.Newest;
+    private string _sortByString => _sortBy.ToString();
+
     protected override async Task OnParametersSetAsync()
     {
         var categories = await CategoryService.GetAllAsync();
@@ -162,7 +174,7 @@
             CategoryId = _categoryId,
             PageNumber = pageToLoad,
             PageSize = _pageSize,
-            SortBy = ThreadSortBy.Newest
+            SortBy = _sortBy
         };
 
         var result = await ThreadService.GetThreadsAsync(filter);
@@ -180,6 +192,19 @@
         _pageSize = newSize;
         _pageNumber = 1;
         await LoadThreads(_pageNumber);
+    }
+
+    private async Task OnSortChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        var val = e.Value.ToString();
+        if (Enum.TryParse<ThreadSortBy>(val, out var parsed))
+        {
+            if (parsed == _sortBy) return;
+            _sortBy = parsed;
+            _pageNumber = 1;
+            await LoadThreads(_pageNumber);
+        }
     }
 
     private async Task PrevPage()
@@ -202,5 +227,14 @@
         if (p < 1 || p > _threadsPage.TotalPages) return;
         _pageNumber = p;
         await LoadThreads(_pageNumber);
+    }
+
+    private static string FormatDate(DateTime dt) => dt.ToString("MMM dd, yyyy");
+
+    private string FormatLastActivity(ThreadSummaryDto t)
+    {
+        if (t.LastCommentTime.HasValue)
+            return FormatDate(t.LastCommentTime.Value);
+        return FormatDate(t.TimeUpdated != default ? t.TimeUpdated : t.TimeCreated);
     }
 }
