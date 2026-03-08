@@ -10,7 +10,7 @@ namespace Forum.Application.Features.Users.Queries;
 /// Retrieves a paginated list of users with their thread and comment counts.
 /// Used by the admin panel to list and manage user accounts.
 /// </summary>
-public record GetPagedUsersQuery(int PageNumber = 1, int PageSize = 10) : IRequest<Result<PagedResult<UserDto>>>;
+public record GetPagedUsersQuery(int PageNumber = 1, int PageSize = 10, UserSortBy SortBy = UserSortBy.Username) : IRequest<Result<PagedResult<UserDto>>>;
 
 public class GetPagedUsersHandler : IRequestHandler<GetPagedUsersQuery, Result<PagedResult<UserDto>>>
 {
@@ -23,21 +23,22 @@ public class GetPagedUsersHandler : IRequestHandler<GetPagedUsersQuery, Result<P
 
     public async Task<Result<PagedResult<UserDto>>> Handle(GetPagedUsersQuery request, CancellationToken cancellationToken)
     {
-        var paginationParams = new PaginationParams
+        var filterParams = new UserFilterParams
         {
             PageNumber = request.PageNumber,
-            PageSize = request.PageSize
+            PageSize = request.PageSize,
+            SortBy = request.SortBy
         };
 
-        var (users, totalCount) = await _userRepository.GetPagedAsync(paginationParams, cancellationToken);
+        var (users, totalCount) = await _userRepository.GetPagedAsync(filterParams, cancellationToken);
 
         var dtos = users.Select(u => u.ToUserDto()).ToList();
 
         return Result.Success(PagedResult<UserDto>.Create(
             dtos,
             totalCount,
-            paginationParams.PageNumber,
-            paginationParams.PageSize
+            filterParams.PageNumber,
+            filterParams.PageSize
         ));
     }
 }

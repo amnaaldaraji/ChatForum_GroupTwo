@@ -13,9 +13,12 @@ public static class UserEndpoints
         var group = app.MapGroup("/api/users").WithTags("Users");
 
         // GET paged users (Admin only)
-        group.MapGet("/", async (IMediator mediator, CancellationToken ct, int pageNumber = 1, int pageSize = 10) =>
+        group.MapGet("/", async (IMediator mediator, CancellationToken ct, int pageNumber = 1, int pageSize = 10, string? sortBy = null) =>
         {
-            var result = await mediator.Send(new GetPagedUsersQuery(pageNumber, pageSize), ct);
+            var sort = Enum.TryParse<Application.DTOs.User.UserSortBy>(sortBy, true, out var parsed)
+                ? parsed
+                : Application.DTOs.User.UserSortBy.Username;
+            var result = await mediator.Send(new GetPagedUsersQuery(pageNumber, pageSize, sort), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();

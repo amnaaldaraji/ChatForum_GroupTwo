@@ -2,6 +2,8 @@
 @inject CategoryService CategoryService
 @inject ThreadService ThreadService
 @inject UserService UserService
+@using Forum.Application.DTOs.Thread
+@using Forum.Application.DTOs.User
 @inject IJSRuntime JS
 
 <PageTitle>Admin Panel - Sport Forum</PageTitle>
@@ -97,6 +99,14 @@
                     }
                 </select>
 
+                <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
+                <select class="form-select form-select-sm w-auto" value="@_threadsSortByString" @onchange="OnThreadsSortChanged">
+                    <option value="@ThreadSortBy.Newest.ToString()">Newest</option>
+                    <option value="@ThreadSortBy.Oldest.ToString()">Oldest</option>
+                    <option value="@ThreadSortBy.Category.ToString()">Category</option>
+                    <option value="@ThreadSortBy.Author.ToString()">Author</option>
+                </select>
+
                 <div class="ms-auto">
                     @if (threadsPaged != null && threadsPaged.TotalPages > 1)
                     {
@@ -188,6 +198,13 @@
                     {
                         <option value="@size">@size</option>
                     }
+                </select>
+
+                <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
+                <select class="form-select form-select-sm w-auto" value="@_usersSortByString" @onchange="OnUsersSortChanged">
+                    <option value="@UserSortBy.Username.ToString()">Username</option>
+                    <option value="@UserSortBy.Threads.ToString()">Threads</option>
+                    <option value="@UserSortBy.Comments.ToString()">Comments</option>
                 </select>
 
                 <div class="ms-auto">
@@ -309,12 +326,16 @@
     private PagedResult<ThreadSummaryDto>? threadsPaged;
     private int threadsPage = 1;
     private int threadsPageSize = 5;
+    private ThreadSortBy _threadsSortBy = ThreadSortBy.Newest;
+    private string _threadsSortByString => _threadsSortBy.ToString();
 
     // Users
     private List<UserDto> users = [];
     private PagedResult<UserDto>? usersPaged;
     private int usersPage = 1;
     private int usersPageSize = 5;
+    private UserSortBy _usersSortBy = UserSortBy.Username;
+    private string _usersSortByString => _usersSortBy.ToString();
     private string? editingUserId;
     private string editingUserName = "";
 
@@ -382,8 +403,18 @@
     // ===== Threads =====
     private async Task LoadThreads()
     {
-        threadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams { PageNumber = threadsPage, PageSize = threadsPageSize });
+        threadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams { PageNumber = threadsPage, PageSize = threadsPageSize, SortBy = _threadsSortBy });
         threads = threadsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task OnThreadsSortChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!Enum.TryParse<ThreadSortBy>(e.Value.ToString(), out var parsed)) return;
+        if (parsed == _threadsSortBy) return;
+        _threadsSortBy = parsed;
+        threadsPage = 1;
+        await LoadThreads();
     }
 
     private async Task DeleteThread(int id, string title)
@@ -435,13 +466,23 @@
     {
         try
         {
-            usersPaged = await UserService.GetPagedAsync(usersPage, usersPageSize);
+            usersPaged = await UserService.GetPagedAsync(usersPage, usersPageSize, _usersSortBy.ToString());
             users = usersPaged?.Items?.ToList() ?? [];
         }
         catch (HttpRequestException)
         {
             SetStatus("Failed to load users. You may not have admin permissions.", true);
         }
+    }
+
+    private async Task OnUsersSortChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!Enum.TryParse<UserSortBy>(e.Value.ToString(), out var parsed)) return;
+        if (parsed == _usersSortBy) return;
+        _usersSortBy = parsed;
+        usersPage = 1;
+        await LoadUsers();
     }
 
     private async Task OnUsersPageSizeChanged(ChangeEventArgs e)
