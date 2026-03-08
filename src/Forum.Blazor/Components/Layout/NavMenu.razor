@@ -86,7 +86,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _categories = await CategoryService.GetAllAsync();
+        try
+        {
+            _categories = await CategoryService.GetAllAsync();
+        }
+        catch
+        {
+            _categories = [];
+        }
     }
 
     private async Task HandleLogout()

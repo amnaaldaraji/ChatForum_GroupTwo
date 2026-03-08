@@ -15,12 +15,14 @@ public class UserService : ApiClientBase
     }
 
     /// <summary>
-    /// GET /api/users?pageNumber=...&pageSize=... — returns paginated users (admin only).
+    /// GET /api/users?pageNumber=...&pageSize=...&sortBy=... — returns paginated users (admin only).
     /// </summary>
-    public async Task<PagedResult<UserDto>?> GetPagedAsync(int pageNumber = 1, int pageSize = 10)
+    public async Task<PagedResult<UserDto>?> GetPagedAsync(int pageNumber = 1, int pageSize = 10, string? sortBy = null)
     {
-        return await GetAuthenticatedAsync<PagedResult<UserDto>>(
-            $"api/users?pageNumber={pageNumber}&pageSize={pageSize}");
+        var url = $"api/users?pageNumber={pageNumber}&pageSize={pageSize}";
+        if (!string.IsNullOrEmpty(sortBy))
+            url += $"&sortBy={sortBy}";
+        return await GetAuthenticatedAsync<PagedResult<UserDto>>(url);
     }
 
     /// <summary>

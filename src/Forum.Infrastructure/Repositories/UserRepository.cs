@@ -1,4 +1,5 @@
 using Forum.Application.Common.Models;
+using Forum.Application.DTOs.User;
 using Forum.Application.Repositories;
 using Forum.Domain.Entities;
 using Forum.Infrastructure.Data;
@@ -85,22 +86,28 @@ public class UserRepository : Repository<User>, IUserRepository
 
     /// <summary>
     /// Retrieves a paginated list of users with their threads and comments eagerly loaded.
-    /// Ordered by username ascending.
+    /// Supports sorting by username, thread count, or comment count.
     /// </summary>
     public async Task<(IReadOnlyList<User> Items, int TotalCount)> GetPagedAsync(
-        PaginationParams paginationParams,
+        UserFilterParams filterParams,
         CancellationToken cancellationToken = default)
     {
-        var query = DbSet
+        var baseQuery = DbSet
             .Include(u => u.Threads)
-            .Include(u => u.Comments)
-            .OrderBy(u => u.UserName);
+            .Include(u => u.Comments);
+
+        IQueryable<User> query = filterParams.SortBy switch
+        {
+            UserSortBy.Threads => baseQuery.OrderByDescending(u => u.Threads.Count),
+            UserSortBy.Comments => baseQuery.OrderByDescending(u => u.Comments.Count),
+            _ => baseQuery.OrderBy(u => u.UserName)
+        };
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
-            .Take(paginationParams.PageSize)
+            .Skip((filterParams.PageNumber - 1) * filterParams.PageSize)
+            .Take(filterParams.PageSize)
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);
