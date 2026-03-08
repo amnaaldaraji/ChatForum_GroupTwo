@@ -37,9 +37,19 @@ public static class CommentEndpoints
         .AllowAnonymous();
 
         // get paged comments for thread
-        group.MapGet("/thread/{threadId:int}", async (int threadId, IMediator mediator, CancellationToken ct, int pageNumber = 1, int pageSize = 50) =>
+        // Pass current userId so vote data is included per user — stays AllowAnonymous,
+        // userId is simply null for unauthenticated requests
+        group.MapGet("/thread/{threadId:int}", async (
+            int threadId,
+            HttpContext httpContext,
+            IMediator mediator,
+            CancellationToken ct,
+            int pageNumber = 1,
+            int pageSize = 50) =>
         {
-            var result = await mediator.Send(new GetCommentsByThreadQuery(threadId, pageNumber, pageSize), ct);
+            var currentUserId = httpContext.User.GetUserId();
+            var result = await mediator.Send(
+                new GetCommentsByThreadQuery(threadId, pageNumber, pageSize, currentUserId), ct);
             return result.IsSuccess
                 ? Results.Ok(result.Value)
                 : result.ToProblemDetails();
