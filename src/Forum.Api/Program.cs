@@ -5,6 +5,7 @@ using Forum.Domain.Entities;
 using Forum.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,7 +80,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Database Seeding
+// Apply migrations and seed the database.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -89,7 +90,10 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<User>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // Seed roles, admin user, sample categories, threads, and comments.
+        // Apply any pending migrations — also creates the DB file if it doesn't exist.
+        context.Database.Migrate();
+
+        // Seed roles, users, categories, threads, comments and votes.
         Forum.Infrastructure.Data.DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
     }
     catch (Exception ex)
