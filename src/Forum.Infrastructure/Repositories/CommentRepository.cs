@@ -42,11 +42,20 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
         PaginationParams paginationParams,
         CancellationToken cancellationToken = default)
     {
+        // Find the body comment ID (oldest comment in the thread) so we can exclude it.
+        // The first comment serves as the thread body and is displayed separately.
+        var bodyCommentId = await DbSet
+            .Where(c => c.ThreadId == threadId)
+            .OrderBy(c => c.TimeCreated)
+            .Select(c => (int?)c.CommentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
         var query = DbSet
             .Include(c => c.User)
             .Include(c => c.ParentComment)
                 .ThenInclude(pc => pc!.User)
             .Where(c => c.ThreadId == threadId && (!c.IsDeleted || c.Replies.Any()))
+            .Where(c => c.CommentId != bodyCommentId)
             .OrderBy(c => c.TimeCreated);
         
         var totalCount = await query.CountAsync(cancellationToken);
