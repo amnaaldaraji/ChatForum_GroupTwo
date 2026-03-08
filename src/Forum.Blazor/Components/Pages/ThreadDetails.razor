@@ -1,6 +1,7 @@
 @page "/thread/{Id:int}"
 @inject ThreadService ThreadService
 @inject CommentService CommentService
+@inject IJSRuntime JS
 
 <link rel="stylesheet" href="/css/thread-details.css" />
 
@@ -147,19 +148,25 @@ else
                                 <Authorized Context="replyAuth">
                                     @if (_replyingToCommentId != comment.CommentId)
                                     {
-                                        <button class="btn btn-link btn-sm p-0 mt-1" @onclick="() => StartReply(comment.CommentId)">Reply</button>
+                                        <button class="btn btn-link btn-sm p-0" @onclick="() => StartReply(comment.CommentId)">Reply</button>
                                     }
                                 </Authorized>
                             </AuthorizeView>
 
-                            <AuthorizeView Roles="Admin">
-                                <Authorized>
-                                    <button class="btn btn-link btn-sm text-danger p-0 ms-2" title="Delete comment"
-                                            @onclick="() => ConfirmAndDelete(comment.CommentId)" disabled="@_isSubmitting">
-                                        Delete
-                                    </button>
-                                </Authorized>
-                            </AuthorizeView>
+                            @if (!comment.IsDeleted)
+                            {
+                                <AuthorizeView>
+                                    <Authorized Context="deleteAuth">
+                                        @if (deleteAuth.User.IsInRole("Admin") || deleteAuth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == comment.AuthorId)
+                                        {
+                                            <button class="btn btn-link btn-sm text-danger p-0 ms-2" title="Delete comment"
+                                                    @onclick="() => ConfirmAndDelete(comment.CommentId)" disabled="@_isSubmitting">
+                                                Delete
+                                            </button>
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
+                            }
                         </div>
 
                         <AuthorizeView>
@@ -402,6 +409,8 @@ else
 
     private async Task ConfirmAndDelete(int commentId)
     {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this comment?");
+        if (!confirmed) return;
         await DeleteComment(commentId);
     }
 
