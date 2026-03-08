@@ -7,23 +7,17 @@ namespace Forum.Infrastructure.Repositories;
 
 public class VoteRepository : Repository<Vote>, IVoteRepository
 {
-    private readonly ForumDbContext _db;
-
-    public VoteRepository(ForumDbContext context) : base(context)
-    {
-        _db = context;
-    }
+    public VoteRepository(ForumDbContext context) : base(context) { }
 
     public async Task<Vote?> GetByUserAndCommentAsync(string userId, int commentId, CancellationToken ct = default)
     {
-        return await _db.Votes
-            .FirstOrDefaultAsync(v => v.UserId == userId && v.CommentId == commentId, ct);
+        return await DbSet.FirstOrDefaultAsync(v => v.UserId == userId && v.CommentId == commentId, ct);
     }
 
     public async Task<Dictionary<int, int>> GetScoresForCommentsAsync(IEnumerable<int> commentIds, CancellationToken ct = default)
     {
         var ids = commentIds.ToList();
-        return await _db.Votes
+        return await DbSet
             .Where(v => ids.Contains(v.CommentId))
             .GroupBy(v => v.CommentId)
             .Select(g => new { CommentId = g.Key, Score = g.Sum(v => v.Value) })
@@ -33,7 +27,7 @@ public class VoteRepository : Repository<Vote>, IVoteRepository
     public async Task<Dictionary<int, int>> GetUserVotesForCommentsAsync(string userId, IEnumerable<int> commentIds, CancellationToken ct = default)
     {
         var ids = commentIds.ToList();
-        return await _db.Votes
+        return await DbSet
             .Where(v => v.UserId == userId && ids.Contains(v.CommentId))
             .ToDictionaryAsync(v => v.CommentId, v => v.Value, ct);
     }

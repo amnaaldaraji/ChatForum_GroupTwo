@@ -89,8 +89,7 @@ public class ThreadRepository : Repository<ThreadEntity>, IThreadRepository
         query = filterParams.SortBy switch
         {
             ThreadSortBy.Oldest => query.OrderBy(t => t.TimeCreated),
-            ThreadSortBy.RecentlyUpdated => query.OrderByDescending(t =>
-                t.Comments.Max(c => (DateTime?)c.TimeCreated) ?? t.TimeCreated),
+            ThreadSortBy.RecentlyUpdated => query.OrderByDescending(t => t.TimeUpdated),
             ThreadSortBy.MostComments => query.OrderByDescending(t => t.Comments.Count),
             _ => query.OrderByDescending(t => t.TimeCreated)
         };

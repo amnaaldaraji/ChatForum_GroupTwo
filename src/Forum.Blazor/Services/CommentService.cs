@@ -22,7 +22,7 @@ public class CommentService : ApiClientBase
     /// </summary>
     public async Task<PagedResult<CommentDto>?> GetByThreadAsync(int threadId, int pageNumber = 1, int pageSize = 20)
     {
-        return await GetAsync<PagedResult<CommentDto>>(
+        return await GetAuthenticatedAsync<PagedResult<CommentDto>>(
             $"api/comments/thread/{threadId}?pageNumber={pageNumber}&pageSize={pageSize}");
     }
 
