@@ -161,6 +161,15 @@ else
                                     }
                                 </Authorized>
                             </AuthorizeView>
+
+                            <AuthorizeView Roles="Admin">
+                                <Authorized>
+                                    <button class="btn btn-link btn-sm text-danger p-0 ms-2" title="Delete comment"
+                                            @onclick="() => ConfirmAndDelete(comment.CommentId)" disabled="@_isSubmitting">
+                                        Delete
+                                    </button>
+                                </Authorized>
+                            </AuthorizeView>
                         </div>
                     </div>
                 }
@@ -216,9 +225,7 @@ else
     private int? _replyingToCommentId;
     private string _replyContent = string.Empty;
 
-    // Mock vote scores per commentId
     private Dictionary<int, int> _voteScores = [];
-    // User's current vote per commentId: 1 = upvote, -1 = downvote, 0 = none
     private Dictionary<int, int> _userVotes = [];
 
     protected override async Task OnParametersSetAsync()
@@ -401,4 +408,38 @@ else
         _pageNumber = p;
         await LoadComments(_pageNumber);
     }
+
+    private async Task ConfirmAndDelete(int commentId)
+    {
+        await DeleteComment(commentId);
+    }
+
+    private async Task DeleteComment(int commentId)
+    {
+        _commentError = string.Empty;
+        _isSubmitting = true;
+        try
+        {
+            var response = await CommentService.DeleteAsync(commentId);
+            if (response.IsSuccessStatusCode)
+            {
+
+                await LoadComments(_pageNumber);
+            }
+            else
+            {
+                _commentError = "Failed to delete comment.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _commentError = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private static string FormatDate(DateTime dt) => dt.ToString("MMM dd, yyyy");
 }

@@ -64,6 +64,6 @@ public class CommentService : ApiClientBase
     /// </summary>
     public async Task<HttpResponseMessage> DeleteAsync(int id)
     {
-        return await DeleteAsync($"api/comments/{id}");
+        return await base.DeleteAsync($"api/comments/{id}");
     }
 }
