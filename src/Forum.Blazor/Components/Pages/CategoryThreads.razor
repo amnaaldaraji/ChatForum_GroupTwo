@@ -93,6 +93,7 @@
                             <th>thread</th>
                             <th>author</th>
                             <th>replies</th>
+                            <th>created</th>
                             <th>last activity</th>
                         </tr>
                     </thead>
@@ -105,7 +106,15 @@
                                 </td>
                                 <td class="author-cell">@thread.AuthorUserName</td>
                                 <td class="replies-cell">@thread.CommentCount</td>
-                                <td class="activity-cell">@FormatLastActivity(thread)</td>
+                                <td class="created-cell">
+                                    <span class="date-line">@FormatDate(thread.TimeCreated)</span>
+                                    <span class="time-line">@FormatTime(thread.TimeCreated)</span>
+                                </td>
+                                <td class="activity-cell">
+                                    @{ var lastActivity = GetLastActivityDate(thread); }
+                                    <span class="date-line">@FormatDate(lastActivity)</span>
+                                    <span class="time-line">@FormatTime(lastActivity)</span>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -230,11 +239,12 @@
     }
 
     private static string FormatDate(DateTime dt) => dt.ToString("MMM dd, yyyy");
+    private static string FormatTime(DateTime dt) => dt.ToString("HH:mm");
 
-    private string FormatLastActivity(ThreadSummaryDto t)
+    private static DateTime GetLastActivityDate(ThreadSummaryDto t)
     {
         if (t.LastCommentTime.HasValue)
-            return FormatDate(t.LastCommentTime.Value);
-        return FormatDate(t.TimeUpdated != default ? t.TimeUpdated : t.TimeCreated);
+            return t.LastCommentTime.Value;
+        return t.TimeUpdated != default ? t.TimeUpdated : t.TimeCreated;
     }
 }
