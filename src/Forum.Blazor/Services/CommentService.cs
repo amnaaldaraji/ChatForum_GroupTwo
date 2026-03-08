@@ -1,5 +1,6 @@
 using Forum.Application.Common.Models;
 using Forum.Application.DTOs.Comment;
+using Forum.Application.DTOs.Vote;
 using Forum.Blazor.Interfaces;
 
 namespace Forum.Blazor.Services;
@@ -65,5 +66,17 @@ public class CommentService : ApiClientBase
     public async Task<HttpResponseMessage> DeleteAsync(int id)
     {
         return await DeleteAsync($"api/comments/{id}");
+    }
+
+    /// <summary>
+    /// POST /api/comments/{commentId}/votes — casts or toggles a vote (1 or -1).
+    /// Returns updated score and user vote state. Returns null on failure.
+    /// </summary>
+    public async Task<VoteResponseDto?> CastVoteAsync(int commentId, int value)
+    {
+        var response = await PostAsync($"api/comments/{commentId}/votes", new CastVoteDto(value));
+        if (response.IsSuccessStatusCode)
+            return await response.Content.ReadFromJsonAsync<VoteResponseDto>(JsonOptions);
+        return null;
     }
 }

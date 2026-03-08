@@ -124,13 +124,13 @@ else
                                 <Authorized>
                                     <div class="vote-bar">
                                         <button class="vote-btn upvote @(GetUserVote(comment.CommentId) == 1 ? "active-up" : "")"
-                                                @onclick="() => Vote(comment.CommentId, 1)"
+                                                @onclick="async () => await Vote(comment.CommentId, 1)"
                                                 title="Upvote">▲</button>
                                         <span class="vote-score @(GetScore(comment.CommentId) > 0 ? "score-positive" : GetScore(comment.CommentId) < 0 ? "score-negative" : "score-zero")">
                                             @GetScore(comment.CommentId)
                                         </span>
                                         <button class="vote-btn downvote @(GetUserVote(comment.CommentId) == -1 ? "active-down" : "")"
-                                                @onclick="() => Vote(comment.CommentId, -1)"
+                                                @onclick="async () => await Vote(comment.CommentId, -1)"
                                                 title="Downvote">▼</button>
                                     </div>
                                 </Authorized>
@@ -216,9 +216,7 @@ else
     private int? _replyingToCommentId;
     private string _replyContent = string.Empty;
 
-    // Mock vote scores per commentId
     private Dictionary<int, int> _voteScores = [];
-    // User's current vote per commentId: 1 = upvote, -1 = downvote, 0 = none
     private Dictionary<int, int> _userVotes = [];
 
     protected override async Task OnParametersSetAsync()
@@ -253,7 +251,7 @@ else
             if (_commentsPage != null)
             {
                 _pageNumber = _commentsPage.PageNumber;
-                SeedMockVotes();
+                PopulateVoteData();
             }
         }
         catch
@@ -263,18 +261,13 @@ else
         StateHasChanged();
     }
 
-    private void SeedMockVotes()
+    private void PopulateVoteData()
     {
         if (_commentsPage?.Items == null) return;
-        var mockScores = new[] { 42, 15, 7, -3, 28, 1, 63, -8, 11, 5, 19, -1, 34, 2, 88 };
-        var i = 0;
-        foreach (var comment in _commentsPage.Items)
+        foreach (var c in _commentsPage.Items)
         {
-            if (!_voteScores.ContainsKey(comment.CommentId))
-                _voteScores[comment.CommentId] = mockScores[i % mockScores.Length];
-            if (!_userVotes.ContainsKey(comment.CommentId))
-                _userVotes[comment.CommentId] = 0;
-            i++;
+            _voteScores[c.CommentId] = c.VoteScore;
+            _userVotes[c.CommentId] = c.CurrentUserVote ?? 0;
         }
     }
 
@@ -284,23 +277,14 @@ else
     private int GetUserVote(int commentId) =>
         _userVotes.TryGetValue(commentId, out var v) ? v : 0;
 
-    private void Vote(int commentId, int direction)
+    private async Task Vote(int commentId, int direction)
     {
-        var current = GetUserVote(commentId);
-
-        if (current == direction)
+        var result = await CommentService.CastVoteAsync(commentId, direction);
+        if (result != null)
         {
-            // clicking same vote removes it
-            _voteScores[commentId] = GetScore(commentId) - direction;
-            _userVotes[commentId] = 0;
+            _voteScores[commentId] = result.NewScore;
+            _userVotes[commentId] = result.UserVote;
         }
-        else if (current == 0)
-        {
-            // first time voting
-            _voteScores[commentId] = GetScore(commentId) + direction;
-            _userVotes[commentId] = direction;
-        }
-        // if voted the other way, must undo first — do nothing
     }
 
     private async Task OnPageSizeChanged(ChangeEventArgs e)
