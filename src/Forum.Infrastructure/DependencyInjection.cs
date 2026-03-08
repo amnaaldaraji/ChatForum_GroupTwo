@@ -24,7 +24,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=forum.db";
+                               ?? "Data Source=forum.db";
         
         services.AddDbContext<ForumDbContext>(options =>
             options.UseSqlite(connectionString));

@@ -19,5 +19,7 @@ public record CommentDto(
     string? ParentCommentContent,
     DateTime TimeCreated,
     int ReplyCount,
-    bool IsDeleted
+    bool IsDeleted,
+    int VoteScore,        // net score (sum of votes)
+    int? CurrentUserVote  // null=anonymous, 0=no vote, 1/-1=voted
 );
