@@ -30,10 +30,12 @@ public class CommentService : ApiClientBase
     /// GET /api/comments?authorId=...&pageNumber=...&pageSize=...
     /// Returns paginated comments filtered by author.
     /// </summary>
-    public async Task<PagedResult<CommentDto>?> GetByAuthorAsync(string authorId, int pageNumber = 1, int pageSize = 20)
+    public async Task<PagedResult<CommentDto>?> GetByAuthorAsync(string authorId, int pageNumber = 1, int pageSize = 20, string? sortBy = null)
     {
-        return await GetAsync<PagedResult<CommentDto>>(
-            $"api/comments?authorId={authorId}&pageNumber={pageNumber}&pageSize={pageSize}");
+        var url = $"api/comments?authorId={authorId}&pageNumber={pageNumber}&pageSize={pageSize}";
+        if (!string.IsNullOrEmpty(sortBy))
+            url += $"&sortBy={sortBy}";
+        return await GetAsync<PagedResult<CommentDto>>(url);
     }
 
     /// <summary>

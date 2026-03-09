@@ -14,6 +14,7 @@ public record CommentDto(
     string AuthorId,
     string AuthorUserName,
     int ThreadId,
+    string? ThreadTitle,
     int? ParentCommentId,
     string? ParentCommentAuthorUserName,
     string? ParentCommentContent,

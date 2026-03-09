@@ -76,10 +76,16 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
         CommentFilterParams filterParams,
         CancellationToken cancellationToken = default)
     {
+        // Exclude thread body comments (the oldest comment in each thread serves as the thread body)
+        var bodyCommentIds = DbSet
+            .GroupBy(c => c.ThreadId)
+            .Select(g => g.OrderBy(c => c.TimeCreated).Select(c => c.CommentId).First());
+
         var query = DbSet
             .Include(c => c.User)
             .Include(c => c.Thread)
             .Where(c => !c.IsDeleted)
+            .Where(c => !bodyCommentIds.Contains(c.CommentId))
             .AsQueryable();
         
         if (!string.IsNullOrWhiteSpace(filterParams.AuthorId))
@@ -102,8 +108,12 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
             query = query.Where(c => c.TimeCreated <= filterParams.ToDate.Value);
         }
         
-        query = query.OrderByDescending(c => c.TimeCreated);
-        
+        query = filterParams.SortBy switch
+        {
+            CommentSortBy.Oldest => query.OrderBy(c => c.TimeCreated),
+            _ => query.OrderByDescending(c => c.TimeCreated)
+        };
+
         var totalCount = await query.CountAsync(cancellationToken);
         
         var items = await query
