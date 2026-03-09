@@ -284,8 +284,8 @@
                         @foreach (var c in myComments)
                         {
                             <tr>
-                                <td><span class="comment-preview" title="@c.Content">@c.Content</span></td>
-                                <td><a href="/thread/@c.ThreadId">View Thread</a></td>
+                                <td><a href="/thread/@c.ThreadId" class="comment-preview" title="@c.Content">@c.Content</a></td>
+                                <td>@(c.ThreadTitle ?? "Unknown")</td>
                                 <td>@c.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
                             </tr>
                         }

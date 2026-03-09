@@ -121,6 +121,7 @@ public static class MappingExtensions
             comment.UserId,
             authorUserName,
             comment.ThreadId,
+            comment.Thread?.Title,
             comment.ParentCommentId,
             parentAuthorUserName,
             parentCommentContent,
