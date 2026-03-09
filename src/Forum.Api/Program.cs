@@ -5,11 +5,11 @@ using Forum.Domain.Entities;
 using Forum.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
@@ -39,14 +39,11 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 // Read JWT settings from configuration, falling back to development defaults.
-// In production, these values should be provided via environment variables or
-// a secure configuration provider (e.g., Azure Key Vault, AWS Secrets Manager).
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "YourSuperSecretKeyForJWTTokenGeneration123!";
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ForumApi";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ForumClient";
 
 // Set JWT Bearer as the default authentication.
-// All endpoints requiring authorization will expect a valid JWT in the Authorization header.
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,7 +51,6 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
-        // Configure token validation parameters to enforce on every incoming request.
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -70,7 +66,6 @@ builder.Services.AddAuthentication(options =>
 // Register the authorization services required by RequireAuthorization() on endpoints.
 builder.Services.AddAuthorization();
 
-
 // Allow the Blazor Server frontend to make cross-origin requests to this API.
 builder.Services.AddCors(options =>
 {
@@ -85,7 +80,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Database Seeding
+// Apply migrations and seed the database.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -95,18 +90,19 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<User>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // Seed roles, admin user, sample categories, threads, and comments.
+        // Apply any pending migrations — also creates the DB file if it doesn't exist.
+        context.Database.Migrate();
+
+        // Seed roles, users, categories, threads, comments and votes.
         Forum.Infrastructure.Data.DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
     }
     catch (Exception ex)
     {
-        // Log seeding errors but do not crash the application; the API can
-        // still run even if seeding fails (e.g., database already populated).
+        // Log seeding errors but do not crash the application.
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -116,11 +112,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
-
 app.UseHttpsRedirection();
-
 app.UseCors("AllowBlazor");
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -129,5 +122,6 @@ app.MapThreadEndpoints();
 app.MapCommentEndpoints();
 app.MapUserEndpoints();
 app.MapAuthEndpoints();
+app.MapVoteEndpoints();
 
 app.Run();

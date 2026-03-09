@@ -53,7 +53,6 @@ Blazor starts at `http://localhost:5159`.
 <br>
 
 **Dependency rules:**
-
 ```
 Dependency rules:
 - Domain has no dependencies (pure entities).
@@ -61,11 +60,9 @@ Dependency rules:
 - Infrastructure implements Application interfaces using EF Core and Identity.
 - Api depends on Application (sends MediatR commands/queries).
 - Blazor calls the Api over HTTP and shares Application DTOs.
-
 ```
 
 ## File Structure
-
 ```
 ChatForum_GroupTwo/
 ├── Forum.sln
@@ -166,4 +163,17 @@ Content-Type: application/json
   "body": "What are your thoughts on..."
 }
 ```
+
+---
+
+## VG Track: Voting (Track 1)
+
+Logged-in users can upvote (▲) or downvote (▼) comments. The score is shown between the arrows, coloured green (positive), red (negative) or grey (zero). Clicking the same arrow undoes the vote; clicking the opposite switches it. Guests see the arrows but cannot interact since you need to be logged in.
+
+The feature spans all layers: 
+- `Vote` entity and `IVoteRepository` in Domain/Application
+- `CastVoteCommand` handler, a `POST /api/comments/{commentId}/votes`
+- Endpoint
+- Vote state loaded per-user when fetching comments.
+- An EF Core migration (`AddVoteEntity`) adds the Votes table with a unique index on `(UserId, CommentId)`.
 

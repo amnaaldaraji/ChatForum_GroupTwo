@@ -91,6 +91,8 @@ public class ThreadRepository : Repository<ThreadEntity>, IThreadRepository
             ThreadSortBy.Oldest => query.OrderBy(t => t.TimeCreated),
             ThreadSortBy.RecentlyUpdated => query.OrderByDescending(t => t.TimeUpdated),
             ThreadSortBy.MostComments => query.OrderByDescending(t => t.Comments.Count),
+            ThreadSortBy.Category => query.OrderBy(t => t.Category.Name),
+            ThreadSortBy.Author => query.OrderBy(t => t.User.UserName),
             _ => query.OrderByDescending(t => t.TimeCreated)
         };
         

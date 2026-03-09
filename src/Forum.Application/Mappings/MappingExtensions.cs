@@ -13,13 +13,8 @@ namespace Forum.Application.Mappings;
 /// </summary>
 public static class MappingExtensions
 {
-    // Display name used when a user has been soft-deleted.
     private const string DeletedUserName = "Deleted User";
-
-    // Content placeholder displayed in place of a soft-deleted comment's text.
     private const string DeletedCommentContent = "[deleted]";
-
-    // Author name shown for soft-deleted comments (shorter than DeletedUserName).
     private const string DeletedAuthorName = "Deleted";
 
     /// <summary>
@@ -30,7 +25,7 @@ public static class MappingExtensions
         return new CategoryDto(
             category.CategoryId,
             category.Name,
-            category.Threads?.Count ?? 0 
+            category.Threads?.Count ?? 0
         );
     }
 
@@ -93,12 +88,14 @@ public static class MappingExtensions
 
     /// <summary>
     /// Maps a Comment entity to a CommentDto. Implements the soft-delete display logic.
+    /// voteScore and currentUserVote are supplied externally by the query handler
+    /// (batch-loaded, not per-comment queries).
     /// </summary>
-    public static CommentDto ToCommentDto(this Comment comment)
+    public static CommentDto ToCommentDto(this Comment comment, int voteScore = 0, int? currentUserVote = null)
     {
         var isDeleted = comment.IsDeleted;
         var authorIsDeleted = comment.User?.IsDeleted == true;
-        
+
         var content = isDeleted ? DeletedCommentContent : comment.Content;
 
         // Determine the author display name based on deletion states:
@@ -109,7 +106,6 @@ public static class MappingExtensions
                 : comment.User?.UserName ?? string.Empty;
 
         // Resolve parent comment author name for reply citation display
-        // Also handles the case where the parent comment's author has been soft-deleted
         var parentAuthorUserName = comment.ParentComment?.User?.IsDeleted == true
             ? DeletedUserName
             : comment.ParentComment?.User?.UserName;
@@ -129,8 +125,10 @@ public static class MappingExtensions
             parentAuthorUserName,
             parentCommentContent,
             comment.TimeCreated,
-            comment.Replies?.Count ?? 0, // Count of direct replies
-            isDeleted
+            comment.Replies?.Count ?? 0,
+            isDeleted,
+            voteScore,
+            currentUserVote
         );
     }
 
@@ -143,7 +141,7 @@ public static class MappingExtensions
         return new UserDto(
             user.Id,
             userName,
-            user.IsDeleted ? null : user.Email, // Hide email for deleted users (privacy)
+            user.IsDeleted ? null : user.Email,
             user.Threads?.Count ?? 0,
             user.Comments?.Count ?? 0,
             user.IsDeleted
@@ -162,7 +160,7 @@ public static class MappingExtensions
         return new UserProfileDto(
             user.Id,
             userName,
-            user.IsDeleted ? null : user.Email, // Hide email for deleted users
+            user.IsDeleted ? null : user.Email,
             user.Threads?.Count ?? 0,
             user.Comments?.Count ?? 0,
             user.IsDeleted,
@@ -171,4 +169,3 @@ public static class MappingExtensions
         );
     }
 }
-

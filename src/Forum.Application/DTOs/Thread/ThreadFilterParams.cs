@@ -24,5 +24,7 @@ public enum ThreadSortBy
     Newest,
     Oldest,
     MostComments,
-    RecentlyUpdated
+    RecentlyUpdated,
+    Category,
+    Author
 }

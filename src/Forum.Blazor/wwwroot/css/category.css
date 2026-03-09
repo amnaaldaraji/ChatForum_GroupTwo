@@ -208,10 +208,29 @@
     border-radius: 4px;
 }
 
+.created-cell,
 .activity-cell {
-    width: 15%;
     color: #8b949e;
-    font-size: 14px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.created-cell .date-line,
+.activity-cell .date-line {
+    display: block;
+    font-weight: 600;
+}
+
+.created-cell .time-line,
+.activity-cell .time-line {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* Make dropdown arrows visible on dark background */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 }
 
 .loading, .no-threads {
