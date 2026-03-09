@@ -45,8 +45,6 @@ public class AuthService : IAuthClientService
                 return AuthResult.Failure(ApiClientBase.TryExtractError(errorBody) ?? "Invalid username or password.");
             }
 
-
-
             var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(JsonOptions);
             if (loginResponse is null || string.IsNullOrEmpty(loginResponse.Token))
                 return AuthResult.Failure("Login failed: no token received.");
