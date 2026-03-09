@@ -73,6 +73,10 @@
     private bool isLoading = false;
     private bool registrationSuccessful = false;
 
+    /// <summary>
+    /// Handles registration form submission.
+    /// Validates password confirmation, calls the client auth service, and navigates to login on success.
+    /// </summary>
     private async Task HandleRegister()
     {
         errorMessage = string.Empty;
@@ -80,6 +84,7 @@
 
         try
         {
+            // Validate password confirmation on the client before calling API
             if (registerModel.Password != registerModel.ConfirmPassword)
             {
                 errorMessage = "Passwords do not match.";
@@ -93,6 +98,7 @@
 
             if (result.Succeeded)
             {
+                // Show success message briefly then navigate to login page
                 registrationSuccessful = true;
                 StateHasChanged();
                 await Task.Delay(2000, _cts.Token);
@@ -118,10 +124,12 @@
 
     public void Dispose()
     {
+        // Cancel any pending delays / operations when the component is disposed
         _cts.Cancel();
         _cts.Dispose();
     }
 
+    // Simple client-side registration DTO used by the EditForm
     private class RegisterModel
     {
         public string Username { get; set; } = string.Empty;

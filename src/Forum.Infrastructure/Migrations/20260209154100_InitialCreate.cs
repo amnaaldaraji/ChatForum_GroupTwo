@@ -11,6 +11,7 @@ namespace Forum.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Create ASP.NET Identity role table
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -25,6 +26,7 @@ namespace Forum.Infrastructure.Migrations
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
                 });
 
+            // Create ASP.NET Identity user table
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
                 columns: table => new
@@ -50,6 +52,7 @@ namespace Forum.Infrastructure.Migrations
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                 });
 
+            // Create Categories table to hold forum categories
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
@@ -63,6 +66,7 @@ namespace Forum.Infrastructure.Migrations
                     table.PrimaryKey("PK_Categories", x => x.CategoryId);
                 });
 
+            // Identity claim / Linking tables
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
@@ -84,6 +88,7 @@ namespace Forum.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // Identity user claims
             migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
@@ -105,6 +110,7 @@ namespace Forum.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // Identity user logins
             migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
                 columns: table => new
@@ -149,6 +155,7 @@ namespace Forum.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // Identity tokens table
             migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
                 columns: table => new
@@ -198,6 +205,7 @@ namespace Forum.Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            // Comments table (thread body + replies)
             migrationBuilder.CreateTable(
                 name: "Comments",
                 columns: table => new
@@ -299,6 +307,7 @@ namespace Forum.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Reverse schema creation in Up()
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
