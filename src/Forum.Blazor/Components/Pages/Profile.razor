@@ -1,5 +1,7 @@
 @page "/profile"
 @using System.Security.Claims
+@using Forum.Application.DTOs.Thread
+@using Forum.Application.DTOs.Comment
 @inject UserService UserService
 @inject ThreadService ThreadService
 @inject CommentService CommentService
@@ -124,6 +126,13 @@
                     }
                 </select>
 
+                <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
+                <select class="form-select form-select-sm w-auto" value="@_myThreadsSortByString" @onchange="OnMyThreadsSortChanged">
+                    <option value="@ThreadSortBy.Newest.ToString()">Newest</option>
+                    <option value="@ThreadSortBy.Oldest.ToString()">Oldest</option>
+                    <option value="@ThreadSortBy.Category.ToString()">Category</option>
+                </select>
+
                 <div class="ms-auto">
                     @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
                     {
@@ -209,6 +218,12 @@
                     {
                         <option value="@size">@size</option>
                     }
+                </select>
+
+                <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
+                <select class="form-select form-select-sm w-auto" value="@_myCommentsSortByString" @onchange="OnMyCommentsSortChanged">
+                    <option value="@CommentSortBy.Newest.ToString()">Newest</option>
+                    <option value="@CommentSortBy.Oldest.ToString()">Oldest</option>
                 </select>
 
                 <div class="ms-auto">
@@ -303,6 +318,8 @@
     private int myThreadsPage = 1;
     private int myThreadsPageSize = 5;
     private bool myThreadsLoaded;
+    private ThreadSortBy _myThreadsSortBy = ThreadSortBy.Newest;
+    private string _myThreadsSortByString => _myThreadsSortBy.ToString();
 
     // My Comments
     private List<CommentDto> myComments = [];
@@ -310,6 +327,8 @@
     private int myCommentsPage = 1;
     private int myCommentsPageSize = 5;
     private bool myCommentsLoaded;
+    private CommentSortBy _myCommentsSortBy = CommentSortBy.Newest;
+    private string _myCommentsSortByString => _myCommentsSortBy.ToString();
 
     protected override async Task OnInitializedAsync()
     {
@@ -452,11 +471,21 @@
         myThreadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams
         {
             AuthorId = userId,
-            SortBy = ThreadSortBy.Newest,
+            SortBy = _myThreadsSortBy,
             PageNumber = myThreadsPage,
             PageSize = myThreadsPageSize
         });
         myThreads = myThreadsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task OnMyThreadsSortChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!Enum.TryParse<ThreadSortBy>(e.Value.ToString(), out var parsed)) return;
+        if (parsed == _myThreadsSortBy) return;
+        _myThreadsSortBy = parsed;
+        myThreadsPage = 1;
+        await LoadMyThreads();
     }
 
     private async Task OnMyThreadsPageSizeChanged(ChangeEventArgs e)
@@ -500,8 +529,18 @@
     private async Task LoadMyComments()
     {
         if (userId == null) return;
-        myCommentsPaged = await CommentService.GetByAuthorAsync(userId, myCommentsPage, myCommentsPageSize);
+        myCommentsPaged = await CommentService.GetByAuthorAsync(userId, myCommentsPage, myCommentsPageSize, _myCommentsSortBy.ToString());
         myComments = myCommentsPaged?.Items?.ToList() ?? [];
+    }
+
+    private async Task OnMyCommentsSortChanged(ChangeEventArgs e)
+    {
+        if (e?.Value == null) return;
+        if (!Enum.TryParse<CommentSortBy>(e.Value.ToString(), out var parsed)) return;
+        if (parsed == _myCommentsSortBy) return;
+        _myCommentsSortBy = parsed;
+        myCommentsPage = 1;
+        await LoadMyComments();
     }
 
     private async Task OnMyCommentsPageSizeChanged(ChangeEventArgs e)

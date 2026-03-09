@@ -102,8 +102,12 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
             query = query.Where(c => c.TimeCreated <= filterParams.ToDate.Value);
         }
         
-        query = query.OrderByDescending(c => c.TimeCreated);
-        
+        query = filterParams.SortBy switch
+        {
+            CommentSortBy.Oldest => query.OrderBy(c => c.TimeCreated),
+            _ => query.OrderByDescending(c => c.TimeCreated)
+        };
+
         var totalCount = await query.CountAsync(cancellationToken);
         
         var items = await query
