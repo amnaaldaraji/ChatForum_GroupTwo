@@ -44,7 +44,7 @@ public class AuthService : IAuthService
             UserName = username,
             Email = email
         };
-        
+
         var result = await _userManager.CreateAsync(user, password);
 
         if (!result.Succeeded)
@@ -58,23 +58,40 @@ public class AuthService : IAuthService
 
     /// <summary>
     /// Authenticates a user by validating their credentials and generates a JWT token on success.
-    /// Rejects soft-deleted users.
+    /// Rejects soft-deleted users and enforces server-side lockout.
     /// </summary>
     public async Task<Result<AuthResponse>> LoginAsync(string username, string password)
     {
         var user = await _userManager.FindByNameAsync(username);
-        
+
         if (user == null || user.IsDeleted)
         {
             return Result.Failure<AuthResponse>("Invalid credentials");
         }
-        
-        var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
+
+        var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+
+        if (result.IsLockedOut)
+        {
+            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+            if (lockoutEnd.HasValue)
+            {
+                var remaining = lockoutEnd.Value - DateTimeOffset.UtcNow;
+                var minutes = (int)Math.Ceiling(Math.Max(remaining.TotalMinutes, 0));
+                return Result.Failure<AuthResponse>($"Account locked due to too many failed attempts. Try again in {minutes} minute{(minutes == 1 ? "" : "s")}.");
+            }
+
+            return Result.Failure<AuthResponse>("Account locked due to too many failed attempts. Try again later.");
+        }
+
         if (!result.Succeeded)
         {
-            return Result.Failure<AuthResponse>("Invalid credentials");
+            var maxAttempts = _userManager.Options.Lockout.MaxFailedAccessAttempts;
+            var failedCount = await _userManager.GetAccessFailedCountAsync(user);
+            var attemptsLeft = Math.Max(0, maxAttempts - failedCount);
+            return Result.Failure<AuthResponse>($"Invalid credentials. {attemptsLeft} attempt{(attemptsLeft == 1 ? "" : "s")} remaining before lockout.");
         }
-        
+
         var token = await GenerateJwtToken(user);
 
         return Result.Success(new AuthResponse(token, user.Id, user.UserName!, user.Email));
@@ -114,7 +131,7 @@ public class AuthService : IAuthService
     private async Task<string> GenerateJwtToken(User user)
     {
         var roles = await _userManager.GetRolesAsync(user);
-        
+
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
@@ -122,13 +139,13 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-        
+
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-        
+
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "YourSuperSecretKeyForJWTTokenGeneration123!"));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        
+
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"] ?? "ForumApi",
             audience: _configuration["Jwt:Audience"] ?? "ForumClient",
@@ -136,7 +153,7 @@ public class AuthService : IAuthService
             expires: DateTime.UtcNow.AddHours(24),
             signingCredentials: creds
         );
-        
+
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
