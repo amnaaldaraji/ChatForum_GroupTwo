@@ -2,6 +2,7 @@
 @using Forum.Blazor.Services
 @inject IAuthClientService AuthService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Login</PageTitle>
 <link rel="stylesheet" href="/css/auth.css" />
@@ -12,6 +13,13 @@
             <h3>Login</h3>
         </div>
         <div class="auth-card-body">
+
+            @if (!string.IsNullOrEmpty(remainingAttemptsMessage))
+            {
+                <div class="alert alert-warning">
+                    @remainingAttemptsMessage
+                </div>
+            }
 
             @if (!string.IsNullOrEmpty(errorMessage))
             {
@@ -51,11 +59,43 @@
 
     private LoginModel loginModel = new();
     private string errorMessage = string.Empty;
+    private string remainingAttemptsMessage = string.Empty;
     private bool isLoading = false;
+
+    // My Code for locking people out if they fail 5 times.
+    private const int MaxAttempts = 5;
+    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
     private async Task HandleLogin()
     {
         errorMessage = string.Empty;
+        remainingAttemptsMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(loginModel.Username))
+        {
+            errorMessage = "Enter a username.";
+            return;
+        }
+
+        var usernameKey = NormalizeKey(loginModel.Username);
+        var lockInfo = await LoadLockInfoAsync(usernameKey);
+
+        // The UI for how many attempts left before you get locked out of logging in.
+        if (lockInfo != null && lockInfo.FailedCount > 0 && lockInfo.FailedCount < MaxAttempts)
+        {
+            var remaining = MaxAttempts - lockInfo.FailedCount;
+            remainingAttemptsMessage = $"{remaining} attempt{(remaining == 1 ? "" : "s")} left before lockout.";
+        }
+
+        if (lockInfo?.LockedUntilUtc != null && lockInfo.LockedUntilUtc > DateTime.UtcNow)
+        {
+            // Account locked
+            var untilLocal = lockInfo.LockedUntilUtc.Value.ToLocalTime();
+            remainingAttemptsMessage = string.Empty;
+            errorMessage = $"Too many failed attempts. Account locked until {untilLocal:MMM dd, yyyy HH:mm}.";
+            return;
+        }
+
         isLoading = true;
 
         try
@@ -64,11 +104,31 @@
 
             if (result.Succeeded)
             {
+                // On success, clear all failures for this username
+                await ClearLockInfoAsync(usernameKey);
+                remainingAttemptsMessage = string.Empty;
                 Navigation.NavigateTo("/");
             }
             else
             {
-                errorMessage = result.ErrorMessage ?? "Invalid username or password.";
+                // The failure count each specific username
+                lockInfo ??= new LoginLockInfo();
+                lockInfo.FailedCount++;
+
+                if (lockInfo.FailedCount >= MaxAttempts)
+                {
+                    lockInfo.LockedUntilUtc = DateTime.UtcNow.Add(LockoutDuration);
+                    remainingAttemptsMessage = string.Empty;
+                    errorMessage = $"Too many failed attempts. Account locked for {LockoutDuration.TotalMinutes} minutes.";
+                }
+                else
+                {
+                    var remaining = MaxAttempts - lockInfo.FailedCount;
+                    errorMessage = result.ErrorMessage ?? $"Invalid username or password.";
+                    remainingAttemptsMessage = $"{remaining} attempt{(remaining == 1 ? "" : "s")} left before lockout.";
+                }
+
+                await SaveLockInfoAsync(usernameKey, lockInfo);
             }
         }
         catch (Exception ex)
@@ -79,6 +139,48 @@
         {
             isLoading = false;
         }
+    }
+
+    private static string NormalizeKey(string username) =>
+        $"loginLock:{username.Trim().ToLowerInvariant()}";
+
+    private class LoginLockInfo
+    {
+        public int FailedCount { get; set; } = 0;
+        public DateTime? LockedUntilUtc { get; set; }
+    }
+
+    private async Task<LoginLockInfo?> LoadLockInfoAsync(string key)
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string>("localStorage.getItem", key);
+            if (string.IsNullOrEmpty(json)) return null;
+            return System.Text.Json.JsonSerializer.Deserialize<LoginLockInfo>(json);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private async Task SaveLockInfoAsync(string key, LoginLockInfo info)
+    {
+        try
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(info);
+            await JS.InvokeVoidAsync("localStorage.setItem", key, json);
+        }
+        catch { }
+    }
+
+    private async Task ClearLockInfoAsync(string key)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.removeItem", key);
+        }
+        catch { }
     }
 
     private class LoginModel

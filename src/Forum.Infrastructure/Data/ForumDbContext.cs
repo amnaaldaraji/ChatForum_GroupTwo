@@ -10,7 +10,7 @@ public class ForumDbContext : IdentityDbContext<User>
 
     public DbSet<Category> Categories => Set<Category>();
 
-    // (for some reason I have to include full name here)
+    // Specify Full Name for Thread to avoid conflict with System.Threading.Thread
     public DbSet<Forum.Domain.Entities.Thread> Threads => Set<Forum.Domain.Entities.Thread>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Vote> Votes => Set<Vote>();
