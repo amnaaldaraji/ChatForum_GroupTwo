@@ -120,6 +120,21 @@ The database is seeded automatically on first run with the following test data.
 
 Each thread has 2–3 comments. The first comment serves as the thread body. One nested reply is seeded on the Formula 1 thread to demonstrate the reply feature.
 
+## User Scenarios
+
+**Scenario 1 – Registration and discussion participation**
+As a new visitor, I want to be able to register an account and post a comment in a thread,
+so that I can participate in sports discussions and share my opinion with other users.
+
+**Scenario 2 – Comment Voting**
+As a logged in user, I want to be able to upvote or downvote comments,
+so that I can show whether I agree and help ensure that the best comments
+are most prominently displayed with a positive score.
+
+**Scenario 3 – Content Management**
+As an administrator, I want to be able to remove inappropriate threads and comments via the admin page,
+so that the forum is kept orderly and free from content that violates the rules.
+
 ## API examples
 
 **Register:**
