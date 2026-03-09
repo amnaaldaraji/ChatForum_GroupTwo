@@ -1,7 +1,7 @@
 ﻿using Forum.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-// Specifies that the ThreadEntity is connected to our defined thread instead of the systems defined thread
+// Specify full name for Thread to avoid conflict with System.Threading.Thread
 using ThreadEntity = Forum.Domain.Entities.Thread;
 
 namespace Forum.Infrastructure.Data;
