@@ -4,6 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Forum.Infrastructure.Data;
 
+/// <summary>
+/// EF Core database context for the forum, extending IdentityDbContext for authentication.
+/// Configures entity relationships, constraints, and indexes in OnModelCreating.
+/// </summary>
 public class ForumDbContext : IdentityDbContext<User>
 {
     public ForumDbContext(DbContextOptions<ForumDbContext> options) : base(options) { }
@@ -11,7 +15,7 @@ public class ForumDbContext : IdentityDbContext<User>
     public DbSet<Category> Categories => Set<Category>();
 
     // Specify Full Name for Thread to avoid conflict with System.Threading.Thread
-    public DbSet<Forum.Domain.Entities.Thread> Threads => Set<Forum.Domain.Entities.Thread>();
+    public DbSet<Domain.Entities.Thread> Threads => Set<Domain.Entities.Thread>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Vote> Votes => Set<Vote>();
 
@@ -27,7 +31,7 @@ public class ForumDbContext : IdentityDbContext<User>
         });
 
         // THREAD
-        builder.Entity<Forum.Domain.Entities.Thread>(e =>
+        builder.Entity<Domain.Entities.Thread>(e =>
         {
             e.HasKey(x => x.ThreadId);
             e.Property(x => x.Title).IsRequired().HasMaxLength(200);

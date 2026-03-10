@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Forum.Infrastructure.Data;
 
+/// <summary>
+/// Factory used by EF Core CLI tools (e.g. dotnet ef migrations)
+/// to create a ForumDbContext when the application host is not running.
+/// </summary>
 public class ForumDbContextFactory
     : IDesignTimeDbContextFactory<ForumDbContext>
 {
