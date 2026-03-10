@@ -2,10 +2,13 @@ using Forum.Blazor.Models;
 
 namespace Forum.Blazor.Interfaces;
 
+/// <summary>
+/// Client-side authentication service for login, registration, and token management.
+/// </summary>
 public interface IAuthClientService
 {
-    Task<AuthResult> LoginAsync(string username, string password);
-    Task<AuthResult> RegisterAsync(string username, string email, string password);
+    Task<AuthResult> LoginAsync(LoginRequest request);
+    Task<AuthResult> RegisterAsync(RegisterRequest request);
     Task LogoutAsync();
     Task<string?> GetTokenAsync();
 }

@@ -1,5 +1,5 @@
 @page "/login"
-@using Forum.Blazor.Services
+@using Forum.Blazor.Models
 @inject IAuthClientService AuthService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -50,7 +50,7 @@
 
 @code {
 
-    private LoginModel loginModel = new();
+    private LoginRequest loginModel = new();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
@@ -68,7 +68,7 @@
 
         try
         {
-            var result = await AuthService.LoginAsync(loginModel.Username, loginModel.Password);
+            var result = await AuthService.LoginAsync(loginModel);
 
             if (result.Succeeded)
             {
@@ -90,9 +90,4 @@
         }
     }
 
-    private class LoginModel
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
 }

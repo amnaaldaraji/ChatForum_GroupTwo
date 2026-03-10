@@ -1,5 +1,5 @@
 @page "/register"
-@using Forum.Blazor.Services
+@using Forum.Blazor.Models
 @inject IAuthClientService AuthService
 @inject NavigationManager Navigation
 @implements IDisposable
@@ -68,7 +68,7 @@
 @code {
 
     private CancellationTokenSource _cts = new();
-    private RegisterModel registerModel = new();
+    private RegisterRequest registerModel = new();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
     private bool registrationSuccessful = false;
@@ -86,15 +86,13 @@
                 return;
             }
 
-            var result = await AuthService.RegisterAsync(
-                registerModel.Username,
-                registerModel.Email,
-                registerModel.Password);
+            var result = await AuthService.RegisterAsync(registerModel);
 
             if (result.Succeeded)
             {
                 registrationSuccessful = true;
                 StateHasChanged();
+                // Brief delay so the user sees the success message before redirect
                 await Task.Delay(2000, _cts.Token);
                 Navigation.NavigateTo("/login");
             }
@@ -116,17 +114,11 @@
         }
     }
 
+    // Cancel the redirect delay if the user navigates away early
     public void Dispose()
     {
         _cts.Cancel();
         _cts.Dispose();
     }
 
-    private class RegisterModel
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string ConfirmPassword { get; set; } = string.Empty;
-    }
 }
