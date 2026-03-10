@@ -38,11 +38,13 @@ public class ForumDbContext : IdentityDbContext<User>
             e.Property(x => x.TimeCreated).IsRequired();
             e.Property(x => x.TimeUpdated).IsRequired();
 
+            // Thread -> User (author). Restrict delete to avoid cascading user deletion of threads.
             e.HasOne(x => x.User)
                 .WithMany(u => u.Threads)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Thread -> Category. Restrict delete to avoid cascading category deletion.
             e.HasOne(x => x.Category)
                 .WithMany(c => c.Threads)
                 .HasForeignKey(x => x.CategoryId)
@@ -56,11 +58,13 @@ public class ForumDbContext : IdentityDbContext<User>
             e.Property(x => x.Content).IsRequired();
             e.Property(x => x.TimeCreated).IsRequired();
 
+            // Comment -> User (author). Restrict delete to preserve historical data.
             e.HasOne(x => x.User)
                 .WithMany(u => u.Comments)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Comment -> Thread. Cascade delete comments when thread is removed.
             e.HasOne(x => x.Thread)
                 .WithMany(t => t.Comments)
                 .HasForeignKey(x => x.ThreadId)
@@ -79,11 +83,13 @@ public class ForumDbContext : IdentityDbContext<User>
             e.HasKey(x => x.VoteId);
             e.Property(x => x.Value).IsRequired();
 
+            // Vote -> User. Cascade deletes votes when user removed.
             e.HasOne(x => x.User)
                 .WithMany(u => u.Votes)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Vote -> Comment. Cascade deletes votes when comment removed.
             e.HasOne(x => x.Comment)
                 .WithMany(c => c.Votes)
                 .HasForeignKey(x => x.CommentId)
