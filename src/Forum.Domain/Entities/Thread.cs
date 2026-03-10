@@ -1,5 +1,8 @@
 namespace Forum.Domain.Entities;
 
+/// <summary>
+/// A discussion thread within a category. The thread body is stored as the first comment.
+/// </summary>
 public class Thread
 {
     public int ThreadId { get; set; }
