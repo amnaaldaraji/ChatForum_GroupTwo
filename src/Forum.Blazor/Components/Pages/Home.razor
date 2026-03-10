@@ -130,6 +130,7 @@
             var result = await ThreadService.GetThreadsAsync(filter);
             var threads = result?.Items?.ToList() ?? [];
 
+            // Use latest comment/update time to rank categories by recent activity
             var latestActivity = threads
                 .Select(t => t.LastCommentTime ?? t.TimeUpdated)
                 .DefaultIfEmpty(DateTime.MinValue)
@@ -141,7 +142,7 @@
                 CategoryId = cat.CategoryId,
                 ThreadCount = cat.ThreadCount,
                 LatestActivity = latestActivity,
-                RecentThreads = threads.Take(2).ToList()
+                RecentThreads = threads.Take(2).ToList() // Show at most 2 threads per category card
             });
 
             foreach (var t in threads)
@@ -157,11 +158,13 @@
             }
         }
 
+        // Pick the top 5 threads across all categories, ranked by comment count
         _popularThreads = _popularThreads
             .OrderByDescending(t => t.CommentCount)
             .Take(5)
             .ToList();
 
+        // Show the 4 most recently active categories
         _popularCategories = allCategories
             .OrderByDescending(c => c.LatestActivity)
             .Take(4)

@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text.Json;
 using Forum.Blazor.Interfaces;
 
@@ -22,6 +21,9 @@ public abstract class ApiClientBase
         PropertyNameCaseInsensitive = true
     };
 
+    /// <summary>
+    /// Initializes the base client with an HTTP client factory and token storage for authenticated API calls.
+    /// </summary>
     protected ApiClientBase(IHttpClientFactory httpClientFactory, ITokenStorageService tokenStorage)
     {
         _httpClientFactory = httpClientFactory;
