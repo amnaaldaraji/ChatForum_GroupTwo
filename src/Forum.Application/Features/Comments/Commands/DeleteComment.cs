@@ -8,15 +8,16 @@ namespace Forum.Application.Features.Comments.Commands;
 /// <summary>
 /// Soft-deletes a comment (sets IsDeleted = true).
 /// Only the comment owner or an admin can perform this action.
-/// The first comment in a thread (which serves as the thread body) cannot be deleted — the entire thread must be deleted instead.
+/// The first comment in a thread (which serves as the thread body) cannot be deleted
+/// — the entire thread must be deleted in that case.
 /// Soft-deleted comments display as "[deleted]" with replies preserved.
 /// </summary>
 public record DeleteCommentCommand(int CommentId, string UserId, bool IsAdmin) : IRequest<Result>;
 
 /// <summary>
 /// Handler for DeleteCommentCommand.
-/// Validates the comment exists, is not already deleted, the user is authorized, and the comment is not the thread body
-/// (first comment) before performing the soft-delete.
+/// Validates the comment exists, is not already deleted, the user is authorized,
+/// and the comment is not the thread body (first comment), before performing the soft-delete.
 /// </summary>
 public class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand, Result>
 {
@@ -50,8 +51,7 @@ public class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand, Result
             return Result.Failure("You are not authorized to delete this comment.", ErrorType.Forbidden);
         }
 
-        // The first comment in a thread serves as the thread body.
-        // It cannot be deleted independently — the entire thread must be deleted instead.
+        // The first comment in a thread serves as the thread body and cannot be deleted independently. 
         var firstComment = await _commentRepository.GetFirstCommentByThreadIdAsync(comment.ThreadId, cancellationToken);
         if (firstComment != null && firstComment.CommentId == request.CommentId)
         {

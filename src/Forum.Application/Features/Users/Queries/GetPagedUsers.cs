@@ -12,6 +12,9 @@ namespace Forum.Application.Features.Users.Queries;
 /// </summary>
 public record GetPagedUsersQuery(int PageNumber = 1, int PageSize = 10, UserSortBy SortBy = UserSortBy.Username) : IRequest<Result<PagedResult<UserDto>>>;
 
+/// <summary>
+/// Handles GetPagedUsersQuery by fetching a filtered page of users from the repository.
+/// </summary>
 public class GetPagedUsersHandler : IRequestHandler<GetPagedUsersQuery, Result<PagedResult<UserDto>>>
 {
     private readonly IUserRepository _userRepository;

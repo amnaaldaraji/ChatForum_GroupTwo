@@ -63,6 +63,7 @@ else
                                     <button class="page-link" @onclick="PrevPage">Prev</button>
                                 </li>
                                 @{
+                                    // Collapsed pagination: show first, last, and neighbors of current page with ellipses
                                     var totalPages = _commentsPage.TotalPages;
                                     var pagesToShow = new SortedSet<int>();
                                     pagesToShow.Add(1);
@@ -237,6 +238,7 @@ else
     private int? _replyingToCommentId;
     private string _replyContent = string.Empty;
 
+    // Local vote state — kept in sync after each vote API call to avoid full reload
     private Dictionary<int, int> _voteScores = [];
     private Dictionary<int, int> _userVotes = [];
 
@@ -282,6 +284,7 @@ else
         StateHasChanged();
     }
 
+    // Seed local vote caches from the server response
     private void PopulateVoteData()
     {
         if (_commentsPage?.Items == null) return;

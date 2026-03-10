@@ -2,8 +2,14 @@ using Forum.Application.Common.Models;
 
 namespace Forum.Api.Extensions;
 
+/// <summary>
+/// Extension methods for converting Result failures into Problem Details responses.
+/// </summary>
 public static class ProblemDetailsMapping
 {
+    /// <summary>
+    /// Maps a failed Result to an IResult with the appropriate HTTP status code.
+    /// </summary>
     public static IResult ToProblemDetails(this Result result)
     {
         if (result.IsSuccess)

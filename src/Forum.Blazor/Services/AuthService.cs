@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using Forum.Blazor.Interfaces;
 using Forum.Blazor.Models;
@@ -32,12 +31,11 @@ public class AuthService : IAuthClientService
     /// <summary>
     /// Sends credentials to POST /api/auth/login.
     /// </summary>
-    public async Task<AuthResult> LoginAsync(string username, string password)
+    public async Task<AuthResult> LoginAsync(LoginRequest request)
     {
         try
         {
-            var request = new { Username = username, Password = password };
-            var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
+            var response = await _httpClient.PostAsJsonAsync("api/auth/login", new { request.Username, request.Password });
 
             if (!response.IsSuccessStatusCode)
             {
@@ -63,12 +61,11 @@ public class AuthService : IAuthClientService
     /// <summary>
     /// Sends registration data to POST /api/auth/register.
     /// </summary>
-    public async Task<AuthResult> RegisterAsync(string username, string email, string password)
+    public async Task<AuthResult> RegisterAsync(RegisterRequest request)
     {
         try
         {
-            var request = new { Username = username, Email = email, Password = password };
-            var response = await _httpClient.PostAsJsonAsync("api/auth/register", request);
+            var response = await _httpClient.PostAsJsonAsync("api/auth/register", new { request.Username, request.Email, request.Password });
 
             if (!response.IsSuccessStatusCode)
             {

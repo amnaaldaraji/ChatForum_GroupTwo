@@ -96,7 +96,7 @@ using (var scope = app.Services.CreateScope())
         // Apply any pending migrations — also creates the DB file if it doesn't exist.
         context.Database.Migrate();
 
-        // Seed roles, users, categories, threads, comments and votes.
+        // Seed roles, users, categories, threads and comments.
         Forum.Infrastructure.Data.DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
     }
     catch (Exception ex)

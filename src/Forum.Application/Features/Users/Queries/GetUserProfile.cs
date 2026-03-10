@@ -46,12 +46,10 @@ public class GetUserProfileHandler : IRequestHandler<GetUserProfileQuery, Result
         var recentThreads = await _threadRepository.GetByUserIdAsync(request.UserId, 5, cancellationToken);
         
         var recentComments = await _commentRepository.GetByUserIdAsync(request.UserId, 5, cancellationToken);
-
-        // Map thread and comment entities to their respective DTOs
+        
         var threadDtos = recentThreads.Select(t => t.ToThreadSummaryDto()).ToList();
         var commentDtos = recentComments.Select(c => c.ToCommentDto()).ToList();
-
-        // Step 5: Compose the full profile DTO with user info and recent activity
+        
         return Result.Success(user.ToUserProfileDto(threadDtos, commentDtos));
     }
 }

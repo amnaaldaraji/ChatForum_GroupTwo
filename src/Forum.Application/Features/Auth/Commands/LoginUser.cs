@@ -7,7 +7,7 @@ namespace Forum.Application.Features.Auth.Commands;
 
 /// <summary>
 /// Command to authenticate a user and obtain a JWT token.
-/// Delegates credential validation and token generation IAuthService.
+/// Delegates credential validation and token generation via IAuthService.
 /// </summary>
 public record LoginUserCommand(string Username, string Password) : IRequest<Result<AuthResponse>>;
 

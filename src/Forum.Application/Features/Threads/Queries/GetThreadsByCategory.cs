@@ -37,8 +37,7 @@ public class GetThreadsByCategoryHandler : IRequestHandler<GetThreadsByCategoryQ
         {
             return Result.Failure<IReadOnlyList<ThreadSummaryDto>>("Category not found.", ErrorType.NotFound);
         }
-
-        // Fetch all threads in the category and map to summary DTOs
+        
         var threads = await _threadRepository.GetByCategoryIdAsync(request.CategoryId, cancellationToken);
         var dtos = threads.Select(t => t.ToThreadSummaryDto()).ToList();
         return Result.Success<IReadOnlyList<ThreadSummaryDto>>(dtos);

@@ -6,7 +6,6 @@ namespace Forum.Application.DTOs.Comment;
 /// Filter parameters for paginated comment queries. Extends PaginationParams
 /// to inherit PageNumber and PageSize, then adds comment-specific filters:
 /// thread, author, date range, and sort order.
-///
 /// Used by the GetComments CQRS query for fetching filtered comment lists.
 /// </summary>
 public class CommentFilterParams : PaginationParams

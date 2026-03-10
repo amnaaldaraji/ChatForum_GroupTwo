@@ -1,5 +1,4 @@
-﻿using Forum.Application.DTOs.Thread;
-using Forum.Application.Features.Comments.Commands;
+﻿using Forum.Application.Features.Comments.Commands;
 using Forum.Application.Features.Comments.Queries;
 using Forum.Api.Extensions;
 using Forum.Application.DTOs.Comment;
@@ -7,14 +6,18 @@ using MediatR;
 
 namespace Forum.Api.Endpoints;
 
+/// <summary>
+/// Minimal API endpoints for CRUD operations on comments, including per-thread listing with vote scores.
+/// </summary>
 public static class CommentEndpoints
 {
+    /// <summary> Registers comment endpoints under /api/comments. </summary>
     public static IEndpointRouteBuilder MapCommentEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/comments")
             .WithTags("Comments");
 
-        // get paginated comments (filterable by author, thread, date)
+        // GET paginated comments (filterable by author, thread, date)
         group.MapGet("/", async ([AsParameters] CommentFilterParams filterParams, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new GetCommentsQuery(filterParams), ct);
@@ -25,7 +28,7 @@ public static class CommentEndpoints
         .WithName("GetComments")
         .AllowAnonymous();
 
-        // get comment by id
+        // GET comment by id
         group.MapGet("/{id:int}", async (int id, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new GetCommentByIdQuery(id), ct);
@@ -36,7 +39,7 @@ public static class CommentEndpoints
         .WithName("GetCommentById")
         .AllowAnonymous();
 
-        // get paged comments for thread
+        // GET paged comments for thread
         // Pass current userId so vote data is included per user — stays AllowAnonymous,
         // userId is simply null for unauthenticated requests
         group.MapGet("/thread/{threadId:int}", async (
@@ -56,7 +59,7 @@ public static class CommentEndpoints
         })
         .AllowAnonymous();
 
-        // create new comment
+        // POST to create a new comment
         group.MapPost("/{threadId:int}", async (int threadId, CreateCommentDto dto, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
         {
             var userId = httpContext.User.GetUserId();
@@ -68,7 +71,7 @@ public static class CommentEndpoints
                 : result.ToProblemDetails();
         }).RequireAuthorization();
 
-        // update comment
+        // PUT to update a comment
         group.MapPut("/{id:int}", async (int id, UpdateCommentDto dto, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
         {
             var userId = httpContext.User.GetUserId();
@@ -81,7 +84,7 @@ public static class CommentEndpoints
                 : result.ToProblemDetails();
         }).RequireAuthorization();
 
-        // delete comment
+        // DELETE to remove a comment
         group.MapDelete("/{id:int}", async (int id, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
         {
             var userId = httpContext.User.GetUserId();

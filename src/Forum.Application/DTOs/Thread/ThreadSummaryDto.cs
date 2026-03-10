@@ -1,7 +1,7 @@
 namespace Forum.Application.DTOs.Thread;
 
 /// <summary>
-/// Lightweight DTO used in thread listings (e.g., category page, search results).
+/// DTO used in thread listings (e.g. category page).
 /// Contains summary information without the full thread body or comments.
 /// </summary>
 public record ThreadSummaryDto(

@@ -38,8 +38,7 @@ public class GetRepliesHandler : IRequestHandler<GetRepliesQuery, Result<IReadOn
         }
         
         var replies = await _commentRepository.GetRepliesAsync(request.CommentId, cancellationToken);
-
-        // Map each reply to a CommentDto (includes soft-delete display logic)
+        
         var dtos = replies.Select(c => c.ToCommentDto()).ToList();
 
         return Result.Success<IReadOnlyList<CommentDto>>(dtos);

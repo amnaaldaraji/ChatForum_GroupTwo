@@ -1,5 +1,8 @@
 namespace Forum.Blazor.Models;
 
+/// <summary>
+/// Wraps the outcome of an authentication operation (login or register) with success/error details.
+/// </summary>
 public class AuthResult
 {
     public bool Succeeded { get; set; }

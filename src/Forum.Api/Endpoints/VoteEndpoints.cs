@@ -5,11 +5,17 @@ using MediatR;
 
 namespace Forum.Api.Endpoints;
 
+/// <summary>
+/// Minimal API endpoints for casting upvotes/downvotes on comments.
+/// </summary>
 public static class VoteEndpoints
 {
+    /// <summary>
+    /// Registers vote-related endpoints under /api/comments/{commentId}/votes.
+    /// </summary>
     public static IEndpointRouteBuilder MapVoteEndpoints(this IEndpointRouteBuilder app)
     {
-        // POST /api/comments/{commentId}/votes
+        // POST to cast a vote on a comment
         app.MapPost("/api/comments/{commentId:int}/votes", async (
                 int commentId,
                 CastVoteDto dto,

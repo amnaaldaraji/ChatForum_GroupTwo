@@ -31,7 +31,6 @@ public class GetCommentByIdHandler : IRequestHandler<GetCommentByIdQuery, Result
     /// </summary>
     public async Task<Result<CommentDto>> Handle(GetCommentByIdQuery request, CancellationToken cancellationToken)
     {
-        // Fetch the comment with eagerly loaded User and ParentComment navigation properties
         var comment = await _commentRepository.GetByIdWithDetailsAsync(request.CommentId, cancellationToken);
         if (comment == null)
         {

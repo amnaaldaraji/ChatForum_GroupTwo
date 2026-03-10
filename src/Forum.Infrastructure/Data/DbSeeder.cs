@@ -6,6 +6,10 @@ using ThreadEntity = Forum.Domain.Entities.Thread;
 
 namespace Forum.Infrastructure.Data;
 
+/// <summary>
+/// Seeds the database with initial roles, users, categories, threads, and comments.
+/// Skips seeding if any users already exist to prevent duplicate data.
+/// </summary>
 public static class DbSeeder
 {
     // Entry point that seeds roles, users, categories, threads, and comments.
@@ -28,7 +32,7 @@ public static class DbSeeder
         await context.SaveChangesAsync();
     }
 
-    // Ensure required roles (for example, "Admin") exist.
+    // Ensure required role "Admin" exist.
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
         if (!await roleManager.RoleExistsAsync("Admin"))

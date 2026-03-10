@@ -33,8 +33,7 @@ public class GetAllUsersHandler : IRequestHandler<GetAllUsers, Result<List<UserD
     public async Task<Result<List<UserDto>>> Handle(GetAllUsers request, CancellationToken cancellationToken)
     {
         var users = await _userRepository.GetAllAsync(cancellationToken);
-
-        // Map each User entity to a UserDto
+        
         var dtos = users.Select(u => u.ToUserDto()).ToList();
 
         return Result.Success(dtos);

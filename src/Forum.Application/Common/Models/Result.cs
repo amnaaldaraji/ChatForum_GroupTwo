@@ -1,5 +1,8 @@
 namespace Forum.Application.Common.Models;
 
+/// <summary>
+/// Classifies the type of error returned in a Result, mapped to HTTP status codes in the API layer.
+/// </summary>
 public enum ErrorType
 {
     None,
@@ -10,6 +13,10 @@ public enum ErrorType
     Conflict
 }
 
+/// <summary>
+/// Represents the outcome of an operation, carrying an optional error message and ErrorType.
+/// Used by all CQRS handlers to communicate success/failure without throwing exceptions.
+/// </summary>
 public class Result
 {
     protected Result(bool isSuccess, string? error, ErrorType errorType = ErrorType.None)
@@ -35,6 +42,9 @@ public class Result
     public static Result<T> Failure<T>(string error, ErrorType errorType = ErrorType.Validation) => Result<T>.Failure(error, errorType);
 }
 
+/// <summary>
+/// Generic variant of Result that also carries a typed Value on success.
+/// </summary>
 public class Result<T> : Result
 {
     private readonly T? _value;

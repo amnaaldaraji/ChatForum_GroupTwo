@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Forum.Domain.Entities;
 
+/// <summary>
+/// Forum user, extends ASP.NET Core Identity with soft-delete and navigation properties.
+/// </summary>
 public class User : IdentityUser
 {
     public bool IsDeleted { get; set; }

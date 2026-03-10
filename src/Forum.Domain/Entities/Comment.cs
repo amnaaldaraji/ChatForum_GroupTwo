@@ -1,5 +1,9 @@
 namespace Forum.Domain.Entities;
 
+/// <summary>
+/// A comment within a thread. Supports soft-delete, self-referencing replies via ParentCommentId,
+/// and upvote/downvote scoring via Votes.
+/// </summary>
 public class Comment
 {
     public int CommentId { get; set; }

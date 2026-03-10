@@ -6,15 +6,19 @@ using MediatR;
 
 namespace Forum.Api.Endpoints;
 
+/// <summary>
+/// Minimal API endpoints for CRUD operations on forum categories (admin-only for write operations).
+/// </summary>
 public static class CategoryEndpoints
 {
+    /// <summary> Registers category endpoints under /api/categories </summary>
     public static IEndpointRouteBuilder MapCategoryEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/categories")
             .WithTags("Categories");
 
 
-        // GET Categories and use MediatR to collect the forum categories, and then Return all the categories
+        // GET all categories
         group.MapGet("/", async (IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new GetAllCategoriesQuery(), ct);
@@ -24,7 +28,7 @@ public static class CategoryEndpoints
         })
         .AllowAnonymous();
 
-        // GET a single category by id using MediatR and return it if it exists
+        // GET a single category by id
         group.MapGet("/{id:int}", async (int id, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new GetCategoryByIdQuery(id), ct);
@@ -38,7 +42,7 @@ public static class CategoryEndpoints
         .WithName("GetCategoryById")
         .AllowAnonymous();
 
-        // POST a new category and use MediatR to create it (Admin only)
+        // POST a new category to create it (Admin only)
         group.MapPost("/", async (CreateCategoryDto dto, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new CreateCategoryCommand(dto.Name), ct);
@@ -47,7 +51,7 @@ public static class CategoryEndpoints
                 : result.ToProblemDetails();
         }).RequireAuthorization(p => p.RequireRole("Admin"));
 
-        // PUT to update a category name using MediatR (Admin only)
+        // PUT to update a category name (Admin only)
         group.MapPut("/{id:int}", async (int id, UpdateCategoryDto dto, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new UpdateCategoryCommand(id, dto.Name), ct);
@@ -56,7 +60,7 @@ public static class CategoryEndpoints
                 : result.ToProblemDetails();
         }).RequireAuthorization(p => p.RequireRole("Admin"));
 
-        // DELETE a category using MediatR (Admin only)
+        // DELETE a category (Admin only)
         group.MapDelete("/{id:int}", async (int id, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new DeleteCategoryCommand(id), ct);

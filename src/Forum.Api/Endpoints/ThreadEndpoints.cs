@@ -6,14 +6,18 @@ using MediatR;
 
 namespace Forum.Api.Endpoints;
 
+/// <summary>
+/// Minimal API endpoints for CRUD operations on discussion threads.
+/// </summary>
 public static class ThreadEndpoints
 {
+    /// <summary> Registers thread endpoints under /api/threads. </summary>
     public static IEndpointRouteBuilder MapThreadEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/threads")
             .WithTags("Threads");
 
-        // get paged list of threads
+        // GET a paged list of threads
         group.MapGet("/", async ([AsParameters] ThreadFilterParams filter, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new GetThreadsQuery(filter), ct);
@@ -23,7 +27,7 @@ public static class ThreadEndpoints
         })
         .AllowAnonymous();
 
-        // get thread by id
+        // GET a thread by id
         group.MapGet("/{id:int}", async (int id, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new GetThreadByIdQuery(id), ct);
@@ -34,7 +38,7 @@ public static class ThreadEndpoints
         .WithName("GetThreadById")
         .AllowAnonymous();
 
-        // create new thread
+        // POST to create a new thread
         group.MapPost("/", async (CreateThreadDto dto, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
         {
             var userId = httpContext.User.GetUserId();
@@ -46,7 +50,7 @@ public static class ThreadEndpoints
                 : result.ToProblemDetails();
         }).RequireAuthorization();
 
-        // update thread
+        // PUT to update a thread
         group.MapPut("/{id:int}", async (int id, UpdateThreadDto dto, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
         {
             var userId = httpContext.User.GetUserId();
@@ -59,7 +63,7 @@ public static class ThreadEndpoints
                 : result.ToProblemDetails();
         }).RequireAuthorization();
 
-        // delete thread
+        // DELETE to remove a thread
         group.MapDelete("/{id:int}", async (int id, HttpContext httpContext, IMediator mediator, CancellationToken ct) =>
         {
             var userId = httpContext.User.GetUserId();
