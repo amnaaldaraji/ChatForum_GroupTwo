@@ -7,8 +7,15 @@ using MediatR;
 
 namespace Forum.Application.Features.Votes.Commands;
 
+/// <summary>
+/// Casts, toggles, or switches a user's vote on a comment.
+/// If the user has no vote, creates one. If same direction, removes it. If opposite, switches.
+/// </summary>
 public record CastVoteCommand(string UserId, int CommentId, int Value) : IRequest<Result<VoteResponseDto>>;
 
+/// <summary>
+/// Handles CastVoteCommand — manages vote creation, toggle, and direction switch.
+/// </summary>
 public class CastVoteHandler : IRequestHandler<CastVoteCommand, Result<VoteResponseDto>>
 {
     private readonly IVoteRepository _voteRepository;
@@ -60,7 +67,7 @@ public class CastVoteHandler : IRequestHandler<CastVoteCommand, Result<VoteRespo
             new[] { request.CommentId }, cancellationToken);
         var newScore = scores.GetValueOrDefault(request.CommentId, 0);
 
-        // Determine user's current vote after the operation
+        // Determine a user's current vote after the operation
         var userVotes = await _voteRepository.GetUserVotesForCommentsAsync(
             request.UserId, new[] { request.CommentId }, cancellationToken);
         var userVote = userVotes.GetValueOrDefault(request.CommentId, 0);

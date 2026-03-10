@@ -4,8 +4,8 @@ using Forum.Application.DTOs.Auth;
 namespace Forum.Application.Common.Interfaces;
 
 /// <summary>
-/// Abstraction for authentication operations (register, login, logout).
-/// Defined in the application layer so that CQRS handlers invoke authentication logic,
+/// Abstraction for authentication operations (register, login, logout and password change).
+/// Defined in the application layer so that CQRS handlers invoke authentication logic
 /// without depending on the Infrastructure layer directly.
 /// </summary>
 public interface IAuthService

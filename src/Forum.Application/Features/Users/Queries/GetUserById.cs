@@ -12,8 +12,8 @@ namespace Forum.Application.Features.Users.Queries;
 public record GetUserByIdQuery(string UserId) : IRequest<Result<UserDto>>;
 
 /// <summary>
-/// Handles the GetUserByIdQuery by looking up the user in the repository
-/// and mapping the result to a UserDto.
+/// Handles the GetUserByIdQuery by looking up the user in
+/// the repository and mapping the result to a UserDto.
 /// </summary>
 public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, Result<UserDto>>
 {

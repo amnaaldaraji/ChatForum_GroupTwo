@@ -10,18 +10,20 @@ namespace Forum.Application.Repositories;
 public interface ICommentRepository : IRepository<Comment>
 {
     Task<Comment?> GetByIdWithDetailsAsync(int commentId, CancellationToken cancellationToken = default);
-
+    
     Task<(IReadOnlyList<Comment> Items, int TotalCount)> GetPagedByThreadIdAsync(
         int threadId,
         PaginationParams paginationParams,
         CancellationToken cancellationToken = default);
-
+    
     Task<(IReadOnlyList<Comment> Items, int TotalCount)> GetPagedAsync(
         CommentFilterParams filterParams,
         CancellationToken cancellationToken = default);
     
     Task<IReadOnlyList<Comment>> GetByUserIdAsync(string userId, int count,
         CancellationToken cancellationToken = default);
+
+    // Returns the first comment in a thread (used as the thread body).
     Task<Comment?> GetFirstCommentByThreadIdAsync(int threadId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<Comment>> GetRepliesAsync (int commentId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Comment>> GetRepliesAsync(int commentId, CancellationToken cancellationToken = default);
 }

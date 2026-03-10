@@ -8,7 +8,7 @@ namespace Forum.Application.Features.Comments.Queries;
 
 /// <summary>
 /// Retrieves the most recent comments made by a specific user.
-/// Used for user profile pages to display recent activity. Does not paginate.
+/// Used for user profile pages to display recent activity.
 /// </summary>
 public record GetCommentsByUserQuery(string UserId, int Count = 10) : IRequest<Result<IReadOnlyList<CommentDto>>>;
 

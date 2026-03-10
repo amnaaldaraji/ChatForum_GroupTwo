@@ -4,7 +4,6 @@ namespace Forum.Application.DTOs.Comment;
 /// Read-only DTO for returning comment data to the client.
 /// Handles soft-delete display logic: if IsDeleted is true, Content shows "[deleted]"
 /// and AuthorUserName shows "Deleted" (applied in MappingExtensions).
-///
 /// Includes parent comment info to support the flat reply display model
 /// with an inline citation of the parent comment.
 /// </summary>
@@ -21,6 +20,6 @@ public record CommentDto(
     DateTime TimeCreated,
     int ReplyCount,
     bool IsDeleted,
-    int VoteScore,        // net score (sum of votes)
-    int? CurrentUserVote  // null=anonymous, 0=no vote, 1/-1=voted
+    int VoteScore,
+    int? CurrentUserVote
 );

@@ -33,7 +33,7 @@ public class GetAllCategoriesHandler : IRequestHandler<GetAllCategoriesQuery, Re
     {
         var categories = await _categoryRepository.GetAllWithThreadCountAsync(cancellationToken);
 
-        // Map each Category entity to a CategoryDto using the centralized mapping extensions
+        // Map each Category entity to a CategoryDto using the mapping extensions
         var dtos = categories.Select(c => c.ToCategoryDto()).ToList();
 
         return Result.Success<IReadOnlyList<CategoryDto>>(dtos);

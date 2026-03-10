@@ -6,7 +6,6 @@ namespace Forum.Application.DTOs.Thread;
 /// Filter and sort parameters for paginated thread queries. Extends PaginationParams
 /// to inherit PageNumber and PageSize, then adds thread-specific filters:
 /// category, author, search text, date range, and sort order.
-///
 /// Used by the GetThreads CQRS query and the thread listing API endpoint.
 /// </summary>
 public class ThreadFilterParams : PaginationParams

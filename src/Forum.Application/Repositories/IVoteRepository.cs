@@ -2,6 +2,9 @@
 
 namespace Forum.Application.Repositories;
 
+/// <summary>
+/// Repository for managing comment votes (upvotes/downvotes).
+/// </summary>
 public interface IVoteRepository : IRepository<Vote>
 {
     Task<Vote?> GetByUserAndCommentAsync(string userId, int commentId, CancellationToken ct = default);
