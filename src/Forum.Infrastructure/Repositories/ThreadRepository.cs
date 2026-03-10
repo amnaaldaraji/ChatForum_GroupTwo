@@ -1,4 +1,3 @@
-using Forum.Application.Common.Models;
 using Forum.Application.DTOs.Thread;
 using Forum.Application.Repositories;
 using Forum.Infrastructure.Data;

@@ -10,6 +10,7 @@ namespace Forum.Application.Features.Categories.Commands;
 /// <summary>
 /// Updates an existing category's name. Only accessible by admins
 /// (authorization enforced at the API endpoint level).
+/// /// </summary>
 public record UpdateCategoryCommand(int CategoryId, string Name) : IRequest<Result<CategoryDto>>;
 
 /// <summary>

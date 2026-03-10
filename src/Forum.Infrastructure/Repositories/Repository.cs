@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Forum.Application.Common.Interfaces;
 using Forum.Application.Repositories;
 using Forum.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

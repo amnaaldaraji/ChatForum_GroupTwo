@@ -1,4 +1,3 @@
-using Forum.Application.Common.Models;
 using Forum.Application.DTOs.User;
 using Forum.Domain.Entities;
 

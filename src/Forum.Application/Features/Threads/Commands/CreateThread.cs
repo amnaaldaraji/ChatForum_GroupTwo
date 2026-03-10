@@ -1,7 +1,6 @@
 using Forum.Application.Common.Interfaces;
 using Forum.Application.Common.Models;
 using Forum.Application.DTOs.Thread;
-using Forum.Application.Mappings;
 using Forum.Application.Repositories;
 using Forum.Domain.Entities;
 using MediatR;
@@ -90,7 +89,7 @@ public class CreateThreadHandler : IRequestHandler<CreateThreadCommand, Result<T
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Re-query the thread to get the fully populated detail DTO
-        // (reuses the GetThreadById query handler for consistency)
-        return await _mediator.Send(new Features.Threads.Queries.GetThreadByIdQuery(thread.ThreadId), cancellationToken);
+        // (reuses the GetThreadById query handler)
+        return await _mediator.Send(new Queries.GetThreadByIdQuery(thread.ThreadId), cancellationToken);
     }
 }
