@@ -1,14 +1,15 @@
 @inherits LayoutComponentBase
 
 <div class="site-wrapper">
-    <NavMenu />
+    <NavMenu /> <!-- Top navigation bar, rendered on all pages -->
 
     <main class="main-body">
-        @Body
+        @Body <!-- Renders the content of the currently matched page component -->
     </main>
 
     @if (!IsHomePage)
     {
+        <!-- Footer is hidden on the home page to preserve its full-screen hero layout -->
         <footer class="main-footer">
             <div class="header-container footer-content">
                 <div class="footer-links">
@@ -22,9 +23,10 @@
 
 @code {
     [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
+    private HttpContext? HttpContext { get; set; } // Provides access to the current HTTP context (e.g. auth state)
 
+    // Returns true if the current URL matches the app root, used to hide the footer on the home page
     private bool IsHomePage => NavigationManager.Uri.TrimEnd('/') == NavigationManager.BaseUri.TrimEnd('/');
 
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!; // Used to read the current URL
 }
