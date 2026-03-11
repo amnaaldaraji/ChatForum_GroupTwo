@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/css/forum-table.css" />
 
 <div class="forum-view-wrapper">
-    @* breadcrumb navigation with links *@
+    @* Breadcrumb navigation — shows category name if filtered, otherwise "ALL" *@
     <nav class="breadcrumb-trail">
         <a href="/">Sport Forum</a>
         <span> &rsaquo; </span>
@@ -26,6 +26,7 @@
                 </tr>
             </thead>
             <tbody>
+                @* Loading / empty / content states *@
                 @if (threads == null) 
                 { 
                     <tr><td colspan="3" class="no-results">loading threads...</td></tr> 
@@ -67,28 +68,29 @@
 </div>
 
 @code {
-    [Parameter] public string? CategoryName { get; set; }
-    private PagedResult<ThreadDto>? threads;
+    [Parameter] public string? CategoryName { get; set; } // Optional filter; null means show all threads
+    private PagedResult<ThreadDto>? threads; // Null while loading
 
     protected override async Task OnParametersSetAsync() {
-        await LoadThreads(); // load threads whenever parameter changes
+        await LoadThreads(); // Reload whenever the category filter changes
     }
 
     private async Task LoadThreads() {
         var url = "api/threads?pageSize=20";
+        // Append category filter to the query string if provided
         if (!string.IsNullOrEmpty(CategoryName)) url += $"&CategoryName={Uri.EscapeDataString(CategoryName)}";
         try {
-            var response = await Http.GetFromJsonAsync<PagedResult<ThreadSummaryDto>>(url); // get data from api
+            var response = await Http.GetFromJsonAsync<PagedResult<ThreadSummaryDto>>(url);
             if (response != null)
             {
-                // map ThreadSummaryDto to ThreadDto with requested property names
+                // Map ThreadSummaryDto to the local ThreadDto with view-friendly property names
                 threads = PagedResult<ThreadDto>.Create(
                     response.Items.Select(t => new ThreadDto(
                         t.ThreadId,
                         t.AuthorUserName,
                         t.TimeCreated,
                         t.Title,
-                        "", // body not needed in listing
+                        "", // Body not needed in the listing view
                         t.CommentCount
                     )).ToList(),
                     response.TotalCount,
@@ -97,11 +99,12 @@
                 );
             }
         } catch {
+            // Fall back to an empty result on network or deserialization failure
             threads = PagedResult<ThreadDto>.Create(new List<ThreadDto>(), 0, 1, 20);
         }
     }
 
-    // thread dto with requested property names
+    // Local view model — maps API DTO fields to names used in the template above
     private record ThreadDto(
         int Id,
         string Author,

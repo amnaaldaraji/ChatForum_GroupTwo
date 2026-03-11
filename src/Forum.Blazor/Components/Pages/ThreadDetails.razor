@@ -375,7 +375,7 @@ else
         finally { _isSubmitting = false; }
     }
 
-    // Truncates long parent comment content for the reply citation block
+    // Shortens long parent comment content for the reply citation block
     private static string TruncateContent(string content, int maxLength)
     {
         if (content.Length <= maxLength) return content;
