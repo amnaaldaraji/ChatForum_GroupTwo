@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Enable Razor Components with Interactive Server rendering (SignalR-based)
+// Enable Razor Components with Interactive Server rendering (SignalR)
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -32,7 +32,7 @@ builder.Services.AddAuthorizationCore();
 // Makes the auth state available as a cascading value throughout the component tree
 builder.Services.AddCascadingAuthenticationState();
 
-// API service clients
+// Every API service client 
 builder.Services.AddScoped<IAuthClientService, AuthService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ThreadService>();
