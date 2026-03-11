@@ -30,14 +30,14 @@
 
     <h1 class="panel-title">Admin Panel</h1>
 
-    @* Tab buttons — clicking a tab sets activeTab and shows the corresponding section *@
+    @* Tab buttons clicking a tab sets activeTab and shows the corresponding section *@
     <div class="panel-tabs">
         <button class="panel-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
         <button class="panel-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
         <button class="panel-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
     </div>
 
-    @* Status banner — shown after any create/update/delete operation *@
+    @* Status banner shown after any create/update/delete operation *@
     @if (!string.IsNullOrEmpty(statusMessage))
     {
         <div class="panel-status @(isError ? "error" : "success")">@statusMessage</div>
