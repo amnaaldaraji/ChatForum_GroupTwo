@@ -23,16 +23,22 @@ public static class VoteEndpoints
                 IMediator mediator,
                 CancellationToken ct) =>
             {
+                // Extract the authenticated user's ID from the JWT/cookie claims
                 var userId = httpContext.User.GetUserId();
+
+                // Reject the request if the user identity could not be resolved
                 if (string.IsNullOrEmpty(userId)) return Results.Unauthorized();
 
+                // Dispatch the vote command through MediatR to the application layer
                 var result = await mediator.Send(new CastVoteCommand(userId, commentId, dto.Value), ct);
+
+                // Return 200 OK with the updated vote state, or a structured problem response on failure
                 return result.IsSuccess
                     ? Results.Ok(result.Value)
                     : result.ToProblemDetails();
             })
-            .RequireAuthorization()
-            .WithTags("Votes");
+            .RequireAuthorization() // Endpoint requires an authenticated user
+            .WithTags("Votes");     // Groups the endpoint under "Votes" in Swagger/OpenAPI
 
         return app;
     }
