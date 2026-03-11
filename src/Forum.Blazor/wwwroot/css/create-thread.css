@@ -108,6 +108,12 @@
     border: 1px solid rgba(196, 64, 64, 0.3);
 }
 
+.create-thread-container .validation-message {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
 .category-display:disabled {
     color: white;
     -webkit-text-fill-color: white;

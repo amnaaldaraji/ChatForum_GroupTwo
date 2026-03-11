@@ -39,7 +39,6 @@
                 <!-- EditForm uses DataAnnotations on CreateThreadModel for client-side validation -->
                 <EditForm Model="@_newThread" OnValidSubmit="@HandleSubmit">
                     <DataAnnotationsValidator/>
-                    <ValidationSummary/>
 
                     <div class="form-group">
                         <label for="title">Title</label>
