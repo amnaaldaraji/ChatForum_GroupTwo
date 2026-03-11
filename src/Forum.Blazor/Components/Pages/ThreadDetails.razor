@@ -7,6 +7,7 @@
 
 <PageTitle>Thread Details - Overtime</PageTitle>
 
+@* Loading / not-found / content states *@
 @if (_isLoading)
 {
     <div class="loading">loading thread...</div>
@@ -35,6 +36,7 @@ else
             </div>
         </div>
 
+        @* The thread body is stored as a special root comment on the thread *@
         @if (_thread.BodyComment != null && !string.IsNullOrEmpty(_thread.BodyComment.Content))
         {
             <div class="body-comment">
@@ -46,6 +48,7 @@ else
             <h3>comments (@(_commentsPage?.TotalCount ?? 0))</h3>
 
             <div class="d-flex align-items-center mb-2">
+                @* Page size selector — resets to page 1 on change *@
                 <label class="me-2 mb-0">Comments per page:</label>
                 <select class="form-select form-select-sm w-auto" value="@_pageSize" @onchange="OnPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
@@ -55,6 +58,7 @@ else
                 </select>
 
                 <div class="ms-auto">
+                    @* Pagination controls — only rendered when there is more than one page *@
                     @if (_commentsPage != null && _commentsPage.TotalPages > 1)
                     {
                         <nav aria-label="Comment pagination">
@@ -75,6 +79,7 @@ else
                                     int? lastShown = null;
                                     foreach (var pageNum in pagesToShow)
                                     {
+                                        // Insert ellipsis between non-consecutive page numbers
                                         if (lastShown.HasValue && pageNum - lastShown.Value > 1)
                                         {
                                             <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -106,11 +111,13 @@ else
                         <div class="comment-header">
                             <strong>@comment.AuthorUserName</strong>
                             <span class="comment-time">@comment.TimeCreated.ToString("MMM dd, yyyy")</span>
+                            @* Show which comment this is a reply to, if applicable *@
                             @if (!string.IsNullOrEmpty(comment.ParentCommentAuthorUserName))
                             {
                                 <span class="reply-info">replying to @comment.ParentCommentAuthorUserName</span>
                             }
                         </div>
+                        @* Quote the parent comment content (truncated) when this is a reply *@
                         @if (!string.IsNullOrEmpty(comment.ParentCommentContent))
                         {
                             <div class="reply-citation">
@@ -124,10 +131,12 @@ else
                             @* ===== Vote buttons ===== *@
                             <AuthorizeView>
                                 <Authorized>
+                                    @* Active class is applied when the user has already voted in that direction *@
                                     <div class="vote-bar">
                                         <button class="vote-btn upvote @(GetUserVote(comment.CommentId) == 1 ? "active-up" : "")"
                                                 @onclick="async () => await Vote(comment.CommentId, 1)"
                                                 title="Upvote">▲</button>
+                                        @* Score colour changes based on positive/negative/zero value *@
                                         <span class="vote-score @(GetScore(comment.CommentId) > 0 ? "score-positive" : GetScore(comment.CommentId) < 0 ? "score-negative" : "score-zero")">
                                             @GetScore(comment.CommentId)
                                         </span>
@@ -137,6 +146,7 @@ else
                                     </div>
                                 </Authorized>
                                 <NotAuthorized>
+                                    @* Unauthenticated users see disabled vote buttons with a tooltip *@
                                     <div class="vote-bar vote-bar-locked" title="Log in to vote">
                                         <button class="vote-btn upvote locked" disabled>▲</button>
                                         <span class="vote-score score-zero">@GetScore(comment.CommentId)</span>
@@ -145,6 +155,7 @@ else
                                 </NotAuthorized>
                             </AuthorizeView>
 
+                            @* Reply button — only shown when not already replying to this comment *@
                             <AuthorizeView>
                                 <Authorized Context="replyAuth">
                                     @if (_replyingToCommentId != comment.CommentId)
@@ -154,6 +165,7 @@ else
                                 </Authorized>
                             </AuthorizeView>
 
+                            @* Delete button — visible to admins and the comment's own author *@
                             @if (!comment.IsDeleted)
                             {
                                 <AuthorizeView>
@@ -170,6 +182,7 @@ else
                             }
                         </div>
 
+                        @* Inline reply form — only shown for the comment currently being replied to *@
                         <AuthorizeView>
                             <Authorized Context="replyFormAuth">
                                 @if (_replyingToCommentId == comment.CommentId)
@@ -191,6 +204,7 @@ else
 
         <AuthorizeView>
             <Authorized>
+                @* New top-level comment form at the bottom of the thread *@
                 <div class="add-comment">
                     @if (!string.IsNullOrEmpty(_commentError))
                     {
@@ -207,6 +221,7 @@ else
                 </div>
             </Authorized>
             <NotAuthorized>
+                @* Prompt unauthenticated users to log in or register to participate *@
                 <div class="auth-prompt">
                     <span class="auth-prompt-icon">💬</span>
                     <p>Want to join the conversation?</p>
@@ -223,7 +238,7 @@ else
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public int Id { get; set; } // Thread ID from the URL segment /thread/{Id}
 
     private ThreadDetailDto? _thread;
     private bool _isLoading = true;
@@ -235,15 +250,16 @@ else
     private string _newCommentContent = string.Empty;
     private string _commentError = string.Empty;
     private bool _isSubmitting;
-    private int? _replyingToCommentId;
+    private int? _replyingToCommentId; // ID of the comment currently being replied to, or null
     private string _replyContent = string.Empty;
 
-    // Local vote state — kept in sync after each vote API call to avoid full reload
+    // Local vote state — kept in sync after each vote API call to avoid full page reload
     private Dictionary<int, int> _voteScores = [];
     private Dictionary<int, int> _userVotes = [];
 
     protected override async Task OnParametersSetAsync()
     {
+        // Re-runs when navigating between threads without a full component remount
         await LoadThread();
     }
 
@@ -257,6 +273,7 @@ else
         }
         catch
         {
+            // Treat any failure as thread not found
             _thread = null;
         }
         finally
@@ -274,7 +291,7 @@ else
             if (_commentsPage != null)
             {
                 _pageNumber = _commentsPage.PageNumber;
-                PopulateVoteData();
+                PopulateVoteData(); // Sync local vote caches from the fresh server response
             }
         }
         catch
@@ -284,7 +301,7 @@ else
         StateHasChanged();
     }
 
-    // Seed local vote caches from the server response
+    // Seed local vote caches from the server response so votes render instantly without re-fetching
     private void PopulateVoteData()
     {
         if (_commentsPage?.Items == null) return;
@@ -295,9 +312,11 @@ else
         }
     }
 
+    // Returns the net vote score for a comment, defaulting to 0 if not yet loaded
     private int GetScore(int commentId) =>
         _voteScores.TryGetValue(commentId, out var s) ? s : 0;
 
+    // Returns the current user's vote for a comment (1, -1, or 0 if not voted)
     private int GetUserVote(int commentId) =>
         _userVotes.TryGetValue(commentId, out var v) ? v : 0;
 
@@ -306,6 +325,7 @@ else
         var result = await CommentService.CastVoteAsync(commentId, direction);
         if (result != null)
         {
+            // Update local caches immediately so the UI reflects the new state without a full reload
             _voteScores[commentId] = result.NewScore;
             _userVotes[commentId] = result.UserVote;
         }
@@ -315,20 +335,22 @@ else
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == _pageSize) return;
+        if (newSize == _pageSize) return; // No-op if same size selected
         _pageSize = newSize;
-        _pageNumber = 1;
+        _pageNumber = 1; // Reset to first page on page size change
         await LoadComments(_pageNumber);
     }
 
     private void StartReply(int commentId)
     {
+        // Enter reply mode for the selected comment
         _replyingToCommentId = commentId;
         _replyContent = string.Empty;
     }
 
     private void CancelReply()
     {
+        // Exit reply mode without submitting
         _replyingToCommentId = null;
         _replyContent = string.Empty;
     }
@@ -343,6 +365,7 @@ else
             var response = await CommentService.CreateAsync(Id, dto);
             if (response.IsSuccessStatusCode)
             {
+                // Clear reply state and refresh comments on success
                 _replyingToCommentId = null;
                 _replyContent = string.Empty;
                 await LoadComments(_pageNumber);
@@ -352,6 +375,7 @@ else
         finally { _isSubmitting = false; }
     }
 
+    // Truncates long parent comment content for the reply citation block
     private static string TruncateContent(string content, int maxLength)
     {
         if (content.Length <= maxLength) return content;
@@ -373,6 +397,7 @@ else
             var response = await CommentService.CreateAsync(Id, dto);
             if (response.IsSuccessStatusCode)
             {
+                // Clear the input and refresh comments on success
                 _newCommentContent = string.Empty;
                 await LoadComments(_pageNumber);
             }
@@ -412,6 +437,7 @@ else
 
     private async Task ConfirmAndDelete(int commentId)
     {
+        // Show a browser confirm dialog before deleting
         var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this comment?");
         if (!confirmed) return;
         await DeleteComment(commentId);
@@ -426,7 +452,7 @@ else
             var response = await CommentService.DeleteAsync(commentId);
             if (response.IsSuccessStatusCode)
             {
-
+                // Refresh the current page after deletion
                 await LoadComments(_pageNumber);
             }
             else
