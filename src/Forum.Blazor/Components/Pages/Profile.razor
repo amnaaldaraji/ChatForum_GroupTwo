@@ -19,12 +19,14 @@
 
     <h1 class="panel-title">Profile</h1>
 
+    @* Tab buttons — My Threads and My Comments load lazily on first click *@
     <div class="panel-tabs">
         <button class="panel-tab @(activeTab == "account" ? "active" : "")" @onclick='() => activeTab = "account"'>Account Settings</button>
         <button class="panel-tab @(activeTab == "mythreads" ? "active" : "")" @onclick="ActivateMyThreads">My Threads</button>
         <button class="panel-tab @(activeTab == "mycomments" ? "active" : "")" @onclick="ActivateMyComments">My Comments</button>
     </div>
 
+    @* Status banners — shown after profile update operations *@
     @if (!string.IsNullOrEmpty(successMessage))
     {
         <div class="panel-status success">@successMessage</div>
@@ -39,6 +41,7 @@
     @if (activeTab == "account")
     {
         <div class="panel-section panel-section-narrow">
+            @* Show spinner while profile data is loading from the API *@
             @if (isLoadingProfile)
             {
                 <div class="text-center">
@@ -47,6 +50,7 @@
             }
             else
             {
+                @* Username is read-only — can only be changed by an admin *@
                 <div class="mb-4">
                     <label class="form-label fw-bold">Username</label>
                     <input class="form-control" value="@profileModel.Username" disabled />
@@ -64,6 +68,7 @@
                                    @bind-Value="emailModel.NewEmail" />
                     </div>
 
+                    @* Button disabled while API call is in flight *@
                     <button type="submit" class="btn btn-primary" disabled="@isLoading">
                         @if (isLoading)
                         {
@@ -99,6 +104,7 @@
                                    @bind-Value="passwordModel.ConfirmNewPassword" />
                     </div>
 
+                    @* Button disabled while API call is in flight *@
                     <button type="submit" class="btn btn-warning" disabled="@isLoading">
                         @if (isLoading)
                         {
@@ -118,6 +124,7 @@
             <h2>My Threads</h2>
 
             <div class="d-flex align-items-center mb-2">
+                @* Page size selector — resets to page 1 on change *@
                 <label class="me-2 mb-0" style="color: #8b949e;">Threads per page:</label>
                 <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myThreadsPageSize" @onchange="OnMyThreadsPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
@@ -126,6 +133,7 @@
                     }
                 </select>
 
+                @* Sort selector — resets to page 1 on change *@
                 <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
                 <select class="form-select form-select-sm w-auto" value="@_myThreadsSortByString" @onchange="OnMyThreadsSortChanged">
                     <option value="@ThreadSortBy.Newest.ToString()">Newest</option>
@@ -134,6 +142,7 @@
                 </select>
 
                 <div class="ms-auto">
+                    @* Pagination controls — only rendered when there is more than one page *@
                     @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
                     {
                         <nav aria-label="My threads pagination">
@@ -145,6 +154,7 @@
                                 @{
                                     var ttPages = myThreadsPaged.TotalPages;
                                     var ttShow = new SortedSet<int>();
+                                    // Always show first and last page, plus neighbours of the current page
                                     ttShow.Add(1);
                                     ttShow.Add(ttPages);
                                     if (myThreadsPage > 1) ttShow.Add(myThreadsPage - 1);
@@ -154,6 +164,7 @@
                                     int? ttLast = null;
                                     foreach (var pageNum in ttShow)
                                     {
+                                        // Insert ellipsis between non-consecutive page numbers
                                         if (ttLast.HasValue && pageNum - ttLast.Value > 1)
                                         {
                                             <li class="page-item disabled">
@@ -212,6 +223,7 @@
             <h2>My Comments</h2>
 
             <div class="d-flex align-items-center mb-2">
+                @* Page size selector — resets to page 1 on change *@
                 <label class="me-2 mb-0" style="color: #8b949e;">Comments per page:</label>
                 <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myCommentsPageSize" @onchange="OnMyCommentsPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
@@ -220,6 +232,7 @@
                     }
                 </select>
 
+                @* Sort selector — resets to page 1 on change *@
                 <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
                 <select class="form-select form-select-sm w-auto" value="@_myCommentsSortByString" @onchange="OnMyCommentsSortChanged">
                     <option value="@CommentSortBy.Newest.ToString()">Newest</option>
@@ -227,6 +240,7 @@
                 </select>
 
                 <div class="ms-auto">
+                    @* Pagination controls — only rendered when there is more than one page *@
                     @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
                     {
                         <nav aria-label="My comments pagination">
@@ -238,6 +252,7 @@
                                 @{
                                     var ccPages = myCommentsPaged.TotalPages;
                                     var ccShow = new SortedSet<int>();
+                                    // Always show first and last page, plus neighbours of the current page
                                     ccShow.Add(1);
                                     ccShow.Add(ccPages);
                                     if (myCommentsPage > 1) ccShow.Add(myCommentsPage - 1);
@@ -247,6 +262,7 @@
                                     int? ccLast = null;
                                     foreach (var pageNum in ccShow)
                                     {
+                                        // Insert ellipsis between non-consecutive page numbers
                                         if (ccLast.HasValue && pageNum - ccLast.Value > 1)
                                         {
                                             <li class="page-item disabled">
@@ -284,6 +300,7 @@
                         @foreach (var c in myComments)
                         {
                             <tr>
+                                @* Full content shown in the title tooltip on hover *@
                                 <td><a href="/thread/@c.ThreadId" class="comment-preview" title="@c.Content">@c.Content</a></td>
                                 <td>@(c.ThreadTitle ?? "Unknown")</td>
                                 <td>@c.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
@@ -298,7 +315,7 @@
 </div>
 
 @code {
-    private string activeTab = "account";
+    private string activeTab = "account"; // Currently active tab: "account", "mythreads", or "mycomments"
 
     private ProfileModel profileModel = new();
     private UpdateEmailModel emailModel = new();
@@ -307,34 +324,36 @@
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
 
-    private bool isLoading = false;
-    private bool isLoadingProfile = true;
+    private bool isLoading = false;        // Prevents double-submit during API calls
+    private bool isLoadingProfile = true;  // Shows spinner until profile data is fetched
 
-    private string? userId;
+    private string? userId; // Resolved from auth claims on init; used for all API calls
 
     // My Threads
     private List<ThreadSummaryDto> myThreads = [];
     private PagedResult<ThreadSummaryDto>? myThreadsPaged;
     private int myThreadsPage = 1;
     private int myThreadsPageSize = 5;
-    private bool myThreadsLoaded;
+    private bool myThreadsLoaded;  // Lazy-load guard — data only fetched on first tab activation
     private ThreadSortBy _myThreadsSortBy = ThreadSortBy.Newest;
-    private string _myThreadsSortByString => _myThreadsSortBy.ToString();
+    private string _myThreadsSortByString => _myThreadsSortBy.ToString(); // Bound to the sort <select> value
 
     // My Comments
     private List<CommentDto> myComments = [];
     private PagedResult<CommentDto>? myCommentsPaged;
     private int myCommentsPage = 1;
     private int myCommentsPageSize = 5;
-    private bool myCommentsLoaded;
+    private bool myCommentsLoaded;  // Lazy-load guard — data only fetched on first tab activation
     private CommentSortBy _myCommentsSortBy = CommentSortBy.Newest;
-    private string _myCommentsSortByString => _myCommentsSortBy.ToString();
+    private string _myCommentsSortByString => _myCommentsSortBy.ToString(); // Bound to the sort <select> value
 
     protected override async Task OnInitializedAsync()
     {
+        // Resolve the current user's ID from authentication claims
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        // Redirect to login if the user is not authenticated
         if (string.IsNullOrEmpty(userId))
         {
             Navigation.NavigateTo("/login");
@@ -349,7 +368,7 @@
             {
                 profileModel.Username = profile.UserName;
                 profileModel.Email = profile.Email ?? string.Empty;
-                emailModel.NewEmail = profile.Email ?? string.Empty;
+                emailModel.NewEmail = profile.Email ?? string.Empty; // Pre-fill the email field
             }
             else
             {
@@ -386,10 +405,11 @@
             if (response.IsSuccessStatusCode)
             {
                 successMessage = "Email updated successfully.";
-                profileModel.Email = emailModel.NewEmail;
+                profileModel.Email = emailModel.NewEmail; // Sync local model with the saved value
             }
             else
             {
+                // Try to extract a readable error from the API response body
                 var body = await response.Content.ReadAsStringAsync();
                 errorMessage = ApiClientBase.TryExtractError(body) ?? "Failed to update email.";
             }
@@ -409,6 +429,7 @@
         errorMessage = string.Empty;
         successMessage = string.Empty;
 
+        // Client-side validation before hitting the API
         if (string.IsNullOrWhiteSpace(passwordModel.CurrentPassword))
         {
             errorMessage = "Current password is required.";
@@ -436,7 +457,7 @@
             if (response.IsSuccessStatusCode)
             {
                 successMessage = "Password changed successfully.";
-                passwordModel = new ChangePasswordModel();
+                passwordModel = new ChangePasswordModel(); // Clear the form on success
             }
             else
             {
@@ -458,6 +479,7 @@
     private async Task ActivateMyThreads()
     {
         activeTab = "mythreads";
+        // Only load data on the first activation to avoid redundant API calls
         if (!myThreadsLoaded)
         {
             await LoadMyThreads();
@@ -482,9 +504,9 @@
     {
         if (e?.Value == null) return;
         if (!Enum.TryParse<ThreadSortBy>(e.Value.ToString(), out var parsed)) return;
-        if (parsed == _myThreadsSortBy) return;
+        if (parsed == _myThreadsSortBy) return; // No-op if same sort selected
         _myThreadsSortBy = parsed;
-        myThreadsPage = 1;
+        myThreadsPage = 1; // Reset to first page on sort change
         await LoadMyThreads();
     }
 
@@ -492,9 +514,9 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == myThreadsPageSize) return;
+        if (newSize == myThreadsPageSize) return; // No-op if same size selected
         myThreadsPageSize = newSize;
-        myThreadsPage = 1;
+        myThreadsPage = 1; // Reset to first page on page size change
         await LoadMyThreads();
     }
 
@@ -519,6 +541,7 @@
     private async Task ActivateMyComments()
     {
         activeTab = "mycomments";
+        // Only load data on the first activation to avoid redundant API calls
         if (!myCommentsLoaded)
         {
             await LoadMyComments();
@@ -537,9 +560,9 @@
     {
         if (e?.Value == null) return;
         if (!Enum.TryParse<CommentSortBy>(e.Value.ToString(), out var parsed)) return;
-        if (parsed == _myCommentsSortBy) return;
+        if (parsed == _myCommentsSortBy) return; // No-op if same sort selected
         _myCommentsSortBy = parsed;
-        myCommentsPage = 1;
+        myCommentsPage = 1; // Reset to first page on sort change
         await LoadMyComments();
     }
 
@@ -547,9 +570,9 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == myCommentsPageSize) return;
+        if (newSize == myCommentsPageSize) return; // No-op if same size selected
         myCommentsPageSize = newSize;
-        myCommentsPage = 1;
+        myCommentsPage = 1; // Reset to first page on page size change
         await LoadMyComments();
     }
 
@@ -570,6 +593,7 @@
         await LoadMyComments();
     }
 
+    // Local form models — keep API DTOs clean and allow profile-specific validation
     private class ProfileModel
     {
         public string Username { get; set; } = string.Empty;
