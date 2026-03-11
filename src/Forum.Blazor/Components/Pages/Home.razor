@@ -1,6 +1,6 @@
 @page "/"
-@inject CategoryService CategoryService
-@inject ThreadService ThreadService
+@inject CategoryService CategoryService   
+@inject ThreadService ThreadService       
 
 <PageTitle>Overtime</PageTitle>
 
@@ -11,12 +11,14 @@
 
         <div class="home-content">
 
+            @* Show a loading indicator while threads are being fetched *@
             @if (_popularThreads == null)
             {
                 <div class="loading">loading...</div>
             }
             else
             {
+                @* Popular Threads section — top 5 threads ranked by comment count *@
                 @if (_popularThreads.Any())
                 {
                     <div class="popular-section">
@@ -38,6 +40,7 @@
                     </div>
                 }
 
+                @* Popular Categories section — top 4 categories ranked by most recent activity *@
                 @if (_popularCategories != null && _popularCategories.Any())
                 {
                     <div class="categories-section">
@@ -52,6 +55,7 @@
                                         <a href="/category/@category.Name" class="view-all-link">View all &rarr;</a>
                                     </div>
 
+                                    @* Show up to 2 recent threads per category card, or a placeholder if empty *@
                                     @if (category.RecentThreads == null || !category.RecentThreads.Any())
                                     {
                                         <div class="no-threads">no threads yet.</div>
@@ -90,18 +94,20 @@
 </div>
 
 @code {
-    private List<PopularThreadItem>? _popularThreads;
-    private List<CategoryWithThreads>? _popularCategories;
+    private List<PopularThreadItem>? _popularThreads;       // Null while loading; top 5 threads by comment count
+    private List<CategoryWithThreads>? _popularCategories; // Top 4 categories by most recent activity
 
+    // Local view model combining category metadata with its recent threads
     private class CategoryWithThreads
     {
         public string Name { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public int ThreadCount { get; set; }
-        public DateTime LatestActivity { get; set; }
+        public DateTime LatestActivity { get; set; }         // Used to rank categories by recent activity
         public List<ThreadSummaryDto> RecentThreads { get; set; } = [];
     }
 
+    // Local view model for displaying a thread across categories on the home page
     private class PopularThreadItem
     {
         public int ThreadId { get; set; }
@@ -121,6 +127,7 @@
 
         foreach (var cat in categories)
         {
+            // Fetch the 3 most recently updated threads per category
             var filter = new ThreadFilterParams
             {
                 CategoryId = cat.CategoryId,
@@ -145,6 +152,7 @@
                 RecentThreads = threads.Take(2).ToList() // Show at most 2 threads per category card
             });
 
+            // Collect all fetched threads into the global popular list for cross-category ranking
             foreach (var t in threads)
             {
                 _popularThreads.Add(new PopularThreadItem
