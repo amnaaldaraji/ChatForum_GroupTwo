@@ -11,17 +11,8 @@ namespace Forum.Application.Features.Votes.Commands;
 /// Casts, toggles, or switches a user's vote on a comment.
 /// If the user has no vote, creates one. If same direction, removes it. If opposite, switches.
 /// </summary>
-/// <summary>
-/// Command to cast a vote on a comment.
-/// </summary>
-/// <param name="UserId">The unique identifier of the user casting the vote</param>
-/// <param name="CommentId">The ID of the comment being voted on</param>
-/// <param name="Value">Vote direction: 1 for upvote, -1 for downvote</param>
 public record CastVoteCommand(string UserId, int CommentId, int Value) : IRequest<Result<VoteResponseDto>>;
 
-/// <summary>
-/// Handles CastVoteCommand — manages vote creation, toggle, and direction switch.
-/// </summary>
 /// <summary>
 /// Handles the CastVoteCommand by implementing the vote casting business logic.
 /// </summary>
@@ -34,9 +25,6 @@ public class CastVoteHandler : IRequestHandler<CastVoteCommand, Result<VoteRespo
     /// <summary>
     /// Initializes a new instance of the CastVoteHandler class.
     /// </summary>
-    /// <param name="voteRepository">Repository for vote operations</param>
-    /// <param name="commentRepository">Repository for comment operations</param>
-    /// <param name="unitOfWork">Unit of work for transaction management</param>
     public CastVoteHandler(IVoteRepository voteRepository, ICommentRepository commentRepository, IUnitOfWork unitOfWork)
     {
         _voteRepository = voteRepository;
@@ -47,25 +35,18 @@ public class CastVoteHandler : IRequestHandler<CastVoteCommand, Result<VoteRespo
     /// <summary>
     /// Handles the CastVoteCommand by processing the vote request.
     /// </summary>
-    /// <param name="request">The vote command containing user ID, comment ID, and vote value</param>
-    /// <param name="cancellationToken">Cancellation token for async operation</param>
-    /// <returns>Result containing VoteResponseDto with updated vote information</returns>
     public async Task<Result<VoteResponseDto>> Handle(CastVoteCommand request, CancellationToken cancellationToken)
     {
-        // Validate vote value - only allow 1 (upvote) or -1 (downvote)
         if (request.Value != 1 && request.Value != -1)
             return Result.Failure<VoteResponseDto>("Vote value must be 1 or -1.", ErrorType.Validation);
-
-        // Verify that the comment exists before allowing voting
+        
         if (!await _commentRepository.ExistsAsync(c => c.CommentId == request.CommentId, cancellationToken))
             return Result.Failure<VoteResponseDto>("Comment not found.", ErrorType.NotFound);
-
-        // Check if user has already voted on this comment
+        
         var existing = await _voteRepository.GetByUserAndCommentAsync(request.UserId, request.CommentId, cancellationToken);
 
         if (existing == null)
         {
-            // New vote
             await _voteRepository.AddAsync(new Vote
             {
                 UserId = request.UserId,
@@ -75,12 +56,12 @@ public class CastVoteHandler : IRequestHandler<CastVoteCommand, Result<VoteRespo
         }
         else if (existing.Value == request.Value)
         {
-            // Same direction — toggle off
+            // Same direction ï¿½ toggle off
             _voteRepository.Delete(existing);
         }
         else
         {
-            // Opposite direction — switch
+            // Opposite direction ï¿½ switch
             existing.Value = request.Value;
             _voteRepository.Update(existing);
         }
