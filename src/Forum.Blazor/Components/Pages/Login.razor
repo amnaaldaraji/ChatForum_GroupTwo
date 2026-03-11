@@ -1,10 +1,11 @@
 @page "/login"
 @using Forum.Blazor.Models
-@inject IAuthClientService AuthService  
-@inject NavigationManager Navigation    
-@inject IJSRuntime JS                   
+@inject IAuthClientService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Login</PageTitle>
+
 <link rel="stylesheet" href="/css/auth.css" />
 
 <div class="auth-container">
@@ -14,7 +15,7 @@
         </div>
         <div class="auth-card-body">
 
-            @* Display login error (wrong credentials, network failure, etc.) *@
+            <!-- Display login error (wrong credentials etc.) -->
             @if (!string.IsNullOrEmpty(errorMessage))
             {
                 <div class="alert alert-danger">
@@ -22,6 +23,7 @@
                 </div>
             }
 
+            <!-- Login form -->
             <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
 
                 <div class="mb-3">
@@ -34,9 +36,9 @@
                     <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
                 </div>
 
-                @* Button is disabled while the API call is in flight to prevent double-submit *@
+                <!-- Button is disabled while the API call is going out to prevent double-submit -->
                 <button type="submit" class="btn btn-primary" disabled="@isLoading">
-                    @* Show a spinner inside the button while loading *@
+                    <!-- Show a spinner inside the button while loading -->
                     @if (isLoading)
                     {
                         <span class="spinner-border spinner-border-sm me-2"></span>
@@ -45,7 +47,6 @@
                 </button>
 
                 <a href="/register" class="auth-link">Don't have an account? Register</a>
-
             </EditForm>
         </div>
     </div>
@@ -55,8 +56,11 @@
 
     private LoginRequest loginModel = new();
     private string errorMessage = string.Empty;
-    private bool isLoading = false; // Prevents double-submit while the login request is in flight
+    private bool isLoading = false;     // Prevents double-submit while the login request is going out
 
+    /// <summary>
+    /// Validates credentials and logs the user in.
+    /// </summary>
     private async Task HandleLogin()
     {
         errorMessage = string.Empty;
@@ -87,7 +91,6 @@
         }
         catch (Exception ex)
         {
-            // Catches network failures or unexpected exceptions
             errorMessage = ex.Message;
         }
         finally
@@ -95,5 +98,4 @@
             isLoading = false;
         }
     }
-
 }

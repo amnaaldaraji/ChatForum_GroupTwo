@@ -1,120 +1,126 @@
 @page "/create-thread"
-@page "/create-thread/{CategoryName}"           
-@inject CategoryService CategoryService        
-@inject ThreadService ThreadService             
-@inject NavigationManager NavigationManager     
+@page "/create-thread/{CategoryName}"
+@inject CategoryService CategoryService
+@inject ThreadService ThreadService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Create New Thread</PageTitle>
 
 <link rel="stylesheet" href="/css/create-thread.css" />
 
 <AuthorizeView>
-<NotAuthorized>
-    @* Unauthenticated users are shown a prompt rather than the form *@
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-6 text-center">
-            <h3>Please log in</h3>
-            <p>You must be logged in to create a thread.</p>
-            <a href="/login" class="btn btn-primary">Log In</a>
+    
+    <!-- Unauthenticated users are shown a prompt rather than the form -->
+    <NotAuthorized>
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6 text-center">
+                <h3>Please log in</h3>
+                <p>You must be logged in to create a thread.</p>
+                <a href="/login" class="btn btn-primary">Log In</a>
+            </div>
         </div>
-    </div>
-</NotAuthorized>
-<Authorized Context="authContext">
-
-<div class="create-thread-container">
-    <div class="form-header">
-        <h1>Create New Thread</h1>
-        <p>start a new discussion in the forum.</p>
-    </div>
-
-    @* Show a spinner-like message while the API call is in flight *@
-    @if (_isSubmitting)
-    {
-        <div class="submitting">creating thread...</div>
-    }
-    else
-    {
-        @* EditForm uses DataAnnotations on CreateThreadModel for client-side validation *@
-        <EditForm Model="@_newThread" OnValidSubmit="@HandleSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <div class="form-group">
-                <label for="title">title</label>
-                <InputText id="title" @bind-Value="@_newThread.Title" class="form-control" />
-                <ValidationMessage For="@(() => _newThread.Title)" />
+    </NotAuthorized>
+    
+    <!-- Authenticated users can create a new thread -->
+    <Authorized Context="authContext">
+        <div class="create-thread-container">
+            <div class="form-header">
+                <h1>Create New Thread</h1>
+                <p>Start a new discussion in the forum.</p>
             </div>
 
-            <div class="form-group">
-                <label>category</label>
+            <!-- Show a spinner-like message while the API call is going out -->
+            @if (_isSubmitting)
+            {
+                <div class="submitting">Creating thread...</div>
+            }
+            else
+            {
+                <!-- EditForm uses DataAnnotations on CreateThreadModel for client-side validation -->
+                <EditForm Model="@_newThread" OnValidSubmit="@HandleSubmit">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
 
-                @* Category is pre-selected from the URL and shown as a read-only display input *@
-               @if (_categories != null)
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <InputText id="title" @bind-Value="@_newThread.Title" class="form-control"/>
+                        <ValidationMessage For="@(() => _newThread.Title)"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+
+                        <!-- Category is pre-selected from the URL and shown as a read-only display input -->
+                        @if (_categories != null)
                         {
-                   var selected = _categories.FirstOrDefault(c => c.CategoryId == _newThread.CategoryId);
+                            var selected = _categories.FirstOrDefault(c => c.CategoryId == _newThread.CategoryId);
 
-                    <input class="form-control category-display" value="@selected?.Name" disabled />
-                }
-            </div>
+                            <input class="form-control category-display" value="@selected?.Name" disabled/>
+                        }
+                    </div>
 
-            <div class="form-group">
-                <label for="body">message</label>
-                <InputTextArea id="body" @bind-Value="@_newThread.Body" class="form-control" rows="10" />
-                <ValidationMessage For="@(() => _newThread.Body)" />
-            </div>
+                    <div class="form-group">
+                        <label for="body">Message</label>
+                        <InputTextArea id="body" @bind-Value="@_newThread.Body" class="form-control" rows="10"/>
+                        <ValidationMessage For="@(() => _newThread.Body)"/>
+                    </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
-                    create thread
-                </button>
-                @* Cancel navigates back to the home page without submitting *@
-                <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/"))">
-                    cancel
-                </button>
-            </div>
-        </EditForm>
-    }
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+                            Create thread
+                        </button>
+                        <!-- Cancel navigates back to the home page without submitting -->
+                        <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/"))">
+                            Cancel
+                        </button>
+                    </div>
+                </EditForm>
+            }
 
-    @* Displays API or network errors below the form *@
-    @if (!string.IsNullOrEmpty(_errorMessage))
-    {
-        <div class="error-message">@_errorMessage</div>
-    }
-</div>
+            <!-- Displays API or network errors below the form -->
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="error-message">@_errorMessage</div>
+            }
+        </div>
 
-</Authorized>
+    </Authorized>
 </AuthorizeView>
 
 @code {
     [Parameter]
-    public string? CategoryName { get; set; } // Optional URL segment; pre-selects the category if provided
-
+    public string? CategoryName { get; set; }
     private CreateThreadModel _newThread = new();
-    private List<CategoryDto>? _categories;  // All available categories, loaded on init
-    private bool _isSubmitting;              // Prevents double-submit while API call is in flight
+    private List<CategoryDto>? _categories;
+    private bool _isSubmitting;              // Prevents double-submit while the API call is going out.
     private string _errorMessage = string.Empty;
-
-    // Local form model with validation attributes — keeps API DTOs clean
+    
+    /// <summary>
+    /// Local form model with validation attributes — keeps API DTOs clean
+    /// </summary>
     public class CreateThreadModel
     {
-        [Required(ErrorMessage = "title is required")]
-        [StringLength(200, MinimumLength = 3, ErrorMessage = "title must be between 3 and 200 characters")]
+        [Required(ErrorMessage = "Title is required")]
+        [StringLength(200, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 200 characters")]
         public string Title { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "category is required")]
+        [Required(ErrorMessage = "Category is required")]
         public string CategoryIdString { get; set; } = string.Empty;
 
-        // Parsed convenience property — avoids storing an int that can't bind to a select easily
+        // Avoids storing an int that can't bind to a select easily
         public int CategoryId => string.IsNullOrEmpty(CategoryIdString) ? 0 : int.Parse(CategoryIdString);
 
-        [Required(ErrorMessage = "message is required")]
-        [StringLength(2000, MinimumLength = 10, ErrorMessage = "message must be between 10 and 2000 characters")]
+        [Required(ErrorMessage = "Message is required")]
+        [StringLength(2000, MinimumLength = 10, ErrorMessage = "Message must be between 10 and 2000 characters")]
         public string Body { get; set; } = string.Empty;
 
         // Maps the form model to the API DTO
         public CreateThreadDto ToDto() => new(Title, CategoryId, Body);
     }
 
+    /// <summary>
+    /// Loads categories and pre-selects the one from the URL if provided.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         var categories = await CategoryService.GetAllAsync();
@@ -133,6 +139,9 @@
         }
     }
 
+    /// <summary>
+    /// Submits the new thread and redirects to the category page on success.
+    /// </summary>
     private async Task HandleSubmit()
     {
         if (_categories == null) return;
@@ -160,13 +169,13 @@
             }
             else
             {
-                _errorMessage = "failed to create thread. please try again.";
+                _errorMessage = "Failed to create thread. please try again.";
             }
         }
         catch
         {
             // Catches network failures or unexpected exceptions
-            _errorMessage = "an error occurred while creating the thread.";
+            _errorMessage = "An error occurred while creating the thread.";
         }
         finally
         {
