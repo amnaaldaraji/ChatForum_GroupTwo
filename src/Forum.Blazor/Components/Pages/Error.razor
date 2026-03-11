@@ -1,15 +1,18 @@
 ﻿@page "/Error"
 @using System.Diagnostics
-<PageTitle>Error</PageTitle>
+
+<PageTitle>Error - Overtime</PageTitle>
+
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
-@* Show the request ID if available — useful for correlating with server logs *@
+
 @if (ShowRequestId)
 {
     <p>
         <strong>Request ID:</strong> <code>@RequestId</code>
     </p>
 }
+
 <h3>Development Mode</h3>
 <p>
     Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
@@ -21,9 +24,18 @@
     and restarting the app.
 </p>
 @code{
-    [CascadingParameter] private HttpContext? HttpContext { get; set; } // Provides access to the current HTTP context for trace info
-    private string? RequestId { get; set; }                             // The trace/request ID displayed on the error page
-    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);     // Only show the request ID section if one is available
+    // Provides access to the current HTTP context for trace info
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+
+    // The trace/request ID displayed on the error page
+    private string? RequestId { get; set; }
+
+    // Only show the request ID section if one is available
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    /// <summary>
+    /// Resolves the request ID from the diagnostic activity or the HTTP trace identifier.
+    /// </summary>
     protected override void OnInitialized() =>
-        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier; // Prefer the diagnostic activity ID, fall back to the HTTP trace identifier
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
 }

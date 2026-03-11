@@ -1,7 +1,5 @@
 @page "/profile"
 @using System.Security.Claims
-@using Forum.Application.DTOs.Thread
-@using Forum.Application.DTOs.Comment
 @inject UserService UserService
 @inject ThreadService ThreadService
 @inject CommentService CommentService
@@ -14,19 +12,19 @@
 
 <div class="panel-wrapper">
     <nav class="breadcrumb-trail">
-        SPORT FORUM > <strong>PROFILE</strong>
+        OVERTIME > <strong>PROFILE</strong>
     </nav>
 
     <h1 class="panel-title">Profile</h1>
 
-    @* Tab buttons — My Threads and My Comments load lazily on first click *@
+    <!-- Tab buttons — My Threads and My Comments load lazily on first click -->
     <div class="panel-tabs">
         <button class="panel-tab @(activeTab == "account" ? "active" : "")" @onclick='() => activeTab = "account"'>Account Settings</button>
         <button class="panel-tab @(activeTab == "mythreads" ? "active" : "")" @onclick="ActivateMyThreads">My Threads</button>
         <button class="panel-tab @(activeTab == "mycomments" ? "active" : "")" @onclick="ActivateMyComments">My Comments</button>
     </div>
 
-    @* Status banners — shown after profile update operations *@
+    <!-- Status banners — shown after profile update operations -->
     @if (!string.IsNullOrEmpty(successMessage))
     {
         <div class="panel-status success">@successMessage</div>
@@ -37,11 +35,12 @@
         <div class="panel-status error">@errorMessage</div>
     }
 
-    @* ===== ACCOUNT SETTINGS TAB ===== *@
+    <!-- Account settings tab -->
     @if (activeTab == "account")
     {
         <div class="panel-section panel-section-narrow">
-            @* Show spinner while profile data is loading from the API *@
+            
+            <!-- Show spinner while profile data is loading from the API -->
             @if (isLoadingProfile)
             {
                 <div class="text-center">
@@ -50,14 +49,15 @@
             }
             else
             {
-                @* Username is read-only — can only be changed by an admin *@
+                <!-- Username is read-only — can only be changed by an admin -->
                 <div class="mb-4">
                     <label class="form-label fw-bold">Username</label>
-                    <input class="form-control" value="@profileModel.Username" disabled />
+                    <input class="form-control" value="@profileModel.Username" disabled/>
                 </div>
 
-                <hr />
+                <hr/>
 
+                <!-- Email update form -->
                 <EditForm Model="@emailModel" OnValidSubmit="HandleUpdateEmail">
                     <h5 class="mt-3">Change Email</h5>
 
@@ -65,10 +65,10 @@
                         <label class="form-label">New Email</label>
                         <InputText type="email"
                                    class="form-control"
-                                   @bind-Value="emailModel.NewEmail" />
+                                   @bind-Value="emailModel.NewEmail"/>
                     </div>
 
-                    @* Button disabled while API call is in flight *@
+                    <!-- Button disabled while API call is going out -->
                     <button type="submit" class="btn btn-primary" disabled="@isLoading">
                         @if (isLoading)
                         {
@@ -78,8 +78,9 @@
                     </button>
                 </EditForm>
 
-                <hr class="my-4" />
+                <hr class="my-4"/>
 
+                <!-- Password change form -->
                 <EditForm Model="@passwordModel" OnValidSubmit="HandleChangePassword">
                     <h5>Change Password</h5>
 
@@ -87,24 +88,24 @@
                         <label class="form-label">Current Password</label>
                         <InputText type="password"
                                    class="form-control"
-                                   @bind-Value="passwordModel.CurrentPassword" />
+                                   @bind-Value="passwordModel.CurrentPassword"/>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">New Password</label>
                         <InputText type="password"
                                    class="form-control"
-                                   @bind-Value="passwordModel.NewPassword" />
+                                   @bind-Value="passwordModel.NewPassword"/>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Confirm New Password</label>
                         <InputText type="password"
                                    class="form-control"
-                                   @bind-Value="passwordModel.ConfirmNewPassword" />
+                                   @bind-Value="passwordModel.ConfirmNewPassword"/>
                     </div>
 
-                    @* Button disabled while API call is in flight *@
+                    <!-- Button disabled while API call is going out -->
                     <button type="submit" class="btn btn-warning" disabled="@isLoading">
                         @if (isLoading)
                         {
@@ -117,14 +118,14 @@
         </div>
     }
 
-    @* ===== MY THREADS TAB ===== *@
+    <!-- My Threads tab -->
     @if (activeTab == "mythreads")
     {
         <div class="panel-section">
             <h2>My Threads</h2>
 
+            <!-- Page size selector — resets to page 1 on change -->
             <div class="d-flex align-items-center mb-2">
-                @* Page size selector — resets to page 1 on change *@
                 <label class="me-2 mb-0" style="color: #8b949e;">Threads per page:</label>
                 <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myThreadsPageSize" @onchange="OnMyThreadsPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
@@ -133,7 +134,7 @@
                     }
                 </select>
 
-                @* Sort selector — resets to page 1 on change *@
+                <!-- Sort selector — resets to page 1 on change -->
                 <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
                 <select class="form-select form-select-sm w-auto" value="@_myThreadsSortByString" @onchange="OnMyThreadsSortChanged">
                     <option value="@ThreadSortBy.Newest.ToString()">Newest</option>
@@ -141,8 +142,8 @@
                     <option value="@ThreadSortBy.Category.ToString()">Category</option>
                 </select>
 
+                <!-- Pagination controls — only rendered when there is more than one page -->
                 <div class="ms-auto">
-                    @* Pagination controls — only rendered when there is more than one page *@
                     @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
                     {
                         <nav aria-label="My threads pagination">
@@ -154,6 +155,7 @@
                                 @{
                                     var ttPages = myThreadsPaged.TotalPages;
                                     var ttShow = new SortedSet<int>();
+                                    
                                     // Always show first and last page, plus neighbours of the current page
                                     ttShow.Add(1);
                                     ttShow.Add(ttPages);
@@ -187,6 +189,7 @@
                 </div>
             </div>
 
+            <!-- Threads table -->
             <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
@@ -216,14 +219,14 @@
         </div>
     }
 
-    @* ===== MY COMMENTS TAB ===== *@
+    <!-- My Comments tab -->
     @if (activeTab == "mycomments")
     {
         <div class="panel-section">
             <h2>My Comments</h2>
 
+            <!-- Page size selector — resets to page 1 on change -->
             <div class="d-flex align-items-center mb-2">
-                @* Page size selector — resets to page 1 on change *@
                 <label class="me-2 mb-0" style="color: #8b949e;">Comments per page:</label>
                 <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myCommentsPageSize" @onchange="OnMyCommentsPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
@@ -232,15 +235,15 @@
                     }
                 </select>
 
-                @* Sort selector — resets to page 1 on change *@
+                <!-- Sort selector — resets to page 1 on change -->
                 <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
                 <select class="form-select form-select-sm w-auto" value="@_myCommentsSortByString" @onchange="OnMyCommentsSortChanged">
                     <option value="@CommentSortBy.Newest.ToString()">Newest</option>
                     <option value="@CommentSortBy.Oldest.ToString()">Oldest</option>
                 </select>
 
+                <!-- Pagination controls — only rendered when there is more than one page -->
                 <div class="ms-auto">
-                    @* Pagination controls — only rendered when there is more than one page *@
                     @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
                     {
                         <nav aria-label="My comments pagination">
@@ -252,6 +255,7 @@
                                 @{
                                     var ccPages = myCommentsPaged.TotalPages;
                                     var ccShow = new SortedSet<int>();
+                                    
                                     // Always show first and last page, plus neighbours of the current page
                                     ccShow.Add(1);
                                     ccShow.Add(ccPages);
@@ -285,6 +289,7 @@
                 </div>
             </div>
 
+            <!-- Comments table -->
             <div class="panel-table-wrap">
             <table class="panel-table">
                 <thead>
@@ -300,7 +305,7 @@
                         @foreach (var c in myComments)
                         {
                             <tr>
-                                @* Full content shown in the title tooltip on hover *@
+                                <!-- Full content shown in the title tooltip on hover -->
                                 <td><a href="/thread/@c.ThreadId" class="comment-preview" title="@c.Content">@c.Content</a></td>
                                 <td>@(c.ThreadTitle ?? "Unknown")</td>
                                 <td>@c.TimeCreated.ToString("yyyy-MM-dd HH:mm")</td>
@@ -327,7 +332,7 @@
     private bool isLoading = false;        // Prevents double-submit during API calls
     private bool isLoadingProfile = true;  // Shows spinner until profile data is fetched
 
-    private string? userId; // Resolved from auth claims on init; used for all API calls
+    private string? userId;
 
     // My Threads
     private List<ThreadSummaryDto> myThreads = [];
@@ -336,7 +341,7 @@
     private int myThreadsPageSize = 5;
     private bool myThreadsLoaded;  // Lazy-load guard — data only fetched on first tab activation
     private ThreadSortBy _myThreadsSortBy = ThreadSortBy.Newest;
-    private string _myThreadsSortByString => _myThreadsSortBy.ToString(); // Bound to the sort <select> value
+    private string _myThreadsSortByString => _myThreadsSortBy.ToString();
 
     // My Comments
     private List<CommentDto> myComments = [];
@@ -345,11 +350,13 @@
     private int myCommentsPageSize = 5;
     private bool myCommentsLoaded;  // Lazy-load guard — data only fetched on first tab activation
     private CommentSortBy _myCommentsSortBy = CommentSortBy.Newest;
-    private string _myCommentsSortByString => _myCommentsSortBy.ToString(); // Bound to the sort <select> value
+    private string _myCommentsSortByString => _myCommentsSortBy.ToString();
 
+    /// <summary>
+    /// Resolves the current user from auth claims and loads the profile data.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
-        // Resolve the current user's ID from authentication claims
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -385,6 +392,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the email update form submission.
+    /// </summary>
     private async Task HandleUpdateEmail()
     {
         errorMessage = string.Empty;
@@ -424,6 +434,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the password change form submission.
+    /// </summary>
     private async Task HandleChangePassword()
     {
         errorMessage = string.Empty;
@@ -475,10 +488,13 @@
         }
     }
 
-    // ===== My Threads =====
+    /// <summary>
+    /// Activates the My Threads tab and lazy-loads data on first click.
+    /// </summary>
     private async Task ActivateMyThreads()
     {
         activeTab = "mythreads";
+        
         // Only load data on the first activation to avoid redundant API calls
         if (!myThreadsLoaded)
         {
@@ -487,6 +503,9 @@
         }
     }
 
+    /// <summary>
+    /// Loads the current user's threads paged.
+    /// </summary>
     private async Task LoadMyThreads()
     {
         if (userId == null) return;
@@ -500,47 +519,65 @@
         myThreads = myThreadsPaged?.Items?.ToList() ?? [];
     }
 
+    /// <summary>
+    /// Updates sorting of threads when changed.
+    /// </summary>
     private async Task OnMyThreadsSortChanged(ChangeEventArgs e)
     {
         if (e?.Value == null) return;
         if (!Enum.TryParse<ThreadSortBy>(e.Value.ToString(), out var parsed)) return;
-        if (parsed == _myThreadsSortBy) return; // No-op if same sort selected
+        if (parsed == _myThreadsSortBy) return;
         _myThreadsSortBy = parsed;
-        myThreadsPage = 1; // Reset to first page on sort change
+        myThreadsPage = 1;         // Reset to first page on sort change
         await LoadMyThreads();
     }
 
+    /// <summary>
+    /// Updates page size of threads when changed.
+    /// </summary>
     private async Task OnMyThreadsPageSizeChanged(ChangeEventArgs e)
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == myThreadsPageSize) return; // No-op if same size selected
+        if (newSize == myThreadsPageSize) return;
         myThreadsPageSize = newSize;
-        myThreadsPage = 1; // Reset to first page on page size change
+        myThreadsPage = 1;         // Reset to first page on page size change
         await LoadMyThreads();
     }
 
+    /// <summary>
+    /// Used to access the previous page of threads.
+    /// </summary>
     private async Task PrevMyThreadsPage()
     {
         if (myThreadsPage > 1) { myThreadsPage--; await LoadMyThreads(); }
     }
 
+    /// <summary>
+    /// Used to access the next page of threads.
+    /// </summary>
     private async Task NextMyThreadsPage()
     {
         if (myThreadsPaged != null && myThreadsPage < myThreadsPaged.TotalPages) { myThreadsPage++; await LoadMyThreads(); }
     }
 
+    /// <summary>
+    /// Used to navigate to a specific page of threads.
+    /// </summary>
     private async Task GoToMyThreadsPage(int p)
     {
         if (myThreadsPaged == null || p < 1 || p > myThreadsPaged.TotalPages) return;
         myThreadsPage = p;
         await LoadMyThreads();
     }
-
-    // ===== My Comments =====
+    
+    /// <summary>
+    /// Activates the My Comments tab and lazy-loads data on first click.
+    /// </summary>
     private async Task ActivateMyComments()
     {
         activeTab = "mycomments";
+        
         // Only load data on the first activation to avoid redundant API calls
         if (!myCommentsLoaded)
         {
@@ -549,6 +586,9 @@
         }
     }
 
+    /// <summary>
+    /// Loads the current user's comments paged.
+    /// </summary>
     private async Task LoadMyComments()
     {
         if (userId == null) return;
@@ -556,55 +596,78 @@
         myComments = myCommentsPaged?.Items?.ToList() ?? [];
     }
 
+    /// <summary>
+    /// Updates sorting of comments when changed.
+    /// </summary>
     private async Task OnMyCommentsSortChanged(ChangeEventArgs e)
     {
         if (e?.Value == null) return;
         if (!Enum.TryParse<CommentSortBy>(e.Value.ToString(), out var parsed)) return;
-        if (parsed == _myCommentsSortBy) return; // No-op if same sort selected
+        if (parsed == _myCommentsSortBy) return;
         _myCommentsSortBy = parsed;
-        myCommentsPage = 1; // Reset to first page on sort change
+        myCommentsPage = 1;         // Reset to first page on sort change
         await LoadMyComments();
     }
 
+    /// <summary>
+    /// Updates page size of comments when changed.
+    /// </summary>
     private async Task OnMyCommentsPageSizeChanged(ChangeEventArgs e)
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == myCommentsPageSize) return; // No-op if same size selected
+        if (newSize == myCommentsPageSize) return;
         myCommentsPageSize = newSize;
-        myCommentsPage = 1; // Reset to first page on page size change
+        myCommentsPage = 1;         // Reset to first page on page size change
         await LoadMyComments();
     }
 
+    /// <summary>
+    /// Used to access the previous page of comments.
+    /// </summary>
     private async Task PrevMyCommentsPage()
     {
         if (myCommentsPage > 1) { myCommentsPage--; await LoadMyComments(); }
     }
 
+    /// <summary>
+    /// Used to access the next page of comments.
+    /// </summary>
     private async Task NextMyCommentsPage()
     {
         if (myCommentsPaged != null && myCommentsPage < myCommentsPaged.TotalPages) { myCommentsPage++; await LoadMyComments(); }
     }
 
+    /// <summary>
+    /// Used to navigate to a specific page of comments.
+    /// </summary>
     private async Task GoToMyCommentsPage(int p)
     {
         if (myCommentsPaged == null || p < 1 || p > myCommentsPaged.TotalPages) return;
         myCommentsPage = p;
         await LoadMyComments();
     }
-
-    // Local form models — keep API DTOs clean and allow profile-specific validation
+    
+    /// <summary>
+    /// Local form model — keep API DTOs clean and allow profile-specific validation
+    /// </summary>
     private class ProfileModel
     {
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Local form model — keep API DTOs clean and allow profile-specific validation
+    /// </summary>
     private class UpdateEmailModel
     {
         public string NewEmail { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Local form model — keep API DTOs clean and allow profile-specific validation
+    /// </summary>
     private class ChangePasswordModel
     {
         public string CurrentPassword { get; set; } = string.Empty;

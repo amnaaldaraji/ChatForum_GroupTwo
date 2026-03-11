@@ -3,80 +3,93 @@
 
 <link rel="stylesheet" href="/css/forum-table.css" />
 
+<PageTitle>Threads</PageTitle>
+
 <div class="forum-view-wrapper">
-    @* Breadcrumb navigation — shows category name if filtered, otherwise "ALL" *@
+    
+    <!-- Breadcrumb navigation — shows category name if filtered, otherwise "ALL" -->
     <nav class="breadcrumb-trail">
         <a href="/">Sport Forum</a>
         <span> &rsaquo; </span>
         <span class="breadcrumb-current">@(CategoryName?.ToUpper() ?? "ALL")</span>
     </nav>
 
+    <!-- Tagline -->
     <div class="forum-intro">
         <h1>@(CategoryName ?? "All Threads")</h1>
-        <p>the place for debates on current affairs and recent past of motorsport.</p>
+        <p>The place for debates on current affairs and recent past of motorsport.</p>
     </div>
 
+    <!-- Thread listing table -->
     <div class="forum-table-container">
         <table class="autosport-table">
             <thead>
-                <tr>
-                    <th class="th-main">TOPIC</th>
-                    <th class="th-stats text-center">STATS</th>
-                    <th class="th-last">DATE</th>
-                </tr>
+            <tr>
+                <th class="th-main">TOPIC</th>
+                <th class="th-stats text-center">STATS</th>
+                <th class="th-last">DATE</th>
+            </tr>
             </thead>
+            
             <tbody>
-                @* Loading / empty / content states *@
-                @if (threads == null) 
-                { 
-                    <tr><td colspan="3" class="no-results">loading threads...</td></tr> 
-                }
-                else if (!threads.Items.Any())
+            <!-- Loading / empty / content states -->
+            @if (threads == null)
+            {
+                <tr><td colspan="3" class="no-results">loading threads...</td></tr>
+            }
+            else if (!threads.Items.Any())
+            {
+                <tr><td colspan="3" class="no-results">no topics found.</td></tr>
+            }
+            else
+            {
+                @foreach (var t in threads.Items)
                 {
-                    <tr><td colspan="3" class="no-results">no topics found.</td></tr>
+                    <tr class="topic-row">
+                        <td class="td-main">
+                            <div class="topic-box">
+                                <div class="topic-info">
+                                    <a href="/thread/@t.Id" class="topic-title">@t.Title</a>
+                                    <div class="topic-subtext">started by <span class="author-bold">@t.Author</span></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="td-stats text-center">
+                            <div class="stat-group">
+                                <span class="stat-count">@t.CommentsCount</span>
+                                <span class="stat-label">REPLIES</span>
+                            </div>
+                        </td>
+                        <td class="td-last">
+                            <div class="last-post-box">
+                                <span class="lp-time">@t.Created.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </td>
+                    </tr>
                 }
-                else 
-                {
-                    @foreach (var t in threads.Items) 
-                    {
-                        <tr class="topic-row">
-                            <td class="td-main">
-                                <div class="topic-box">
-                                    <div class="topic-info">
-                                        <a href="/thread/@t.Id" class="topic-title">@t.Title</a>
-                                        <div class="topic-subtext">started by <span class="author-bold">@t.Author</span></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="td-stats text-center">
-                                <div class="stat-group">
-                                    <span class="stat-count">@t.CommentsCount</span>
-                                    <span class="stat-label">REPLIES</span>
-                                </div>
-                            </td>
-                            <td class="td-last">
-                                <div class="last-post-box">
-                                    <span class="lp-time">@t.Created.ToString("MMM dd, yyyy")</span>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
+            }
             </tbody>
         </table>
     </div>
 </div>
 
 @code {
-    [Parameter] public string? CategoryName { get; set; } // Optional filter; null means show all threads
-    private PagedResult<ThreadDto>? threads; // Null while loading
+    [Parameter] public string? CategoryName { get; set; }
+    private PagedResult<ThreadDto>? threads;
 
+    /// <summary>
+    /// Reloads threads whenever the category filter changes.
+    /// </summary>
     protected override async Task OnParametersSetAsync() {
-        await LoadThreads(); // Reload whenever the category filter changes
+        await LoadThreads();
     }
 
+    /// <summary>
+    /// Fetches threads from the API, optionally filtered by category.
+    /// </summary>
     private async Task LoadThreads() {
         var url = "api/threads?pageSize=20";
+        
         // Append category filter to the query string if provided
         if (!string.IsNullOrEmpty(CategoryName)) url += $"&CategoryName={Uri.EscapeDataString(CategoryName)}";
         try {
@@ -90,7 +103,7 @@
                         t.AuthorUserName,
                         t.TimeCreated,
                         t.Title,
-                        "", // Body not needed in the listing view
+                        "",         // Body not needed in the listing view
                         t.CommentCount
                     )).ToList(),
                     response.TotalCount,
@@ -103,8 +116,10 @@
             threads = PagedResult<ThreadDto>.Create(new List<ThreadDto>(), 0, 1, 20);
         }
     }
-
-    // Local view model — maps API DTO fields to names used in the template above
+    
+    /// <summary>
+    /// Local view model — maps API DTO fields to names used in the template.
+    /// </summary>
     private record ThreadDto(
         int Id,
         string Author,

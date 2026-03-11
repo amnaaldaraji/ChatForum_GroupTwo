@@ -25,14 +25,16 @@ builder.Services.AddScoped(sp => new HttpClient
 // Authentication and authorization services
 builder.Services.AddScoped<ITokenStorageService, TokenStorageService>();
 builder.Services.AddScoped<ApiAuthenticationStateProvider>();
+
 // Register the custom provider as the AuthenticationStateProvider Blazor resolves
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<ApiAuthenticationStateProvider>());
 builder.Services.AddAuthorizationCore();
+
 // Makes the auth state available as a cascading value throughout the component tree
 builder.Services.AddCascadingAuthenticationState();
 
-// Every API service client 
+// API service clients
 builder.Services.AddScoped<IAuthClientService, AuthService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ThreadService>();
@@ -43,14 +45,13 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    // Use a dedicated error page and enforce HSTS in production
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseAntiforgery(); // Required for Blazor form anti-forgery token validation
+app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 app.Run();

@@ -5,6 +5,7 @@
 @implements IDisposable
 
 <PageTitle>Register</PageTitle>
+
 <link rel="stylesheet" href="/css/auth.css" />
 
 <div class="auth-container">
@@ -14,7 +15,7 @@
         </div>
         <div class="auth-card-body">
 
-            @* Display registration error (validation failure, duplicate username, etc.) *@
+            <!-- Display registration error (validation failure, duplicate username, etc.) -->
             @if (!string.IsNullOrEmpty(errorMessage))
             {
                 <div class="alert alert-danger">
@@ -22,7 +23,7 @@
                 </div>
             }
 
-            @* Shown briefly after successful registration before redirecting to login *@
+            <!-- Shown briefly after successful registration before redirecting to login -->
             @if (registrationSuccessful)
             {
                 <div class="alert alert-success">
@@ -30,6 +31,7 @@
                 </div>
             }
 
+            <!-- Registration form -->
             <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
 
                 <div class="mb-3">
@@ -52,7 +54,7 @@
                     <InputText type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
                 </div>
 
-                @* Button disabled while the API call is in flight to prevent double-submit *@
+                <!-- Button disabled while the API call is going out to prevent double-submit -->
                 <button type="submit" class="btn btn-primary" disabled="@isLoading">
                     @if (isLoading)
                     {
@@ -62,7 +64,6 @@
                 </button>
 
                 <a href="/login" class="auth-link">Already have an account? Login</a>
-
             </EditForm>
         </div>
     </div>
@@ -70,10 +71,10 @@
 
 @code {
 
-    private CancellationTokenSource _cts = new(); // Used to cancel the redirect delay if the component is disposed early
+    private CancellationTokenSource _cts = new();
     private RegisterRequest registerModel = new();
     private string errorMessage = string.Empty;
-    private bool isLoading = false;           // Prevents double-submit while the API call is in flight
+    private bool isLoading = false;           // Prevents double-submit while the API call is going out.
     private bool registrationSuccessful = false;
 
     /// <summary>
@@ -100,6 +101,7 @@
             {
                 registrationSuccessful = true;
                 StateHasChanged();
+                
                 // Brief delay so the user sees the success message before redirect
                 await Task.Delay(2000, _cts.Token);
                 Navigation.NavigateTo("/login");
@@ -123,11 +125,12 @@
         }
     }
 
-    // Cancel the redirect delay if the user navigates away early
+    /// <summary>
+    /// Cancel the redirect delay if the user navigates away early.
+    /// </summary>
     public void Dispose()
     {
         _cts.Cancel();
         _cts.Dispose();
     }
-
 }

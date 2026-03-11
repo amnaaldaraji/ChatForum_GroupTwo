@@ -1,9 +1,8 @@
 @page "/logout"
-@using Forum.Blazor.Services
 @inject IAuthClientService AuthService
 @inject NavigationManager Navigation
 
-<PageTitle>Logging out...</PageTitle>
+<PageTitle>Logging out</PageTitle>
 
 <div class="row justify-content-center">
     <div class="col-md-6 text-center">
@@ -12,9 +11,11 @@
 </div>
 
 @code {
+    /// <summary>
+    /// Clear the auth session then redirect to home
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
-        // Clear the auth session then redirect to home
         await AuthService.LogoutAsync();
         Navigation.NavigateTo("/");
     }

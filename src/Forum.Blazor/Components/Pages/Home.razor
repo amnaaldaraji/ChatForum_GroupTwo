@@ -1,6 +1,6 @@
 @page "/"
-@inject CategoryService CategoryService   
-@inject ThreadService ThreadService       
+@inject CategoryService CategoryService
+@inject ThreadService ThreadService
 
 <PageTitle>Overtime</PageTitle>
 
@@ -8,17 +8,16 @@
 
 <div class="home-wrapper">
     <div class="home-overlay">
-
         <div class="home-content">
 
-            @* Show a loading indicator while threads are being fetched *@
+            <!-- Show a loading indicator while threads are being fetched -->
             @if (_popularThreads == null)
             {
                 <div class="loading">loading...</div>
             }
             else
             {
-                @* Popular Threads section — top 5 threads ranked by comment count *@
+                <!-- Popular Threads section — top 5 threads ranked by comment count -->
                 @if (_popularThreads.Any())
                 {
                     <div class="popular-section">
@@ -40,7 +39,7 @@
                     </div>
                 }
 
-                @* Popular Categories section — top 4 categories ranked by most recent activity *@
+                <!-- Popular Categories section — top 4 categories ranked by most recent activity -->
                 @if (_popularCategories != null && _popularCategories.Any())
                 {
                     <div class="categories-section">
@@ -55,10 +54,10 @@
                                         <a href="/category/@category.Name" class="view-all-link">View all &rarr;</a>
                                     </div>
 
-                                    @* Show up to 2 recent threads per category card, or a placeholder if empty *@
+                                    <!-- Show up to 2 recent threads per category card, or a placeholder if empty -->
                                     @if (category.RecentThreads == null || !category.RecentThreads.Any())
                                     {
-                                        <div class="no-threads">no threads yet.</div>
+                                        <div class="no-threads">No threads yet.</div>
                                     }
                                     else
                                     {
@@ -88,26 +87,29 @@
                     </div>
                 }
             }
-
         </div>
     </div>
 </div>
 
 @code {
-    private List<PopularThreadItem>? _popularThreads;       // Null while loading; top 5 threads by comment count
+    private List<PopularThreadItem>? _popularThreads;       // Top 5 threads by comment count
     private List<CategoryWithThreads>? _popularCategories; // Top 4 categories by most recent activity
-
-    // Local view model combining category metadata with its recent threads
+    
+    /// <summary>
+    /// Local view model combining category metadata with its recent threads.
+    /// </summary>
     private class CategoryWithThreads
     {
         public string Name { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public int ThreadCount { get; set; }
-        public DateTime LatestActivity { get; set; }         // Used to rank categories by recent activity
+        public DateTime LatestActivity { get; set; }
         public List<ThreadSummaryDto> RecentThreads { get; set; } = [];
     }
-
-    // Local view model for displaying a thread across categories on the home page
+    
+    /// <summary>
+    /// Local view model for displaying a thread across categories on the home page
+    /// </summary>
     private class PopularThreadItem
     {
         public int ThreadId { get; set; }
@@ -117,6 +119,9 @@
         public int CommentCount { get; set; }
     }
 
+    /// <summary>
+    /// Fetches categories and threads, then builds the popular threads and categories lists.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         var categories = await CategoryService.GetAllAsync();
