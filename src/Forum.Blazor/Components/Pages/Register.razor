@@ -88,7 +88,25 @@
 
         try
         {
-            // Validate password confirmation on the client before calling API
+            // Validate fields client-side in priority order: username, email, password
+            if (string.IsNullOrWhiteSpace(registerModel.Username))
+            {
+                errorMessage = "Username is required.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(registerModel.Email))
+            {
+                errorMessage = "Email is required.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(registerModel.Password))
+            {
+                errorMessage = "Password is required.";
+                return;
+            }
+
             if (registerModel.Password != registerModel.ConfirmPassword)
             {
                 errorMessage = "Passwords do not match.";
@@ -108,7 +126,8 @@
             }
             else
             {
-                errorMessage = result.ErrorMessage ?? "Registration failed.";
+                var fullError = result.ErrorMessage ?? "Registration failed.";
+                errorMessage = fullError.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? fullError;
             }
         }
         catch (OperationCanceledException)
