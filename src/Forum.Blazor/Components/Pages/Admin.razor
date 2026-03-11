@@ -1,10 +1,10 @@
 @page "/admin"
-@inject CategoryService CategoryService
-@inject ThreadService ThreadService
-@inject UserService UserService
+@inject CategoryService CategoryService  
+@inject ThreadService ThreadService       
+@inject UserService UserService           
 @using Forum.Application.DTOs.Thread
 @using Forum.Application.DTOs.User
-@inject IJSRuntime JS
+@inject IJSRuntime JS                     
 
 <PageTitle>Admin Panel - Sport Forum</PageTitle>
 
@@ -12,6 +12,7 @@
 
 <AuthorizeView Roles="Admin">
 <NotAuthorized>
+    @* Shown to any user who is not in the Admin role *@
     <div class="row justify-content-center mt-5">
         <div class="col-md-6 text-center">
             <h3>Access Denied</h3>
@@ -29,12 +30,14 @@
 
     <h1 class="panel-title">Admin Panel</h1>
 
+    @* Tab buttons clicking a tab sets activeTab and shows the corresponding section *@
     <div class="panel-tabs">
         <button class="panel-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
         <button class="panel-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
         <button class="panel-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
     </div>
 
+    @* Status banner shown after any create/update/delete operation *@
     @if (!string.IsNullOrEmpty(statusMessage))
     {
         <div class="panel-status @(isError ? "error" : "success")">@statusMessage</div>
@@ -46,6 +49,7 @@
         <div class="panel-section panel-section-narrow">
             <h2>Manage Categories</h2>
 
+            @* Inline form for creating a new category *@
             <div class="panel-add-form">
                 <input type="text" class="panel-input" placeholder="New category name..." @bind="newCategoryName" />
                 <button class="btn-red" @onclick="AddCategory" disabled="@isLoading">Add Category</button>
@@ -69,6 +73,7 @@
                             <td>@cat.Name</td>
                             <td>@cat.ThreadCount</td>
                             <td>
+                                @* Delete is disabled if the category contains threads to prevent orphaned data *@
                                 <button class="btn-danger-sm"
                                         @onclick="() => DeleteCategory(cat.CategoryId, cat.Name)"
                                         disabled="@(cat.ThreadCount > 0)"
@@ -91,6 +96,7 @@
             <h2>Manage Threads</h2>
 
             <div class="d-flex align-items-center mb-2">
+                @* Page size selector — resets to page 1 on change *@
                 <label class="me-2 mb-0 panel-page-size-label">Threads per page:</label>
                 <select class="form-select form-select-sm w-auto" value="@threadsPageSize" @onchange="OnThreadsPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
@@ -99,6 +105,7 @@
                     }
                 </select>
 
+                @* Sort selector — resets to page 1 on change *@
                 <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
                 <select class="form-select form-select-sm w-auto" value="@_threadsSortByString" @onchange="OnThreadsSortChanged">
                     <option value="@ThreadSortBy.Newest.ToString()">Newest</option>
@@ -108,6 +115,7 @@
                 </select>
 
                 <div class="ms-auto">
+                    @* Pagination controls — only rendered when there is more than one page *@
                     @if (threadsPaged != null && threadsPaged.TotalPages > 1)
                     {
                         <nav aria-label="Threads pagination">
@@ -119,6 +127,7 @@
                                 @{
                                     var ttPages = threadsPaged.TotalPages;
                                     var ttShow = new SortedSet<int>();
+                                    // Always show first and last page, plus neighbours of the current page
                                     ttShow.Add(1);
                                     ttShow.Add(ttPages);
                                     if (threadsPage > 1) ttShow.Add(threadsPage - 1);
@@ -128,6 +137,7 @@
                                     int? ttLast = null;
                                     foreach (var pageNum in ttShow)
                                     {
+                                        // Insert ellipsis between non-consecutive page numbers
                                         if (ttLast.HasValue && pageNum - ttLast.Value > 1)
                                         {
                                             <li class="page-item disabled">
@@ -192,6 +202,7 @@
             <h2>Manage Users</h2>
 
             <div class="d-flex align-items-center mb-2">
+                @* Page size selector — resets to page 1 on change *@
                 <label class="me-2 mb-0 panel-page-size-label">Users per page:</label>
                 <select class="form-select form-select-sm w-auto" value="@usersPageSize" @onchange="OnUsersPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
@@ -200,6 +211,7 @@
                     }
                 </select>
 
+                @* Sort selector — resets to page 1 on change *@
                 <label class="ms-3 me-2 mb-0 panel-page-size-label">Sort:</label>
                 <select class="form-select form-select-sm w-auto" value="@_usersSortByString" @onchange="OnUsersSortChanged">
                     <option value="@UserSortBy.Username.ToString()">Username</option>
@@ -208,6 +220,7 @@
                 </select>
 
                 <div class="ms-auto">
+                    @* Pagination controls — only rendered when there is more than one page *@
                     @if (usersPaged != null && usersPaged.TotalPages > 1)
                     {
                         <nav aria-label="Users pagination">
@@ -219,6 +232,7 @@
                                 @{
                                     var uuPages = usersPaged.TotalPages;
                                     var uuShow = new SortedSet<int>();
+                                    // Always show first and last page, plus neighbours of the current page
                                     uuShow.Add(1);
                                     uuShow.Add(uuPages);
                                     if (usersPage > 1) uuShow.Add(usersPage - 1);
@@ -228,6 +242,7 @@
                                     int? uuLast = null;
                                     foreach (var pageNum in uuShow)
                                     {
+                                        // Insert ellipsis between non-consecutive page numbers
                                         if (uuLast.HasValue && pageNum - uuLast.Value > 1)
                                         {
                                             <li class="page-item disabled">
@@ -269,6 +284,7 @@
                         {
                             <tr>
                                 <td>
+                                    @* Inline username editing — shows an input field when this row is being edited *@
                                     @if (editingUserId == user.Id)
                                     {
                                         <input type="text" class="panel-input-inline" @bind="editingUserName" />
@@ -283,15 +299,18 @@
                                 <td>@user.CommentCount</td>
                                 <td>@(user.IsDeleted ? "Deleted" : "Active")</td>
                                 <td class="panel-actions">
+                                    @* Actions are hidden for already-deleted (soft-deleted) users *@
                                     @if (!user.IsDeleted)
                                     {
                                         @if (editingUserId == user.Id)
                                         {
+                                            @* Editing mode — show Save/Cancel *@
                                             <button class="btn-success-sm" @onclick="() => SaveUserName(user.Id)">Save</button>
                                             <button class="btn-outline-sm" @onclick="CancelEditUser">Cancel</button>
                                         }
                                         else
                                         {
+                                            @* View mode — show Rename/Delete *@
                                             <button class="btn-outline-sm" @onclick="() => StartEditUser(user.Id, user.UserName)">Rename</button>
                                             <button class="btn-danger-sm" @onclick="() => DeleteUser(user.Id, user.UserName)">Delete</button>
                                         }
@@ -312,10 +331,10 @@
 </AuthorizeView>
 
 @code {
-    private string activeTab = "categories";
-    private string statusMessage = "";
-    private bool isError;
-    private bool isLoading;
+    private string activeTab = "categories"; // Currently active tab: "categories", "threads", or "users"
+    private string statusMessage = "";       // Feedback message shown after admin actions
+    private bool isError;                    // True if statusMessage represents an error
+    private bool isLoading;                  // Prevents double-submits during async operations
 
     // Categories
     private List<CategoryDto> categories = [];
@@ -327,7 +346,7 @@
     private int threadsPage = 1;
     private int threadsPageSize = 5;
     private ThreadSortBy _threadsSortBy = ThreadSortBy.Newest;
-    private string _threadsSortByString => _threadsSortBy.ToString();
+    private string _threadsSortByString => _threadsSortBy.ToString(); // Bound to the sort <select> value
 
     // Users
     private List<UserDto> users = [];
@@ -335,14 +354,16 @@
     private int usersPage = 1;
     private int usersPageSize = 5;
     private UserSortBy _usersSortBy = UserSortBy.Username;
-    private string _usersSortByString => _usersSortBy.ToString();
-    private string? editingUserId;
-    private string editingUserName = "";
+    private string _usersSortByString => _usersSortBy.ToString(); // Bound to the sort <select> value
+    private string? editingUserId;       // ID of the user row currently being renamed, or null
+    private string editingUserName = ""; // Holds the draft username during inline editing
 
-    private bool _loaded;
+    private bool _loaded; // Guard flag to prevent double-loading on re-render
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Load all data once after the first render, using OnAfterRenderAsync to support
+        // InteractiveServer render mode where OnInitializedAsync may run before auth is available
         if (firstRender && !_loaded)
         {
             _loaded = true;
@@ -355,6 +376,7 @@
 
     private void SetStatus(string message, bool error = false)
     {
+        // Updates the status banner with a success or error message
         statusMessage = message;
         isError = error;
     }
@@ -372,7 +394,7 @@
         var response = await CategoryService.CreateAsync(new CreateCategoryDto(newCategoryName.Trim()));
         if (response.IsSuccessStatusCode)
         {
-            newCategoryName = "";
+            newCategoryName = "";  // Clear the input on success
             await LoadCategories();
             SetStatus("Category created.");
         }
@@ -385,6 +407,7 @@
 
     private async Task DeleteCategory(int id, string name)
     {
+        // Confirm before deleting — warns that all threads in the category will also be removed
         var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete category \"{name}\"? All threads in it will also be deleted.");
         if (!confirmed) return;
 
@@ -411,14 +434,15 @@
     {
         if (e?.Value == null) return;
         if (!Enum.TryParse<ThreadSortBy>(e.Value.ToString(), out var parsed)) return;
-        if (parsed == _threadsSortBy) return;
+        if (parsed == _threadsSortBy) return; // No-op if same sort selected
         _threadsSortBy = parsed;
-        threadsPage = 1;
+        threadsPage = 1; // Reset to first page on sort change
         await LoadThreads();
     }
 
     private async Task DeleteThread(int id, string title)
     {
+        // Confirm before deleting a thread
         var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete thread \"{title}\"?");
         if (!confirmed) return;
 
@@ -438,9 +462,9 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == threadsPageSize) return;
+        if (newSize == threadsPageSize) return; // No-op if same size selected
         threadsPageSize = newSize;
-        threadsPage = 1;
+        threadsPage = 1; // Reset to first page on page size change
         await LoadThreads();
     }
 
@@ -471,6 +495,7 @@
         }
         catch (HttpRequestException)
         {
+            // API returns 403 if the cookie has expired or role claim is missing
             SetStatus("Failed to load users. You may not have admin permissions.", true);
         }
     }
@@ -479,9 +504,9 @@
     {
         if (e?.Value == null) return;
         if (!Enum.TryParse<UserSortBy>(e.Value.ToString(), out var parsed)) return;
-        if (parsed == _usersSortBy) return;
+        if (parsed == _usersSortBy) return; // No-op if same sort selected
         _usersSortBy = parsed;
-        usersPage = 1;
+        usersPage = 1; // Reset to first page on sort change
         await LoadUsers();
     }
 
@@ -489,9 +514,9 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == usersPageSize) return;
+        if (newSize == usersPageSize) return; // No-op if same size selected
         usersPageSize = newSize;
-        usersPage = 1;
+        usersPage = 1; // Reset to first page on page size change
         await LoadUsers();
     }
 
@@ -514,12 +539,14 @@
 
     private void StartEditUser(string id, string currentName)
     {
+        // Enter inline edit mode for the selected user row
         editingUserId = id;
         editingUserName = currentName;
     }
 
     private void CancelEditUser()
     {
+        // Exit inline edit mode without saving
         editingUserId = null;
         editingUserName = "";
     }
@@ -544,6 +571,7 @@
 
     private async Task DeleteUser(string id, string name)
     {
+        // Soft-delete — the user record is flagged as deleted, not removed from the database
         var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete user \"{name}\"? This is a soft-delete.");
         if (!confirmed) return;
 

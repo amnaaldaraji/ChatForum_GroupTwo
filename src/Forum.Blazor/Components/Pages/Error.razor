@@ -3,6 +3,7 @@
 <PageTitle>Error</PageTitle>
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
+@* Show the request ID if available — useful for correlating with server logs *@
 @if (ShowRequestId)
 {
     <p>
@@ -20,10 +21,9 @@
     and restarting the app.
 </p>
 @code{
-    [CascadingParameter] private HttpContext? HttpContext { get; set; }
-    private string? RequestId { get; set; }
-    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+    [CascadingParameter] private HttpContext? HttpContext { get; set; } // Provides access to the current HTTP context for trace info
+    private string? RequestId { get; set; }                             // The trace/request ID displayed on the error page
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);     // Only show the request ID section if one is available
     protected override void OnInitialized() =>
-        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier; // Prefer the diagnostic activity ID, fall back to the HTTP trace identifier
 }
-

@@ -1,8 +1,8 @@
 @page "/create-thread"
-@page "/create-thread/{CategoryName}"
-@inject CategoryService CategoryService
-@inject ThreadService ThreadService
-@inject NavigationManager NavigationManager
+@page "/create-thread/{CategoryName}"           
+@inject CategoryService CategoryService        
+@inject ThreadService ThreadService             
+@inject NavigationManager NavigationManager     
 
 <PageTitle>Create New Thread</PageTitle>
 
@@ -10,6 +10,7 @@
 
 <AuthorizeView>
 <NotAuthorized>
+    @* Unauthenticated users are shown a prompt rather than the form *@
     <div class="row justify-content-center mt-5">
         <div class="col-md-6 text-center">
             <h3>Please log in</h3>
@@ -26,12 +27,14 @@
         <p>start a new discussion in the forum.</p>
     </div>
 
+    @* Show a spinner-like message while the API call is in flight *@
     @if (_isSubmitting)
     {
         <div class="submitting">creating thread...</div>
     }
     else
     {
+        @* EditForm uses DataAnnotations on CreateThreadModel for client-side validation *@
         <EditForm Model="@_newThread" OnValidSubmit="@HandleSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
@@ -45,6 +48,7 @@
             <div class="form-group">
                 <label>category</label>
 
+                @* Category is pre-selected from the URL and shown as a read-only display input *@
                @if (_categories != null)
                         {
                    var selected = _categories.FirstOrDefault(c => c.CategoryId == _newThread.CategoryId);
@@ -63,6 +67,7 @@
                 <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
                     create thread
                 </button>
+                @* Cancel navigates back to the home page without submitting *@
                 <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/"))">
                     cancel
                 </button>
@@ -70,6 +75,7 @@
         </EditForm>
     }
 
+    @* Displays API or network errors below the form *@
     @if (!string.IsNullOrEmpty(_errorMessage))
     {
         <div class="error-message">@_errorMessage</div>
@@ -81,14 +87,14 @@
 
 @code {
     [Parameter]
-    public string? CategoryName { get; set; }
+    public string? CategoryName { get; set; } // Optional URL segment; pre-selects the category if provided
 
     private CreateThreadModel _newThread = new();
-    private List<CategoryDto>? _categories;
-    private bool _isSubmitting;
+    private List<CategoryDto>? _categories;  // All available categories, loaded on init
+    private bool _isSubmitting;              // Prevents double-submit while API call is in flight
     private string _errorMessage = string.Empty;
 
-    // model with validation attributes
+    // Local form model with validation attributes — keeps API DTOs clean
     public class CreateThreadModel
     {
         [Required(ErrorMessage = "title is required")]
@@ -98,12 +104,14 @@
         [Required(ErrorMessage = "category is required")]
         public string CategoryIdString { get; set; } = string.Empty;
 
+        // Parsed convenience property — avoids storing an int that can't bind to a select easily
         public int CategoryId => string.IsNullOrEmpty(CategoryIdString) ? 0 : int.Parse(CategoryIdString);
 
         [Required(ErrorMessage = "message is required")]
         [StringLength(2000, MinimumLength = 10, ErrorMessage = "message must be between 10 and 2000 characters")]
         public string Body { get; set; } = string.Empty;
 
+        // Maps the form model to the API DTO
         public CreateThreadDto ToDto() => new(Title, CategoryId, Body);
     }
 
@@ -112,6 +120,7 @@
         var categories = await CategoryService.GetAllAsync();
         _categories = categories?.ToList();
 
+        // If a category name was passed in the URL, pre-select it in the form
         if (!string.IsNullOrEmpty(CategoryName) && _categories != null)
         {
             var selectedCategory = _categories
@@ -137,7 +146,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                // navigate to threads page on success
+                // On success, redirect to the category page the thread was posted in
                 var selectedCategory = _categories.FirstOrDefault(c => c.CategoryId == _newThread.CategoryId);
                 if (selectedCategory != null)
                 {
@@ -145,6 +154,7 @@
                 }
                 else
                 {
+                    // Fallback if category can't be resolved
                     NavigationManager.NavigateTo("/threads");
                 }
             }
@@ -155,6 +165,7 @@
         }
         catch
         {
+            // Catches network failures or unexpected exceptions
             _errorMessage = "an error occurred while creating the thread.";
         }
         finally

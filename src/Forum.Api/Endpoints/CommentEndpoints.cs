@@ -17,7 +17,7 @@ public static class CommentEndpoints
         var group = app.MapGroup("/api/comments")
             .WithTags("Comments");
 
-        // GET paginated comments (filterable by author, thread, date)
+        // GET paginated comments (filterable by author, thread, date )
         group.MapGet("/", async ([AsParameters] CommentFilterParams filterParams, IMediator mediator, CancellationToken ct) =>
         {
             var result = await mediator.Send(new GetCommentsQuery(filterParams), ct);

@@ -6,10 +6,10 @@
 /// </summary>
 public class Vote
 {
-    public int VoteId { get; set; }
-    public int Value { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public int CommentId { get; set; }
-    public User User { get; set; } = null!;
-    public Comment Comment { get; set; } = null!;
+    public int VoteId { get; set; }          // Primary key
+    public int Value { get; set; }           // 1 for upvote, -1 for downvote
+    public string UserId { get; set; } = string.Empty; // FK to the user who cast the vote
+    public int CommentId { get; set; }       // FK to the comment being voted on
+    public User User { get; set; } = null!;  // Navigation property to the voting user
+    public Comment Comment { get; set; } = null!; // Navigation property to the voted-on comment
 }

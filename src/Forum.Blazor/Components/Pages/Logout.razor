@@ -14,6 +14,7 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        // Clear the auth session then redirect to home
         await AuthService.LogoutAsync();
         Navigation.NavigateTo("/");
     }

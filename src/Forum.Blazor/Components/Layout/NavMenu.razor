@@ -1,21 +1,23 @@
 @using Forum.Blazor.Services
-@inject CategoryService CategoryService
-@inject IAuthClientService AuthService
-@inject NavigationManager Navigation
+@inject CategoryService CategoryService      
+@inject IAuthClientService AuthService        
+@inject NavigationManager Navigation          
 
 <header class="main-header">
     <div class="top-row-black">
         <div class="header-container">
             <div class="brand">
-                <a href="/">OVER<span class="red-text">TIME</span></a>
+                <a href="/">OVER<span class="red-text">TIME</span></a> @* Site logo/wordmark linking to home *@
             </div>
             <span class="brand-tagline">Debates on current affairs and recent past of your favourite sports.</span>
             <div class="user-actions desktop-only">
                 <AuthorizeView>
                     <Authorized>
+                        @* Show username as a link to the profile page when logged in *@
                         <a href="/profile" class="user-greeting">
                             @context.User.Identity?.Name
                         </a>
+                        @* Only render the Admin button if the user has the Admin role *@
                         <AuthorizeView Roles="Admin">
                             <Authorized Context="adminContext">
                                 <a href="/admin" class="btn-outline">Admin</a>
@@ -24,11 +26,13 @@
                         <button class="btn-outline" @onclick="HandleLogout">Log Out</button>
                     </Authorized>
                     <NotAuthorized>
+                        @* Show login/register buttons to unauthenticated users *@
                         <a href="/login" class="btn-outline">Log In</a>
                         <a href="/register" class="btn-red">Register</a>
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
+            @* Hamburger button — toggles the mobile nav collapse via Bootstrap *@
             <button class="mobile-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenuCollapse" aria-controls="navMenuCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
@@ -37,6 +41,7 @@
         </div>
     </div>
 
+    @* Desktop category navigation bar — dynamically populated from the API *@
     <nav class="sub-nav-white desktop-only">
         <div class="header-container">
             <ul class="nav-menu">
@@ -51,6 +56,7 @@
         </div>
     </nav>
 
+    @* Mobile collapsible menu — contains categories and auth actions *@
     <div class="collapse" id="navMenuCollapse">
         <div class="mobile-nav-menu">
             @if (_categories != null)
@@ -82,22 +88,25 @@
 </header>
 
 @code {
-    private List<CategoryDto>? _categories;
+    private List<CategoryDto>? _categories; // Holds the list of categories fetched on init
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            // Fetch all categories to populate the nav menus
             _categories = await CategoryService.GetAllAsync();
         }
         catch
         {
+            // Fall back to an empty list if the API is unavailable
             _categories = [];
         }
     }
 
     private async Task HandleLogout()
     {
+        // Clear the auth session then force a full page reload to reset all state
         await AuthService.LogoutAsync();
         Navigation.NavigateTo("/", forceLoad: true);
     }

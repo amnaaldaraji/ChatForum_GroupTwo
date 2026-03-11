@@ -14,6 +14,7 @@
         </div>
         <div class="auth-card-body">
 
+            @* Display registration error (validation failure, duplicate username, etc.) *@
             @if (!string.IsNullOrEmpty(errorMessage))
             {
                 <div class="alert alert-danger">
@@ -21,6 +22,7 @@
                 </div>
             }
 
+            @* Shown briefly after successful registration before redirecting to login *@
             @if (registrationSuccessful)
             {
                 <div class="alert alert-success">
@@ -50,6 +52,7 @@
                     <InputText type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
                 </div>
 
+                @* Button disabled while the API call is in flight to prevent double-submit *@
                 <button type="submit" class="btn btn-primary" disabled="@isLoading">
                     @if (isLoading)
                     {
@@ -67,10 +70,10 @@
 
 @code {
 
-    private CancellationTokenSource _cts = new();
+    private CancellationTokenSource _cts = new(); // Used to cancel the redirect delay if the component is disposed early
     private RegisterRequest registerModel = new();
     private string errorMessage = string.Empty;
-    private bool isLoading = false;
+    private bool isLoading = false;           // Prevents double-submit while the API call is in flight
     private bool registrationSuccessful = false;
 
     /// <summary>
@@ -108,6 +111,7 @@
         }
         catch (OperationCanceledException)
         {
+            // Swallowed intentionally — triggered when the user navigates away before the delay completes
         }
         catch (Exception ex)
         {
