@@ -34,11 +34,7 @@ Blazor starts at `http://localhost:5159`.
 
 ```mermaid
 erDiagram
-    User {
-        string Id PK
-        string UserName
-        string Email
-        string PasswordHash
+    User["User (extends IdentityUser)"] {
         bool IsDeleted
     }
     Category {
