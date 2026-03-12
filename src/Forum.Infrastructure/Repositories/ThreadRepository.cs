@@ -119,16 +119,4 @@ public class ThreadRepository : Repository<ThreadEntity>, IThreadRepository
             .ToListAsync(cancellationToken);
     }
 
-    /// <summary>
-    /// Retrieves all threads belonging to a specific category, ordered by most recently updated.
-    /// Includes the thread author.
-    /// </summary>
-    public async Task<IReadOnlyList<ThreadEntity>> GetByCategoryIdAsync(int categoryId, CancellationToken cancellationToken = default)
-    {
-        return await DbSet
-            .Include(t => t.User)
-            .Where(t => t.CategoryId == categoryId)
-            .OrderByDescending(t => t.TimeUpdated)
-            .ToListAsync(cancellationToken);
-    }
 }

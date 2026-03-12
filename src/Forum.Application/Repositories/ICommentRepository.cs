@@ -25,5 +25,4 @@ public interface ICommentRepository : IRepository<Comment>
 
     // Returns the first comment in a thread (used as the thread body).
     Task<Comment?> GetFirstCommentByThreadIdAsync(int threadId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<Comment>> GetRepliesAsync(int commentId, CancellationToken cancellationToken = default);
 }

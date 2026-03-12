@@ -51,11 +51,6 @@ public static class UserEndpoints
             }
             
             var isAdmin = httpContext.User.IsAdmin();
-            
-            if (userId != id && !isAdmin)
-            {
-                return Results.Forbid();
-            }
 
             var result = await mediator.Send(new UpdateUserProfileCommand(id, dto.UserName, dto.Email, userId, isAdmin), ct);
             return result.IsSuccess
@@ -71,8 +66,6 @@ public static class UserEndpoints
                 return Results.Unauthorized();
 
             var isAdmin = httpContext.User.IsAdmin();
-            if (userId != id && !isAdmin)
-                return Results.Forbid();
 
             var result = await mediator.Send(new ChangePasswordCommand(id, dto.CurrentPassword, dto.NewPassword, userId, isAdmin), ct);
             return result.IsSuccess
@@ -90,11 +83,6 @@ public static class UserEndpoints
             }
             
             var isAdmin = httpContext.User.IsAdmin();
-            
-            if (userId != id && !isAdmin)
-            {
-                return Results.Forbid();
-            }
 
             var result = await mediator.Send(new DeleteUserCommand(id, userId, isAdmin), ct);
             return result.IsSuccess
