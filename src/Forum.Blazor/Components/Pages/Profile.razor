@@ -19,29 +19,29 @@
 
     <!-- Tab buttons — My Threads and My Comments load lazily on first click -->
     <div class="panel-tabs">
-        <button class="panel-tab @(activeTab == "account" ? "active" : "")" @onclick='() => activeTab = "account"'>Account Settings</button>
-        <button class="panel-tab @(activeTab == "mythreads" ? "active" : "")" @onclick="ActivateMyThreads">My Threads</button>
-        <button class="panel-tab @(activeTab == "mycomments" ? "active" : "")" @onclick="ActivateMyComments">My Comments</button>
+        <button class="panel-tab @(_activeTab == "account" ? "active" : "")" @onclick='() => _activeTab = "account"'>Account Settings</button>
+        <button class="panel-tab @(_activeTab == "mythreads" ? "active" : "")" @onclick="ActivateMyThreads">My Threads</button>
+        <button class="panel-tab @(_activeTab == "mycomments" ? "active" : "")" @onclick="ActivateMyComments">My Comments</button>
     </div>
 
     <!-- Status banners — shown after profile update operations -->
-    @if (!string.IsNullOrEmpty(successMessage))
+    @if (!string.IsNullOrEmpty(_successMessage))
     {
-        <div class="panel-status success">@successMessage</div>
+        <div class="panel-status success">@_successMessage</div>
     }
 
-    @if (!string.IsNullOrEmpty(errorMessage))
+    @if (!string.IsNullOrEmpty(_errorMessage))
     {
-        <div class="panel-status error">@errorMessage</div>
+        <div class="panel-status error">@_errorMessage</div>
     }
 
     <!-- Account settings tab -->
-    @if (activeTab == "account")
+    @if (_activeTab == "account")
     {
         <div class="panel-section panel-section-narrow">
             
             <!-- Show spinner while profile data is loading from the API -->
-            @if (isLoadingProfile)
+            @if (_isLoadingProfile)
             {
                 <div class="text-center">
                     <div class="spinner-border"></div>
@@ -52,25 +52,25 @@
                 <!-- Username is read-only — can only be changed by an admin -->
                 <div class="mb-4">
                     <label class="form-label fw-bold">Username</label>
-                    <input class="form-control" value="@profileModel.Username" disabled/>
+                    <input class="form-control" value="@_profileModel.Username" disabled/>
                 </div>
 
                 <hr/>
 
                 <!-- Email update form -->
-                <EditForm Model="@emailModel" OnValidSubmit="HandleUpdateEmail">
+                <EditForm Model="@_emailModel" OnValidSubmit="HandleUpdateEmail">
                     <h5 class="mt-3">Change Email</h5>
 
                     <div class="mb-3">
                         <label class="form-label">New Email</label>
                         <InputText type="email"
                                    class="form-control"
-                                   @bind-Value="emailModel.NewEmail"/>
+                                   @bind-Value="_emailModel.NewEmail"/>
                     </div>
 
                     <!-- Button disabled while API call is going out -->
-                    <button type="submit" class="btn btn-primary" disabled="@isLoading">
-                        @if (isLoading)
+                    <button type="submit" class="btn btn-primary" disabled="@_isLoading">
+                        @if (_isLoading)
                         {
                             <span class="spinner-border spinner-border-sm me-2"></span>
                         }
@@ -81,33 +81,33 @@
                 <hr class="my-4"/>
 
                 <!-- Password change form -->
-                <EditForm Model="@passwordModel" OnValidSubmit="HandleChangePassword">
+                <EditForm Model="@_passwordModel" OnValidSubmit="HandleChangePassword">
                     <h5>Change Password</h5>
 
                     <div class="mb-3">
                         <label class="form-label">Current Password</label>
                         <InputText type="password"
                                    class="form-control"
-                                   @bind-Value="passwordModel.CurrentPassword"/>
+                                   @bind-Value="_passwordModel.CurrentPassword"/>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">New Password</label>
                         <InputText type="password"
                                    class="form-control"
-                                   @bind-Value="passwordModel.NewPassword"/>
+                                   @bind-Value="_passwordModel.NewPassword"/>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Confirm New Password</label>
                         <InputText type="password"
                                    class="form-control"
-                                   @bind-Value="passwordModel.ConfirmNewPassword"/>
+                                   @bind-Value="_passwordModel.ConfirmNewPassword"/>
                     </div>
 
                     <!-- Button disabled while API call is going out -->
-                    <button type="submit" class="btn btn-warning" disabled="@isLoading">
-                        @if (isLoading)
+                    <button type="submit" class="btn btn-warning" disabled="@_isLoading">
+                        @if (_isLoading)
                         {
                             <span class="spinner-border spinner-border-sm me-2"></span>
                         }
@@ -119,7 +119,7 @@
     }
 
     <!-- My Threads tab -->
-    @if (activeTab == "mythreads")
+    @if (_activeTab == "mythreads")
     {
         <div class="panel-section">
             <h2>My Threads</h2>
@@ -127,7 +127,7 @@
             <!-- Page size selector — resets to page 1 on change -->
             <div class="d-flex align-items-center mb-2">
                 <label class="me-2 mb-0" style="color: #8b949e;">Threads per page:</label>
-                <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myThreadsPageSize" @onchange="OnMyThreadsPageSizeChanged">
+                <select class="form-select form-select-sm w-auto panel-pagination-select" value="@_myThreadsPageSize" @onchange="OnMyThreadsPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
                     {
                         <option value="@size">@size</option>
@@ -144,24 +144,24 @@
 
                 <!-- Pagination controls — only rendered when there is more than one page -->
                 <div class="ms-auto">
-                    @if (myThreadsPaged != null && myThreadsPaged.TotalPages > 1)
+                    @if (_myThreadsPaged != null && _myThreadsPaged.TotalPages > 1)
                     {
                         <nav aria-label="My threads pagination">
                             <ul class="pagination pagination-sm mb-0 panel-pagination-nav">
-                                <li class="page-item @(myThreadsPage == 1 ? "disabled" : "")">
+                                <li class="page-item @(_myThreadsPage == 1 ? "disabled" : "")">
                                     <button class="page-link" @onclick="PrevMyThreadsPage">Prev</button>
                                 </li>
 
                                 @{
-                                    var ttPages = myThreadsPaged.TotalPages;
+                                    var ttPages = _myThreadsPaged.TotalPages;
                                     var ttShow = new SortedSet<int>();
                                     
                                     // Always show first and last page, plus neighbours of the current page
                                     ttShow.Add(1);
                                     ttShow.Add(ttPages);
-                                    if (myThreadsPage > 1) ttShow.Add(myThreadsPage - 1);
-                                    ttShow.Add(myThreadsPage);
-                                    if (myThreadsPage < ttPages) ttShow.Add(myThreadsPage + 1);
+                                    if (_myThreadsPage > 1) ttShow.Add(_myThreadsPage - 1);
+                                    ttShow.Add(_myThreadsPage);
+                                    if (_myThreadsPage < ttPages) ttShow.Add(_myThreadsPage + 1);
 
                                     int? ttLast = null;
                                     foreach (var pageNum in ttShow)
@@ -173,14 +173,14 @@
                                                 <span class="page-link">...</span>
                                             </li>
                                         }
-                                        <li class="page-item @(pageNum == myThreadsPage ? "active" : "")">
+                                        <li class="page-item @(pageNum == _myThreadsPage ? "active" : "")">
                                             <button class="page-link" @onclick="() => GoToMyThreadsPage(pageNum)">@pageNum</button>
                                         </li>
                                         ttLast = pageNum;
                                     }
                                 }
 
-                                <li class="page-item @(myThreadsPage == myThreadsPaged.TotalPages ? "disabled" : "")">
+                                <li class="page-item @(_myThreadsPage == _myThreadsPaged.TotalPages ? "disabled" : "")">
                                     <button class="page-link" @onclick="NextMyThreadsPage">Next</button>
                                 </li>
                             </ul>
@@ -201,9 +201,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (myThreads != null)
+                    @if (_myThreads != null)
                     {
-                        @foreach (var t in myThreads)
+                        @foreach (var t in _myThreads)
                         {
                             <tr>
                                 <td><a href="/thread/@t.ThreadId">@t.Title</a></td>
@@ -220,7 +220,7 @@
     }
 
     <!-- My Comments tab -->
-    @if (activeTab == "mycomments")
+    @if (_activeTab == "mycomments")
     {
         <div class="panel-section">
             <h2>My Comments</h2>
@@ -228,7 +228,7 @@
             <!-- Page size selector — resets to page 1 on change -->
             <div class="d-flex align-items-center mb-2">
                 <label class="me-2 mb-0" style="color: #8b949e;">Comments per page:</label>
-                <select class="form-select form-select-sm w-auto panel-pagination-select" value="@myCommentsPageSize" @onchange="OnMyCommentsPageSizeChanged">
+                <select class="form-select form-select-sm w-auto panel-pagination-select" value="@_myCommentsPageSize" @onchange="OnMyCommentsPageSizeChanged">
                     @foreach (var size in new[] { 5, 10, 15, 20 })
                     {
                         <option value="@size">@size</option>
@@ -244,24 +244,24 @@
 
                 <!-- Pagination controls — only rendered when there is more than one page -->
                 <div class="ms-auto">
-                    @if (myCommentsPaged != null && myCommentsPaged.TotalPages > 1)
+                    @if (_myCommentsPaged != null && _myCommentsPaged.TotalPages > 1)
                     {
                         <nav aria-label="My comments pagination">
                             <ul class="pagination pagination-sm mb-0 panel-pagination-nav">
-                                <li class="page-item @(myCommentsPage == 1 ? "disabled" : "")">
+                                <li class="page-item @(_myCommentsPage == 1 ? "disabled" : "")">
                                     <button class="page-link" @onclick="PrevMyCommentsPage">Prev</button>
                                 </li>
 
                                 @{
-                                    var ccPages = myCommentsPaged.TotalPages;
+                                    var ccPages = _myCommentsPaged.TotalPages;
                                     var ccShow = new SortedSet<int>();
                                     
                                     // Always show first and last page, plus neighbours of the current page
                                     ccShow.Add(1);
                                     ccShow.Add(ccPages);
-                                    if (myCommentsPage > 1) ccShow.Add(myCommentsPage - 1);
-                                    ccShow.Add(myCommentsPage);
-                                    if (myCommentsPage < ccPages) ccShow.Add(myCommentsPage + 1);
+                                    if (_myCommentsPage > 1) ccShow.Add(_myCommentsPage - 1);
+                                    ccShow.Add(_myCommentsPage);
+                                    if (_myCommentsPage < ccPages) ccShow.Add(_myCommentsPage + 1);
 
                                     int? ccLast = null;
                                     foreach (var pageNum in ccShow)
@@ -273,14 +273,14 @@
                                                 <span class="page-link">...</span>
                                             </li>
                                         }
-                                        <li class="page-item @(pageNum == myCommentsPage ? "active" : "")">
+                                        <li class="page-item @(pageNum == _myCommentsPage ? "active" : "")">
                                             <button class="page-link" @onclick="() => GoToMyCommentsPage(pageNum)">@pageNum</button>
                                         </li>
                                         ccLast = pageNum;
                                     }
                                 }
 
-                                <li class="page-item @(myCommentsPage == myCommentsPaged.TotalPages ? "disabled" : "")">
+                                <li class="page-item @(_myCommentsPage == _myCommentsPaged.TotalPages ? "disabled" : "")">
                                     <button class="page-link" @onclick="NextMyCommentsPage">Next</button>
                                 </li>
                             </ul>
@@ -300,9 +300,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (myComments != null)
+                    @if (_myComments != null)
                     {
-                        @foreach (var c in myComments)
+                        @foreach (var c in _myComments)
                         {
                             <tr>
                                 <!-- Full content shown in the title tooltip on hover -->
@@ -320,35 +320,35 @@
 </div>
 
 @code {
-    private string activeTab = "account"; // Currently active tab: "account", "mythreads", or "mycomments"
+    private string _activeTab = "account"; // Currently active tab: "account", "mythreads", or "mycomments"
 
-    private ProfileModel profileModel = new();
-    private UpdateEmailModel emailModel = new();
-    private ChangePasswordModel passwordModel = new();
+    private ProfileModel _profileModel = new();
+    private UpdateEmailModel _emailModel = new();
+    private ChangePasswordModel _passwordModel = new();
 
-    private string errorMessage = string.Empty;
-    private string successMessage = string.Empty;
+    private string _errorMessage = string.Empty;
+    private string _successMessage = string.Empty;
 
-    private bool isLoading = false;        // Prevents double-submit during API calls
-    private bool isLoadingProfile = true;  // Shows spinner until profile data is fetched
+    private bool _isLoading = false;        // Prevents double-submit during API calls
+    private bool _isLoadingProfile = true;  // Shows spinner until profile data is fetched
 
-    private string? userId;
+    private string? _userId;
 
     // My Threads
-    private List<ThreadSummaryDto> myThreads = [];
-    private PagedResult<ThreadSummaryDto>? myThreadsPaged;
-    private int myThreadsPage = 1;
-    private int myThreadsPageSize = 5;
-    private bool myThreadsLoaded;  // Lazy-load guard — data only fetched on first tab activation
+    private List<ThreadSummaryDto> _myThreads = [];
+    private PagedResult<ThreadSummaryDto>? _myThreadsPaged;
+    private int _myThreadsPage = 1;
+    private int _myThreadsPageSize = 5;
+    private bool _myThreadsLoaded;  // Lazy-load guard — data only fetched on first tab activation
     private ThreadSortBy _myThreadsSortBy = ThreadSortBy.Newest;
     private string _myThreadsSortByString => _myThreadsSortBy.ToString();
 
     // My Comments
-    private List<CommentDto> myComments = [];
-    private PagedResult<CommentDto>? myCommentsPaged;
-    private int myCommentsPage = 1;
-    private int myCommentsPageSize = 5;
-    private bool myCommentsLoaded;  // Lazy-load guard — data only fetched on first tab activation
+    private List<CommentDto> _myComments = [];
+    private PagedResult<CommentDto>? _myCommentsPaged;
+    private int _myCommentsPage = 1;
+    private int _myCommentsPageSize = 5;
+    private bool _myCommentsLoaded;  // Lazy-load guard — data only fetched on first tab activation
     private CommentSortBy _myCommentsSortBy = CommentSortBy.Newest;
     private string _myCommentsSortByString => _myCommentsSortBy.ToString();
 
@@ -358,10 +358,10 @@
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        _userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         // Redirect to login if the user is not authenticated
-        if (string.IsNullOrEmpty(userId))
+        if (string.IsNullOrEmpty(_userId))
         {
             Navigation.NavigateTo("/login");
             return;
@@ -369,26 +369,26 @@
 
         try
         {
-            var profile = await UserService.GetProfileAsync(userId);
+            var profile = await UserService.GetProfileAsync(_userId);
 
             if (profile != null)
             {
-                profileModel.Username = profile.UserName;
-                profileModel.Email = profile.Email ?? string.Empty;
-                emailModel.NewEmail = profile.Email ?? string.Empty; // Pre-fill the email field
+                _profileModel.Username = profile.UserName;
+                _profileModel.Email = profile.Email ?? string.Empty;
+                _emailModel.NewEmail = profile.Email ?? string.Empty; // Pre-fill the email field
             }
             else
             {
-                errorMessage = "Failed to load profile.";
+                _errorMessage = "Failed to load profile.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            _errorMessage = ex.Message;
         }
         finally
         {
-            isLoadingProfile = false;
+            _isLoadingProfile = false;
         }
     }
 
@@ -397,40 +397,40 @@
     /// </summary>
     private async Task HandleUpdateEmail()
     {
-        errorMessage = string.Empty;
-        successMessage = string.Empty;
+        _errorMessage = string.Empty;
+        _successMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(emailModel.NewEmail))
+        if (string.IsNullOrWhiteSpace(_emailModel.NewEmail))
         {
-            errorMessage = "Email cannot be empty.";
+            _errorMessage = "Email cannot be empty.";
             return;
         }
 
-        isLoading = true;
+        _isLoading = true;
 
         try
         {
-            var response = await UserService.UpdateAsync(userId!, new UpdateUserProfileDto(Email: emailModel.NewEmail));
+            var response = await UserService.UpdateAsync(_userId!, new UpdateUserProfileDto(Email: _emailModel.NewEmail));
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Email updated successfully.";
-                profileModel.Email = emailModel.NewEmail; // Sync local model with the saved value
+                _successMessage = "Email updated successfully.";
+                _profileModel.Email = _emailModel.NewEmail; // Sync local model with the saved value
             }
             else
             {
                 // Try to extract a readable error from the API response body
                 var body = await response.Content.ReadAsStringAsync();
-                errorMessage = ApiClientBase.TryExtractError(body) ?? "Failed to update email.";
+                _errorMessage = ApiClientBase.TryExtractError(body) ?? "Failed to update email.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            _errorMessage = ex.Message;
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
         }
     }
 
@@ -439,52 +439,52 @@
     /// </summary>
     private async Task HandleChangePassword()
     {
-        errorMessage = string.Empty;
-        successMessage = string.Empty;
+        _errorMessage = string.Empty;
+        _successMessage = string.Empty;
 
         // Client-side validation before hitting the API
-        if (string.IsNullOrWhiteSpace(passwordModel.CurrentPassword))
+        if (string.IsNullOrWhiteSpace(_passwordModel.CurrentPassword))
         {
-            errorMessage = "Current password is required.";
+            _errorMessage = "Current password is required.";
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(passwordModel.NewPassword))
+        if (string.IsNullOrWhiteSpace(_passwordModel.NewPassword))
         {
-            errorMessage = "New password cannot be empty.";
+            _errorMessage = "New password cannot be empty.";
             return;
         }
 
-        if (passwordModel.NewPassword != passwordModel.ConfirmNewPassword)
+        if (_passwordModel.NewPassword != _passwordModel.ConfirmNewPassword)
         {
-            errorMessage = "New password and confirmation do not match.";
+            _errorMessage = "New password and confirmation do not match.";
             return;
         }
 
-        isLoading = true;
+        _isLoading = true;
 
         try
         {
-            var response = await UserService.ChangePasswordAsync(userId!, passwordModel.CurrentPassword, passwordModel.NewPassword);
+            var response = await UserService.ChangePasswordAsync(_userId!, _passwordModel.CurrentPassword, _passwordModel.NewPassword);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Password changed successfully.";
-                passwordModel = new ChangePasswordModel(); // Clear the form on success
+                _successMessage = "Password changed successfully.";
+                _passwordModel = new ChangePasswordModel(); // Clear the form on success
             }
             else
             {
                 var body = await response.Content.ReadAsStringAsync();
-                errorMessage = ApiClientBase.TryExtractError(body) ?? "Failed to change password.";
+                _errorMessage = ApiClientBase.TryExtractError(body) ?? "Failed to change password.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            _errorMessage = ex.Message;
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
         }
     }
 
@@ -493,13 +493,13 @@
     /// </summary>
     private async Task ActivateMyThreads()
     {
-        activeTab = "mythreads";
+        _activeTab = "mythreads";
         
         // Only load data on the first activation to avoid redundant API calls
-        if (!myThreadsLoaded)
+        if (!_myThreadsLoaded)
         {
             await LoadMyThreads();
-            myThreadsLoaded = true;
+            _myThreadsLoaded = true;
         }
     }
 
@@ -508,15 +508,15 @@
     /// </summary>
     private async Task LoadMyThreads()
     {
-        if (userId == null) return;
-        myThreadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams
+        if (_userId == null) return;
+        _myThreadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams
         {
-            AuthorId = userId,
+            AuthorId = _userId,
             SortBy = _myThreadsSortBy,
-            PageNumber = myThreadsPage,
-            PageSize = myThreadsPageSize
+            PageNumber = _myThreadsPage,
+            PageSize = _myThreadsPageSize
         });
-        myThreads = myThreadsPaged?.Items?.ToList() ?? [];
+        _myThreads = _myThreadsPaged?.Items?.ToList() ?? [];
     }
 
     /// <summary>
@@ -528,7 +528,7 @@
         if (!Enum.TryParse<ThreadSortBy>(e.Value.ToString(), out var parsed)) return;
         if (parsed == _myThreadsSortBy) return;
         _myThreadsSortBy = parsed;
-        myThreadsPage = 1;         // Reset to first page on sort change
+        _myThreadsPage = 1;         // Reset to first page on sort change
         await LoadMyThreads();
     }
 
@@ -539,9 +539,9 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == myThreadsPageSize) return;
-        myThreadsPageSize = newSize;
-        myThreadsPage = 1;         // Reset to first page on page size change
+        if (newSize == _myThreadsPageSize) return;
+        _myThreadsPageSize = newSize;
+        _myThreadsPage = 1;         // Reset to first page on page size change
         await LoadMyThreads();
     }
 
@@ -550,7 +550,7 @@
     /// </summary>
     private async Task PrevMyThreadsPage()
     {
-        if (myThreadsPage > 1) { myThreadsPage--; await LoadMyThreads(); }
+        if (_myThreadsPage > 1) { _myThreadsPage--; await LoadMyThreads(); }
     }
 
     /// <summary>
@@ -558,7 +558,7 @@
     /// </summary>
     private async Task NextMyThreadsPage()
     {
-        if (myThreadsPaged != null && myThreadsPage < myThreadsPaged.TotalPages) { myThreadsPage++; await LoadMyThreads(); }
+        if (_myThreadsPaged != null && _myThreadsPage < _myThreadsPaged.TotalPages) { _myThreadsPage++; await LoadMyThreads(); }
     }
 
     /// <summary>
@@ -566,8 +566,8 @@
     /// </summary>
     private async Task GoToMyThreadsPage(int p)
     {
-        if (myThreadsPaged == null || p < 1 || p > myThreadsPaged.TotalPages) return;
-        myThreadsPage = p;
+        if (_myThreadsPaged == null || p < 1 || p > _myThreadsPaged.TotalPages) return;
+        _myThreadsPage = p;
         await LoadMyThreads();
     }
     
@@ -576,13 +576,13 @@
     /// </summary>
     private async Task ActivateMyComments()
     {
-        activeTab = "mycomments";
+        _activeTab = "mycomments";
         
         // Only load data on the first activation to avoid redundant API calls
-        if (!myCommentsLoaded)
+        if (!_myCommentsLoaded)
         {
             await LoadMyComments();
-            myCommentsLoaded = true;
+            _myCommentsLoaded = true;
         }
     }
 
@@ -591,9 +591,9 @@
     /// </summary>
     private async Task LoadMyComments()
     {
-        if (userId == null) return;
-        myCommentsPaged = await CommentService.GetByAuthorAsync(userId, myCommentsPage, myCommentsPageSize, _myCommentsSortBy.ToString());
-        myComments = myCommentsPaged?.Items?.ToList() ?? [];
+        if (_userId == null) return;
+        _myCommentsPaged = await CommentService.GetByAuthorAsync(_userId, _myCommentsPage, _myCommentsPageSize, _myCommentsSortBy.ToString());
+        _myComments = _myCommentsPaged?.Items?.ToList() ?? [];
     }
 
     /// <summary>
@@ -605,7 +605,7 @@
         if (!Enum.TryParse<CommentSortBy>(e.Value.ToString(), out var parsed)) return;
         if (parsed == _myCommentsSortBy) return;
         _myCommentsSortBy = parsed;
-        myCommentsPage = 1;         // Reset to first page on sort change
+        _myCommentsPage = 1;         // Reset to first page on sort change
         await LoadMyComments();
     }
 
@@ -616,9 +616,9 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == myCommentsPageSize) return;
-        myCommentsPageSize = newSize;
-        myCommentsPage = 1;         // Reset to first page on page size change
+        if (newSize == _myCommentsPageSize) return;
+        _myCommentsPageSize = newSize;
+        _myCommentsPage = 1;         // Reset to first page on page size change
         await LoadMyComments();
     }
 
@@ -627,7 +627,7 @@
     /// </summary>
     private async Task PrevMyCommentsPage()
     {
-        if (myCommentsPage > 1) { myCommentsPage--; await LoadMyComments(); }
+        if (_myCommentsPage > 1) { _myCommentsPage--; await LoadMyComments(); }
     }
 
     /// <summary>
@@ -635,7 +635,7 @@
     /// </summary>
     private async Task NextMyCommentsPage()
     {
-        if (myCommentsPaged != null && myCommentsPage < myCommentsPaged.TotalPages) { myCommentsPage++; await LoadMyComments(); }
+        if (_myCommentsPaged != null && _myCommentsPage < _myCommentsPaged.TotalPages) { _myCommentsPage++; await LoadMyComments(); }
     }
 
     /// <summary>
@@ -643,8 +643,8 @@
     /// </summary>
     private async Task GoToMyCommentsPage(int p)
     {
-        if (myCommentsPaged == null || p < 1 || p > myCommentsPaged.TotalPages) return;
-        myCommentsPage = p;
+        if (_myCommentsPaged == null || p < 1 || p > _myCommentsPaged.TotalPages) return;
+        _myCommentsPage = p;
         await LoadMyComments();
     }
     
