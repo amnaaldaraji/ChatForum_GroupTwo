@@ -16,30 +16,30 @@
         <div class="auth-card-body">
 
             <!-- Display login error (wrong credentials etc.) -->
-            @if (!string.IsNullOrEmpty(errorMessage))
+            @if (!string.IsNullOrEmpty(_errorMessage))
             {
                 <div class="alert alert-danger">
-                    @errorMessage
+                    @_errorMessage
                 </div>
             }
 
             <!-- Login form -->
-            <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <EditForm Model="@_loginModel" OnValidSubmit="HandleLogin">
 
                 <div class="mb-3">
                     <label class="form-label">Username</label>
-                    <InputText class="form-control" @bind-Value="loginModel.Username" />
+                    <InputText class="form-control" @bind-Value="_loginModel.Username" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Password</label>
-                    <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
+                    <InputText type="password" class="form-control" @bind-Value="_loginModel.Password" />
                 </div>
 
                 <!-- Button is disabled while the API call is going out to prevent double-submit -->
-                <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                <button type="submit" class="btn btn-primary" disabled="@_isLoading">
                     <!-- Show a spinner inside the button while loading -->
-                    @if (isLoading)
+                    @if (_isLoading)
                     {
                         <span class="spinner-border spinner-border-sm me-2"></span>
                     }
@@ -54,29 +54,29 @@
 
 @code {
 
-    private LoginRequest loginModel = new();
-    private string errorMessage = string.Empty;
-    private bool isLoading = false;     // Prevents double-submit while the login request is going out
+    private LoginRequest _loginModel = new();
+    private string _errorMessage = string.Empty;
+    private bool _isLoading = false;     // Prevents double-submit while the login request is going out
 
     /// <summary>
     /// Validates credentials and logs the user in.
     /// </summary>
     private async Task HandleLogin()
     {
-        errorMessage = string.Empty;
+        _errorMessage = string.Empty;
 
         // Basic client-side guard before hitting the API
-        if (string.IsNullOrWhiteSpace(loginModel.Username))
+        if (string.IsNullOrWhiteSpace(_loginModel.Username))
         {
-            errorMessage = "Enter a username.";
+            _errorMessage = "Enter a username.";
             return;
         }
 
-        isLoading = true;
+        _isLoading = true;
 
         try
         {
-            var result = await AuthService.LoginAsync(loginModel);
+            var result = await AuthService.LoginAsync(_loginModel);
 
             if (result.Succeeded)
             {
@@ -86,16 +86,16 @@
             else
             {
                 // Show the API error message, or a generic fallback
-                errorMessage = result.ErrorMessage ?? "Invalid username or password.";
+                _errorMessage = result.ErrorMessage ?? "Invalid username or password.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            _errorMessage = ex.Message;
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
         }
     }
 }

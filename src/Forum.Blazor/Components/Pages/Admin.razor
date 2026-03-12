@@ -21,7 +21,7 @@
         </div>
     </NotAuthorized>
 
-    <!-- Admin panel shown to users with the Admin role -->
+    <!-- Admin panel shown to _users with the Admin role -->
     <Authorized>
         <div class="panel-wrapper">
             <nav class="breadcrumb-trail">
@@ -30,32 +30,32 @@
 
             <h1 class="panel-title">Admin Panel</h1>
 
-        <!-- Tab buttons - clicking a tab sets activeTab and shows the corresponding section -->
+        <!-- Tab buttons - clicking a tab sets _activeTab and shows the corresponding section -->
             <div class="panel-tabs">
-                <button class="panel-tab @(activeTab == "categories" ? "active" : "")" @onclick='() => activeTab = "categories"'>Categories</button>
-                <button class="panel-tab @(activeTab == "threads" ? "active" : "")" @onclick='() => activeTab = "threads"'>Threads</button>
-                <button class="panel-tab @(activeTab == "users" ? "active" : "")" @onclick='() => activeTab = "users"'>Users</button>
+                <button class="panel-tab @(_activeTab == "categories" ? "active" : "")" @onclick='() => _activeTab = "categories"'>Categories</button>
+                <button class="panel-tab @(_activeTab == "threads" ? "active" : "")" @onclick='() => _activeTab = "threads"'>Threads</button>
+                <button class="panel-tab @(_activeTab == "users" ? "active" : "")" @onclick='() => _activeTab = "users"'>Users</button>
             </div>
 
             <!-- Status banner shown after any create/update/delete operation -->
-            @if (!string.IsNullOrEmpty(statusMessage))
+            @if (!string.IsNullOrEmpty(_statusMessage))
             {
-                <div class="panel-status @(isError ? "error" : "success")">@statusMessage</div>
+                <div class="panel-status @(_isError ? "error" : "success")">@_statusMessage</div>
             }
 
             <!-- Categories tab -->
-            @if (activeTab == "categories")
+            @if (_activeTab == "categories")
             {
                 <div class="panel-section panel-section-narrow">
                     <h2>Manage Categories</h2>
 
                 <!-- Inline form for creating a new category -->
                     <div class="panel-add-form">
-                        <input type="text" class="panel-input" placeholder="New category name..." @bind="newCategoryName"/>
-                        <button class="btn-red" @onclick="AddCategory" disabled="@isLoading">Add Category</button>
+                        <input type="text" class="panel-input" placeholder="New category name..." @bind="_newCategoryName"/>
+                        <button class="btn-red" @onclick="AddCategory" disabled="@_isLoading">Add Category</button>
                     </div>
 
-                    <!-- Table of existing categories -->
+                    <!-- Table of existing _categories -->
                     <div class="panel-table-wrap">
                         <table class="panel-table">
                             <thead>
@@ -67,7 +67,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach (var cat in categories)
+                            @foreach (var cat in _categories)
                             {
                                 <tr>
                                     <td>@cat.CategoryId</td>
@@ -75,11 +75,11 @@
                                     <td>@cat.ThreadCount</td>
                                     <td>
                                         
-                                        <!-- Delete is disabled if the category contains threads to prevent orphaned data -->
+                                        <!-- Delete is disabled if the category contains _threads to prevent orphaned data -->
                                         <button class="btn-danger-sm"
                                                 @onclick="() => DeleteCategory(cat.CategoryId, cat.Name)"
                                                 disabled="@(cat.ThreadCount > 0)"
-                                                title="@(cat.ThreadCount > 0 ? "Cannot delete: category has threads" : "Delete category")">
+                                                title="@(cat.ThreadCount > 0 ? "Cannot delete: category has _threads" : "Delete category")">
                                             Delete
                                         </button>
                                     </td>
@@ -92,7 +92,7 @@
             }
 
             <!-- Threads tab -->
-            @if (activeTab == "threads")
+            @if (_activeTab == "threads")
             {
                 <div class="panel-section">
                     <h2>Manage Threads</h2>
@@ -100,7 +100,7 @@
                     <!-- Page size selector — resets to page 1 on change -->
                     <div class="d-flex align-items-center mb-2">
                         <label class="me-2 mb-0 panel-page-size-label">Threads per page:</label>
-                        <select class="form-select form-select-sm w-auto" value="@threadsPageSize" @onchange="OnThreadsPageSizeChanged">
+                        <select class="form-select form-select-sm w-auto" value="@_threadsPageSize" @onchange="OnThreadsPageSizeChanged">
                             @foreach (var size in new[] { 5, 10, 15, 20 })
                             {
                                 <option value="@size">@size</option>
@@ -118,23 +118,23 @@
 
                         <!-- Pagination controls — only rendered when there is more than one page -->
                         <div class="ms-auto">
-                            @if (threadsPaged != null && threadsPaged.TotalPages > 1)
+                            @if (_threadsPaged != null && _threadsPaged.TotalPages > 1)
                             {
                                 <nav aria-label="Threads pagination">
                                     <ul class="pagination pagination-sm mb-0">
-                                        <li class="page-item @(threadsPage == 1 ? "disabled" : "")">
+                                        <li class="page-item @(_threadsPage == 1 ? "disabled" : "")">
                                             <button class="page-link" @onclick="PrevThreadsPage">Prev</button>
                                         </li>
 
                                         @{
-                                            var ttPages = threadsPaged.TotalPages;
+                                            var ttPages = _threadsPaged.TotalPages;
                                             var ttShow = new SortedSet<int>();
                                             // Always show first and last page, plus neighbours of the current page
                                             ttShow.Add(1);
                                             ttShow.Add(ttPages);
-                                            if (threadsPage > 1) ttShow.Add(threadsPage - 1);
-                                            ttShow.Add(threadsPage);
-                                            if (threadsPage < ttPages) ttShow.Add(threadsPage + 1);
+                                            if (_threadsPage > 1) ttShow.Add(_threadsPage - 1);
+                                            ttShow.Add(_threadsPage);
+                                            if (_threadsPage < ttPages) ttShow.Add(_threadsPage + 1);
 
                                             int? ttLast = null;
                                             foreach (var pageNum in ttShow)
@@ -147,14 +147,14 @@
                                                     </li>
                                                 }
 
-                                                <li class="page-item @(pageNum == threadsPage ? "active" : "")">
+                                                <li class="page-item @(pageNum == _threadsPage ? "active" : "")">
                                                     <button class="page-link" @onclick="() => GoToThreadsPage(pageNum)">@pageNum</button>
                                                 </li>
                                                 ttLast = pageNum;
                                             }
                                         }
 
-                                        <li class="page-item @(threadsPage == threadsPaged.TotalPages ? "disabled" : "")">
+                                        <li class="page-item @(_threadsPage == _threadsPaged.TotalPages ? "disabled" : "")">
                                             <button class="page-link" @onclick="NextThreadsPage">Next</button>
                                         </li>
                                     </ul>
@@ -163,7 +163,7 @@
                         </div>
                     </div>
 
-                    <!-- Table of existing threads -->
+                    <!-- Table of existing _threads -->
                     <div class="panel-table-wrap">
                         <table class="panel-table">
                             <thead>
@@ -177,9 +177,9 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @if (threads != null)
+                            @if (_threads != null)
                             {
-                                @foreach (var t in threads)
+                                @foreach (var t in _threads)
                                 {
                                     <tr>
                                         <td>@t.ThreadId</td>
@@ -200,7 +200,7 @@
             }
 
            <!-- Users tab -->
-            @if (activeTab == "users")
+            @if (_activeTab == "users")
             {
                 <div class="panel-section">
                     <h2>Manage Users</h2>
@@ -208,7 +208,7 @@
                     <!-- Page size selector — resets to page 1 on change -->
                     <div class="d-flex align-items-center mb-2">
                         <label class="me-2 mb-0 panel-page-size-label">Users per page:</label>
-                        <select class="form-select form-select-sm w-auto" value="@usersPageSize" @onchange="OnUsersPageSizeChanged">
+                        <select class="form-select form-select-sm w-auto" value="@_usersPageSize" @onchange="OnUsersPageSizeChanged">
                             @foreach (var size in new[] { 5, 10, 15, 20 })
                             {
                                 <option value="@size">@size</option>
@@ -225,23 +225,23 @@
 
                         <!-- Pagination controls — only rendered when there is more than one page -->
                         <div class="ms-auto">
-                            @if (usersPaged != null && usersPaged.TotalPages > 1)
+                            @if (_usersPaged != null && _usersPaged.TotalPages > 1)
                             {
                                 <nav aria-label="Users pagination">
                                     <ul class="pagination pagination-sm mb-0">
-                                        <li class="page-item @(usersPage == 1 ? "disabled" : "")">
+                                        <li class="page-item @(_usersPage == 1 ? "disabled" : "")">
                                             <button class="page-link" @onclick="PrevUsersPage">Prev</button>
                                         </li>
 
                                         @{
-                                            var uuPages = usersPaged.TotalPages;
+                                            var uuPages = _usersPaged.TotalPages;
                                             var uuShow = new SortedSet<int>();
                                             // Always show first and last page, plus neighbours of the current page
                                             uuShow.Add(1);
                                             uuShow.Add(uuPages);
-                                            if (usersPage > 1) uuShow.Add(usersPage - 1);
-                                            uuShow.Add(usersPage);
-                                            if (usersPage < uuPages) uuShow.Add(usersPage + 1);
+                                            if (_usersPage > 1) uuShow.Add(_usersPage - 1);
+                                            uuShow.Add(_usersPage);
+                                            if (_usersPage < uuPages) uuShow.Add(_usersPage + 1);
 
                                             int? uuLast = null;
                                             foreach (var pageNum in uuShow)
@@ -254,14 +254,14 @@
                                                     </li>
                                                 }
 
-                                                <li class="page-item @(pageNum == usersPage ? "active" : "")">
+                                                <li class="page-item @(pageNum == _usersPage ? "active" : "")">
                                                     <button class="page-link" @onclick="() => GoToUsersPage(pageNum)">@pageNum</button>
                                                 </li>
                                                 uuLast = pageNum;
                                             }
                                         }
 
-                                        <li class="page-item @(usersPage == usersPaged.TotalPages ? "disabled" : "")">
+                                        <li class="page-item @(_usersPage == _usersPaged.TotalPages ? "disabled" : "")">
                                             <button class="page-link" @onclick="NextUsersPage">Next</button>
                                         </li>
                                     </ul>
@@ -270,7 +270,7 @@
                         </div>
                     </div>
 
-                    <!-- Table of existing users -->
+                    <!-- Table of existing _users -->
                     <div class="panel-table-wrap">
                         <table class="panel-table">
                             <thead>
@@ -284,16 +284,16 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @if (users != null)
+                            @if (_users != null)
                             {
-                                @foreach (var user in users)
+                                @foreach (var user in _users)
                                 {
                                     <tr>
                                         <!-- Inline username editing — shows an input field when this row is being edited -->
                                         <td>
-                                            @if (editingUserId == user.Id)
+                                            @if (_editingUserId == user.Id)
                                             {
-                                                <input type="text" class="panel-input-inline" @bind="editingUserName"/>
+                                                <input type="text" class="panel-input-inline" @bind="_editingUserName"/>
                                             }
                                             else
                                             {
@@ -305,11 +305,11 @@
                                         <td>@user.CommentCount</td>
                                         <td>@(user.IsDeleted ? "Deleted" : "Active")</td>
                                         
-                                        <!-- Actions are hidden for already-deleted (soft-deleted) users -->
+                                        <!-- Actions are hidden for already-deleted (soft-deleted) _users -->
                                         <td class="panel-actions">
                                             @if (!user.IsDeleted)
                                             {
-                                                @if (editingUserId == user.Id)
+                                                @if (_editingUserId == user.Id)
                                                 {
                                                     <button class="btn-success-sm" @onclick="() => SaveUserName(user.Id)">Save</button>
                                                     <button class="btn-outline-sm" @onclick="CancelEditUser">Cancel</button>
@@ -336,32 +336,32 @@
 </AuthorizeView>
 
 @code {
-    private string activeTab = "categories";
-    private string statusMessage = "";
-    private bool isError;
-    private bool isLoading;                  // Prevents double-submits during async operations
+    private string _activeTab = "categories";
+    private string _statusMessage = "";
+    private bool _isError;
+    private bool _isLoading;                  // Prevents double-submits during async operations
 
     // Categories
-    private List<CategoryDto> categories = [];
-    private string newCategoryName = "";
+    private List<CategoryDto> _categories = [];
+    private string _newCategoryName = "";
 
     // Threads
-    private List<ThreadSummaryDto> threads = [];
-    private PagedResult<ThreadSummaryDto>? threadsPaged;
-    private int threadsPage = 1;
-    private int threadsPageSize = 5;
+    private List<ThreadSummaryDto> _threads = [];
+    private PagedResult<ThreadSummaryDto>? _threadsPaged;
+    private int _threadsPage = 1;
+    private int _threadsPageSize = 5;
     private ThreadSortBy _threadsSortBy = ThreadSortBy.Newest;
     private string _threadsSortByString => _threadsSortBy.ToString();
 
     // Users
-    private List<UserDto> users = [];
-    private PagedResult<UserDto>? usersPaged;
-    private int usersPage = 1;
-    private int usersPageSize = 5;
+    private List<UserDto> _users = [];
+    private PagedResult<UserDto>? _usersPaged;
+    private int _usersPage = 1;
+    private int _usersPageSize = 5;
     private UserSortBy _usersSortBy = UserSortBy.Username;
     private string _usersSortByString => _usersSortBy.ToString();
-    private string? editingUserId;
-    private string editingUserName = "";    // Holds the draft username during inline editing
+    private string? _editingUserId;
+    private string _editingUserName = "";    // Holds the draft username during inline editing
 
     private bool _loaded;                   // Guard flag to prevent double-loading on re-render
 
@@ -387,16 +387,16 @@
     private void SetStatus(string message, bool error = false)
     {
         
-        statusMessage = message;
-        isError = error;
+        _statusMessage = message;
+        _isError = error;
     }
 
     /// <summary>
-    /// Loads all categories.
+    /// Loads all _categories.
     /// </summary>
     private async Task LoadCategories()
     {
-        categories = await CategoryService.GetAllAsync();
+        _categories = await CategoryService.GetAllAsync();
     }
 
     /// <summary>
@@ -404,12 +404,12 @@
     /// </summary>
     private async Task AddCategory()
     {
-        if (string.IsNullOrWhiteSpace(newCategoryName)) return;
-        isLoading = true;
-        var response = await CategoryService.CreateAsync(new CreateCategoryDto(newCategoryName.Trim()));
+        if (string.IsNullOrWhiteSpace(_newCategoryName)) return;
+        _isLoading = true;
+        var response = await CategoryService.CreateAsync(new CreateCategoryDto(_newCategoryName.Trim()));
         if (response.IsSuccessStatusCode)
         {
-            newCategoryName = "";   // Clear the input on success
+            _newCategoryName = "";   // Clear the input on success
             await LoadCategories();
             SetStatus("Category created.");
         }
@@ -417,15 +417,15 @@
         {
             SetStatus("Failed to create category.", true);
         }
-        isLoading = false;
+        _isLoading = false;
     }
 
     /// <summary>
-    /// Deletes a category (only possible if the category doesn't have any threads).
+    /// Deletes a category (only possible if the category doesn't have any _threads).
     /// </summary>
     private async Task DeleteCategory(int id, string name)
     {
-        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete category \"{name}\"? All threads in it will also be deleted.");
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete category \"{name}\"? All _threads in it will also be deleted.");
         if (!confirmed) return;
 
         var response = await CategoryService.DeleteAsync(id);
@@ -441,16 +441,16 @@
     }
 
     /// <summary>
-    /// Loads threads paged.
+    /// Loads _threads paged.
     /// </summary>
     private async Task LoadThreads()
     {
-        threadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams { PageNumber = threadsPage, PageSize = threadsPageSize, SortBy = _threadsSortBy });
-        threads = threadsPaged?.Items?.ToList() ?? [];
+        _threadsPaged = await ThreadService.GetThreadsAsync(new ThreadFilterParams { PageNumber = _threadsPage, PageSize = _threadsPageSize, SortBy = _threadsSortBy });
+        _threads = _threadsPaged?.Items?.ToList() ?? [];
     }
 
     /// <summary>
-    /// Updates sorting of threads when changed.
+    /// Updates sorting of _threads when changed.
     /// </summary>
     private async Task OnThreadsSortChanged(ChangeEventArgs e)
     {
@@ -458,7 +458,7 @@
         if (!Enum.TryParse<ThreadSortBy>(e.Value.ToString(), out var parsed)) return;
         if (parsed == _threadsSortBy) return;
         _threadsSortBy = parsed;
-        threadsPage = 1;            // Reset to first page on sort change
+        _threadsPage = 1;            // Reset to first page on sort change
         await LoadThreads();
     }
 
@@ -489,56 +489,56 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == threadsPageSize) return;
-        threadsPageSize = newSize;
-        threadsPage = 1;        // Reset to first page on page size change
+        if (newSize == _threadsPageSize) return;
+        _threadsPageSize = newSize;
+        _threadsPage = 1;        // Reset to first page on page size change
         await LoadThreads();
     }
 
     /// <summary>
-    /// Used to access the previous page of threads (using current page).
+    /// Used to access the previous page of _threads (using current page).
     /// </summary>
     private async Task PrevThreadsPage()
     {
-        if (threadsPage > 1) { threadsPage--; await LoadThreads(); }
+        if (_threadsPage > 1) { _threadsPage--; await LoadThreads(); }
     }
 
     /// <summary>
-    /// Used to access the next page of threads (using current page).
+    /// Used to access the next page of _threads (using current page).
     /// </summary>
     private async Task NextThreadsPage()
     {
-        if (threadsPaged != null && threadsPage < threadsPaged.TotalPages) { threadsPage++; await LoadThreads(); }
+        if (_threadsPaged != null && _threadsPage < _threadsPaged.TotalPages) { _threadsPage++; await LoadThreads(); }
     }
 
     /// <summary>
-    /// Used to navigate to a new pag of threads.
+    /// Used to navigate to a new pag of _threads.
     /// </summary>
     private async Task GoToThreadsPage(int p)
     {
-        if (threadsPaged == null || p < 1 || p > threadsPaged.TotalPages) return;
-        threadsPage = p;
+        if (_threadsPaged == null || p < 1 || p > _threadsPaged.TotalPages) return;
+        _threadsPage = p;
         await LoadThreads();
     }
 
    /// <summary>
-   /// Load users paged.
+   /// Load _users paged.
    /// </summary>
     private async Task LoadUsers()
     {
         try
         {
-            usersPaged = await UserService.GetPagedAsync(usersPage, usersPageSize, _usersSortBy.ToString());
-            users = usersPaged?.Items?.ToList() ?? [];
+            _usersPaged = await UserService.GetPagedAsync(_usersPage, _usersPageSize, _usersSortBy.ToString());
+            _users = _usersPaged?.Items?.ToList() ?? [];
         }
         catch (HttpRequestException)
         {
-            SetStatus("Failed to load users. You may not have admin permissions.", true);
+            SetStatus("Failed to load _users. You may not have admin permissions.", true);
         }
     }
 
     /// <summary>
-    /// Updates sorting of users when changed.
+    /// Updates sorting of _users when changed.
     /// </summary>
     private async Task OnUsersSortChanged(ChangeEventArgs e)
     {
@@ -546,7 +546,7 @@
         if (!Enum.TryParse<UserSortBy>(e.Value.ToString(), out var parsed)) return;
         if (parsed == _usersSortBy) return;
         _usersSortBy = parsed;
-        usersPage = 1;          // Reset to first page on sort change
+        _usersPage = 1;          // Reset to first page on sort change
         await LoadUsers();
     }
 
@@ -557,35 +557,35 @@
     {
         if (e?.Value == null) return;
         if (!int.TryParse(e.Value.ToString(), out var newSize)) return;
-        if (newSize == usersPageSize) return;
-        usersPageSize = newSize;
-        usersPage = 1;          // Reset to first page on page size change
+        if (newSize == _usersPageSize) return;
+        _usersPageSize = newSize;
+        _usersPage = 1;          // Reset to first page on page size change
         await LoadUsers();
     }
 
     /// <summary>
-    /// Used to access the previous page of users (using current page).
+    /// Used to access the previous page of _users (using current page).
     /// </summary>
     private async Task PrevUsersPage()
     {
-        if (usersPage > 1) { usersPage--; await LoadUsers(); }
+        if (_usersPage > 1) { _usersPage--; await LoadUsers(); }
     }
 
     /// <summary>
-    /// Used to access the next page of users (using current page).
+    /// Used to access the next page of _users (using current page).
     /// </summary>
     private async Task NextUsersPage()
     {
-        if (usersPaged != null && usersPage < usersPaged.TotalPages) { usersPage++; await LoadUsers(); }
+        if (_usersPaged != null && _usersPage < _usersPaged.TotalPages) { _usersPage++; await LoadUsers(); }
     }
 
     /// <summary>
-    /// Used to navigate to a new page of users.
+    /// Used to navigate to a new page of _users.
     /// </summary>
     private async Task GoToUsersPage(int p)
     {
-        if (usersPaged == null || p < 1 || p > usersPaged.TotalPages) return;
-        usersPage = p;
+        if (_usersPaged == null || p < 1 || p > _usersPaged.TotalPages) return;
+        _usersPage = p;
         await LoadUsers();
     }
 
@@ -594,8 +594,8 @@
     /// </summary>
     private void StartEditUser(string id, string currentName)
     {
-        editingUserId = id;
-        editingUserName = currentName;
+        _editingUserId = id;
+        _editingUserName = currentName;
     }
 
     /// <summary>
@@ -603,8 +603,8 @@
     /// </summary>
     private void CancelEditUser()
     {
-        editingUserId = null;
-        editingUserName = "";
+        _editingUserId = null;
+        _editingUserName = "";
     }
 
     /// <summary>
@@ -613,13 +613,13 @@
     /// <param name="id"></param>
     private async Task SaveUserName(string id)
     {
-        if (string.IsNullOrWhiteSpace(editingUserName)) return;
+        if (string.IsNullOrWhiteSpace(_editingUserName)) return;
 
-        var response = await UserService.UpdateAsync(id, new UpdateUserProfileDto(editingUserName.Trim(), null));
+        var response = await UserService.UpdateAsync(id, new UpdateUserProfileDto(_editingUserName.Trim(), null));
         if (response.IsSuccessStatusCode)
         {
-            editingUserId = null;
-            editingUserName = "";
+            _editingUserId = null;
+            _editingUserName = "";
             await LoadUsers();
             SetStatus("Username updated.");
         }
@@ -630,7 +630,7 @@
     }
 
     /// <summary>
-    /// Soft-delete for users — the user record is flagged as deleted, not removed from the database.
+    /// Soft-delete for _users — the user record is flagged as deleted, not removed from the database.
     /// </summary>
     private async Task DeleteUser(string id, string name)
     {

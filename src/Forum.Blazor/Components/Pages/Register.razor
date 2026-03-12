@@ -16,15 +16,15 @@
         <div class="auth-card-body">
 
             <!-- Display registration error (validation failure, duplicate username, etc.) -->
-            @if (!string.IsNullOrEmpty(errorMessage))
+            @if (!string.IsNullOrEmpty(_errorMessage))
             {
                 <div class="alert alert-danger">
-                    @errorMessage
+                    @_errorMessage
                 </div>
             }
 
             <!-- Shown briefly after successful registration before redirecting to login -->
-            @if (registrationSuccessful)
+            @if (_registrationSuccessful)
             {
                 <div class="alert alert-success">
                     Registration successful! Redirecting to login...
@@ -32,31 +32,31 @@
             }
 
             <!-- Registration form -->
-            <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+            <EditForm Model="@_registerModel" OnValidSubmit="HandleRegister">
 
                 <div class="mb-3">
                     <label class="form-label">Username</label>
-                    <InputText class="form-control" @bind-Value="registerModel.Username" />
+                    <InputText class="form-control" @bind-Value="_registerModel.Username" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Email</label>
-                    <InputText type="email" class="form-control" @bind-Value="registerModel.Email" />
+                    <InputText type="email" class="form-control" @bind-Value="_registerModel.Email" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Password</label>
-                    <InputText type="password" class="form-control" @bind-Value="registerModel.Password" />
+                    <InputText type="password" class="form-control" @bind-Value="_registerModel.Password" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Confirm Password</label>
-                    <InputText type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
+                    <InputText type="password" class="form-control" @bind-Value="_registerModel.ConfirmPassword" />
                 </div>
 
                 <!-- Button disabled while the API call is going out to prevent double-submit -->
-                <button type="submit" class="btn btn-primary" disabled="@isLoading">
-                    @if (isLoading)
+                <button type="submit" class="btn btn-primary" disabled="@_isLoading">
+                    @if (_isLoading)
                     {
                         <span class="spinner-border spinner-border-sm me-2"></span>
                     }
@@ -72,10 +72,10 @@
 @code {
 
     private CancellationTokenSource _cts = new();
-    private RegisterRequest registerModel = new();
-    private string errorMessage = string.Empty;
-    private bool isLoading = false;           // Prevents double-submit while the API call is going out.
-    private bool registrationSuccessful = false;
+    private RegisterRequest _registerModel = new();
+    private string _errorMessage = string.Empty;
+    private bool _isLoading = false;           // Prevents double-submit while the API call is going out.
+    private bool _registrationSuccessful = false;
 
     /// <summary>
     /// Handles registration form submission.
@@ -83,41 +83,41 @@
     /// </summary>
     private async Task HandleRegister()
     {
-        errorMessage = string.Empty;
-        isLoading = true;
+        _errorMessage = string.Empty;
+        _isLoading = true;
 
         try
         {
             // Validate fields client-side in priority order: username, email, password
-            if (string.IsNullOrWhiteSpace(registerModel.Username))
+            if (string.IsNullOrWhiteSpace(_registerModel.Username))
             {
-                errorMessage = "Username is required.";
+                _errorMessage = "Username is required.";
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(registerModel.Email))
+            if (string.IsNullOrWhiteSpace(_registerModel.Email))
             {
-                errorMessage = "Email is required.";
+                _errorMessage = "Email is required.";
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(registerModel.Password))
+            if (string.IsNullOrWhiteSpace(_registerModel.Password))
             {
-                errorMessage = "Password is required.";
+                _errorMessage = "Password is required.";
                 return;
             }
 
-            if (registerModel.Password != registerModel.ConfirmPassword)
+            if (_registerModel.Password != _registerModel.ConfirmPassword)
             {
-                errorMessage = "Passwords do not match.";
+                _errorMessage = "Passwords do not match.";
                 return;
             }
 
-            var result = await AuthService.RegisterAsync(registerModel);
+            var result = await AuthService.RegisterAsync(_registerModel);
 
             if (result.Succeeded)
             {
-                registrationSuccessful = true;
+                _registrationSuccessful = true;
                 StateHasChanged();
                 
                 // Brief delay so the user sees the success message before redirect
@@ -127,7 +127,7 @@
             else
             {
                 var fullError = result.ErrorMessage ?? "Registration failed.";
-                errorMessage = fullError.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? fullError;
+                _errorMessage = fullError.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? fullError;
             }
         }
         catch (OperationCanceledException)
@@ -136,11 +136,11 @@
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            _errorMessage = ex.Message;
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
         }
     }
 
