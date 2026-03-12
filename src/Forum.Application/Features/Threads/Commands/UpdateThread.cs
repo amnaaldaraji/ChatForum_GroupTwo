@@ -74,6 +74,6 @@ public class UpdateThreadHandler : IRequestHandler<UpdateThreadCommand, Result<T
         _threadRepository.Update(thread);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return await _mediator.Send(new Features.Threads.Queries.GetThreadByIdQuery(request.ThreadId), cancellationToken);
+        return await _mediator.Send(new Queries.GetThreadByIdQuery(request.ThreadId), cancellationToken);
     }
 }
