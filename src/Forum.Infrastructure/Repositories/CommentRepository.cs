@@ -151,16 +151,4 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    /// <summary>
-    /// Retrieves all direct replies to a specific comment, ordered by creation time ascending.
-    /// Includes the author of each reply.
-    /// </summary>
-    public async Task<IReadOnlyList<Comment>> GetRepliesAsync(int commentId, CancellationToken cancellationToken = default)
-    {
-        return await DbSet
-            .Include(c => c.User)
-            .Where(c => c.ParentCommentId == commentId)
-            .OrderBy(c => c.TimeCreated)
-            .ToListAsync(cancellationToken);
-    }
 }

@@ -147,13 +147,11 @@ ChatForum_GroupTwo/
     │   │   ├── Categories/Commands/      # CreateCategory, UpdateCategory, DeleteCategory
     │   │   ├── Categories/Queries/       # GetAllCategories, GetCategoryById
     │   │   ├── Threads/Commands/         # CreateThread, UpdateThread, DeleteThread
-    │   │   ├── Threads/Queries/          # GetThreads, GetThreadById, GetThreadsByCategory,
-    │   │   │                             # GetThreadsByUser
+    │   │   ├── Threads/Queries/          # GetThreads, GetThreadById
     │   │   ├── Comments/Commands/        # CreateComment, UpdateComment, DeleteComment
-    │   │   ├── Comments/Queries/         # GetComments, GetCommentById, GetCommentsByThread,
-    │   │   │                             # GetCommentsByUser, GetReplies
+    │   │   ├── Comments/Queries/         # GetComments, GetCommentById, GetCommentsByThread
     │   │   ├── Users/Commands/           # UpdateUserProfile, ChangePassword, DeleteUser
-    │   │   ├── Users/Queries/            # GetUserById, GetUserProfile, GetAllUsers, GetPagedUsers
+    │   │   ├── Users/Queries/            # GetUserProfile, GetPagedUsers
     │   │   └── Votes/Commands/           # CastVote
     │   ├── Repositories/                 # IRepository<T>, ICategoryRepository, IThreadRepository,
     │   │                                 # ICommentRepository, IUserRepository, IVoteRepository
@@ -341,7 +339,7 @@ Login attempts are rate-limited using ASP.NET Core Identity's built-in lockout. 
 
 Each user's profile displays their activity history: a **My Threads** tab listing their created threads and a **My Comments** tab listing their comments, both with pagination.
 
-- **Application** — `UserProfileDto` includes `RecentThreads` and `RecentComments`. `GetThreadsByUser` and `GetCommentsByUser` queries return paginated results.
+- **Application** — `UserProfileDto` includes `RecentThreads` and `RecentComments`, fetched via `GetUserProfileQuery`.
 - **Infrastructure** — `ThreadRepository` and `CommentRepository` filter by `UserId`.
 - **Api** — `GET /api/threads/user/{userId}` and `GET /api/comments/user/{userId}` endpoints.
 - **Blazor** — Profile page with tabbed "My Threads" / "My Comments" views and pagination controls.

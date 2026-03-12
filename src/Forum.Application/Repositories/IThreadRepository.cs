@@ -16,5 +16,4 @@ public interface IThreadRepository : IRepository<ThreadEntity>
         CancellationToken cancellationToken = default);
     
     Task<IReadOnlyList<ThreadEntity>> GetByUserIdAsync(string userId, int count, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<ThreadEntity>> GetByCategoryIdAsync(int categoryId, CancellationToken cancellationToken = default);
 }
