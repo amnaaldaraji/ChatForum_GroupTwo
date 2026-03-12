@@ -20,12 +20,10 @@ public record GetThreadByIdQuery(int ThreadId) : IRequest<Result<ThreadDetailDto
 public class GetThreadByIdHandler : IRequestHandler<GetThreadByIdQuery, Result<ThreadDetailDto>>
 {
     private readonly IThreadRepository _threadRepository;
-    private readonly ICommentRepository _commentRepository;
 
-    public GetThreadByIdHandler(IThreadRepository threadRepository, ICommentRepository commentRepository)
+    public GetThreadByIdHandler(IThreadRepository threadRepository)
     {
         _threadRepository = threadRepository;
-        _commentRepository = commentRepository;
     }
 
     /// <summary>
@@ -38,13 +36,14 @@ public class GetThreadByIdHandler : IRequestHandler<GetThreadByIdQuery, Result<T
         {
             return Result.Failure<ThreadDetailDto>("Thread not found.", ErrorType.NotFound);
         }
-        
-        var bodyComment = await _commentRepository.GetFirstCommentByThreadIdAsync(request.ThreadId, cancellationToken);
+
+        // Body comment is the earliest comment in the thread (loaded via GetByIdWithCommentsAsync).
+        var bodyComment = thread.Comments?.OrderBy(c => c.TimeCreated).FirstOrDefault();
 
         // Filter out the body comment from the reply list, sort chronologically, and map to DTOs.
         var comments = thread.Comments?
-            .Where(c => c.CommentId != bodyComment?.CommentId) 
-            .OrderBy(c => c.TimeCreated)                      
+            .Where(c => c.CommentId != bodyComment?.CommentId)
+            .OrderBy(c => c.TimeCreated)
             .Select(c => c.ToCommentDto())
             .ToList() ?? new List<DTOs.Comment.CommentDto>();
 
