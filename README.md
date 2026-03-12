@@ -176,8 +176,8 @@ ChatForum_GroupTwo/
         ├── Components/
         │   ├── Layout/                   # MainLayout.razor, NavMenu.razor
         │   └── Pages/                    # Home, Login, Register, Logout, Profile, Admin,
-        │                                 # Threads, CategoryThreads, ThreadDetails,
-        │                                 # CreateThread, Error
+        │                                 # CategoryThreads, ThreadDetails, CreateThread,
+        │                                 # Error
         ├── Services/                     # ApiClientBase, ApiAuthenticationStateProvider,
         │                                 # TokenStorageService, AuthService, CategoryService,
         │                                 # ThreadService, CommentService, UserService
@@ -222,6 +222,14 @@ Each thread has 2–3 comments. The first comment serves as the thread body. One
 
 A guest registers with a username, email, and password. The server creates the account and returns a JWT token for immediate authentication. Passwords must be at least 6 characters and include at least one digit, one lowercase letter, and one uppercase letter (no special character required).
 
+**Data flow:**
+1. The user fills in the registration form on `Register.razor` and clicks submit. `HandleRegister()` validates the input client-side, then calls `AuthService.RegisterAsync(registerModel)`.
+2. The Blazor `AuthService` sends a `POST /api/auth/register` request with the username, email, and password as JSON.
+3. The API layer (`AuthEndpoints.cs`) receives the request and dispatches a `RegisterUserCommand` through MediatR.
+4. The `RegisterUserHandler` delegates to `IAuthService.RegisterAsync()` in the application layer.
+5. The infrastructure `AuthService` creates a `User` entity, calls `UserManager.CreateAsync()` (Identity hashes the password), and generates a JWT token.
+6. A new row is inserted into the `AspNetUsers` table in SQLite via EF Core. The token and user info are returned to the client.
+
 ```http
 POST /api/auth/register
 Content-Type: application/json
@@ -242,6 +250,14 @@ Content-Type: application/json
 
 A logged-in user replies to another user's comment by clicking "Reply" on their comment. The reply is displayed by setting `parentCommentId` and showing a "replying to @username" label and a quoted excerpt of the original comment.
 
+**Data flow:**
+1. On `ThreadDetails.razor`, the user clicks "Reply" on a comment and types their response. `SubmitReply(parentCommentId)` builds a `CreateCommentDto` with the content and parentCommentId, then calls `CommentService.CreateAsync(threadId, dto)`.
+2. The Blazor `CommentService` sends a `POST /api/comments/{threadId}` request with the content and parentCommentId as JSON, including the JWT bearer token.
+3. The API layer (`CommentEndpoints.cs`) extracts the userId from the JWT claims and dispatches a `CreateCommentCommand(userId, threadId, content, parentCommentId)` through MediatR.
+4. The `CreateCommentHandler` validates that the thread exists and that the parent comment exists and belongs to the same thread, creates a `Comment` entity, calls `_commentRepository.AddAsync()`, updates the thread's `TimeUpdated`, and calls `_unitOfWork.SaveChangesAsync()`.
+5. A new row is inserted into the `Comments` table in SQLite via EF Core with the appropriate foreign key references.
+6. On success, the Blazor page calls `LoadComments()` to refresh the comment list, displaying the new reply with a "replying to @username" label.
+
 ```http
 POST /api/comments/1
 Authorization: Bearer <token>
@@ -256,6 +272,14 @@ Content-Type: application/json
 ### Scenario 3: Admin soft-deletes a user
 
 An admin soft-deletes a user account. The user's threads and comments are preserved but the author name is replaced with "Deleted User".
+
+**Data flow:**
+1. On the `Admin.razor` page, the admin clicks delete on a user. `DeleteUser(id, name)` shows a JavaScript confirmation dialog. On confirm, it calls `UserService.DeleteAsync(id)`.
+2. The Blazor `UserService` sends a `DELETE /api/users/{id}` request with the JWT bearer token.
+3. The API layer (`UserEndpoints.cs`) extracts the userId and isAdmin flag from the JWT claims, verifies the caller is authorized (must be self or admin), and dispatches a `DeleteUserCommand(id, userId, isAdmin)` through MediatR.
+4. The `DeleteUserHandler` validates that the user exists and is not already deleted, sets `user.IsDeleted = true`, calls `_userRepository.Update()` and `_unitOfWork.SaveChangesAsync()`.
+5. The `IsDeleted` flag is set to `true` in the `AspNetUsers` table in SQLite via EF Core. The user record is preserved for referential integrity.
+6. From this point on, `MappingExtensions.cs` replaces the username with "Deleted User" whenever the entity is mapped to a DTO, so all threads and comments by this user display the anonymized name.
 
 ```http
 DELETE /api/users/a1b2c3
