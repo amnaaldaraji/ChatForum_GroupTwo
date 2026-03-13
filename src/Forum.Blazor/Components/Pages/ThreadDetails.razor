@@ -28,20 +28,67 @@ else
         </nav>
 
         <div class="thread-header">
-            <h1>@_thread.Title</h1>
+            <!-- Inline title edit form — replaces the static title when editing -->
+            @if (_isEditingTitle)
+            {
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <input type="text" class="form-control" @bind="_editTitleValue" />
+                    <button class="btn btn-primary btn-sm" @onclick="SaveTitleEdit" disabled="@_isSubmitting">Save</button>
+                    <button class="btn btn-secondary btn-sm" @onclick="CancelTitleEdit">Cancel</button>
+                </div>
+            }
+            else
+            {
+                <h1>@_thread.Title</h1>
+            }
             <div class="thread-meta">
                 <span>started by <strong>@_thread.AuthorUserName</strong></span>
                 <span>@_thread.TimeCreated.ToString("MMM dd, yyyy")</span>
                 <span>in <strong>@_thread.CategoryName</strong></span>
             </div>
+            <!-- Edit button — visible to admins and the thread's own author -->
+            <AuthorizeView>
+                <Authorized Context="threadEditAuth">
+                    @if (threadEditAuth.User.IsInRole("Admin") || threadEditAuth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == _thread.AuthorId)
+                    {
+                        <button class="btn btn-link btn-sm p-0 mt-2" @onclick="StartTitleEdit">Edit</button>
+                    }
+                </Authorized>
+            </AuthorizeView>
         </div>
 
         <!-- The thread body is stored as a special root comment on the thread -->
         @if (_thread.BodyComment != null && !string.IsNullOrEmpty(_thread.BodyComment.Content))
         {
             <div class="body-comment">
-                <div class="comment-content">@_thread.BodyComment.Content</div>
+                <!-- Inline body edit form — replaces the static body when editing -->
+                @if (_isEditingBody)
+                {
+                    <textarea class="form-control" rows="5" @bind="_editBodyValue"></textarea>
+                    <div class="mt-3">
+                        <button class="btn btn-primary btn-sm" @onclick="SaveBodyEdit" disabled="@_isSubmitting">Save</button>
+                        <button class="btn btn-secondary btn-sm ms-1" @onclick="CancelBodyEdit">Cancel</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="comment-content">@_thread.BodyComment.Content</div>
+                    <!-- Edit button — visible to admins and the body comment's own author -->
+                    <AuthorizeView>
+                        <Authorized Context="bodyEditAuth">
+                            @if (bodyEditAuth.User.IsInRole("Admin") || bodyEditAuth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == _thread.BodyComment.AuthorId)
+                            {
+                                <button class="btn btn-link btn-sm p-0 mt-2" @onclick="StartBodyEdit">Edit</button>
+                            }
+                        </Authorized>
+                    </AuthorizeView>
+                }
             </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_editError))
+        {
+            <div class="alert alert-danger">@_editError</div>
         }
 
         <!-- Total comments in thread -->
@@ -128,7 +175,21 @@ else
                                 <span class="reply-citation-content">@TruncateContent(comment.ParentCommentContent, 200)</span>
                             </div>
                         }
-                        <div class="comment-body">@comment.Content</div>
+                        <!-- Inline comment edit form — replaces the static body when editing -->
+                        @if (_editingCommentId == comment.CommentId)
+                        {
+                            <div class="reply-form">
+                                <textarea class="form-control" rows="3" @bind="_editCommentValue"></textarea>
+                                <div class="mt-3">
+                                    <button class="btn btn-primary btn-sm" @onclick="() => SaveCommentEdit(comment.CommentId)" disabled="@_isSubmitting">Save</button>
+                                    <button class="btn btn-secondary btn-sm ms-1" @onclick="CancelCommentEdit">Cancel</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="comment-body">@comment.Content</div>
+                        }
 
                         <div class="comment-footer">
                             
@@ -172,9 +233,23 @@ else
                                 </Authorized>
                             </AuthorizeView>
 
-                            <!-- Delete button — visible to admins and the comment's own author -->
+                            <!-- Edit and Delete buttons — visible to admins and the comment's own author -->
                             @if (!comment.IsDeleted)
                             {
+                                <AuthorizeView>
+                                    <Authorized Context="editAuth">
+                                        @if (editAuth.User.IsInRole("Admin") || editAuth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == comment.AuthorId)
+                                        {
+                                            @if (_editingCommentId != comment.CommentId)
+                                            {
+                                                <button class="btn btn-link btn-sm p-0 ms-2" title="Edit comment"
+                                                        @onclick="() => StartCommentEdit(comment.CommentId, comment.Content)">
+                                                    Edit
+                                                </button>
+                                            }
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
                                 <AuthorizeView>
                                     <Authorized Context="deleteAuth">
                                         @if (deleteAuth.User.IsInRole("Admin") || deleteAuth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == comment.AuthorId)
@@ -257,6 +332,15 @@ else
     private bool _isSubmitting;
     private int? _replyingToCommentId;
     private string _replyContent = string.Empty;
+
+    // Edit/delete state
+    private bool _isEditingTitle;
+    private string _editTitleValue = string.Empty;
+    private bool _isEditingBody;
+    private string _editBodyValue = string.Empty;
+    private int? _editingCommentId;
+    private string _editCommentValue = string.Empty;
+    private string _editError = string.Empty;
 
     // Local vote state — kept in sync after each vote API call to avoid full page reload
     private Dictionary<int, int> _voteScores = [];
@@ -369,6 +453,7 @@ else
     /// </summary>
     private void StartReply(int commentId)
     {
+        CancelAllEditing();
         _replyingToCommentId = commentId;
         _replyContent = string.Empty;
     }
@@ -524,4 +609,179 @@ else
     /// Formats a DateTime for display.
     /// </summary>
     private static string FormatDate(DateTime dt) => dt.ToString("MMM dd, yyyy");
+
+    /// <summary>
+    /// Closes any open edit or reply form so only one is active at a time.
+    /// </summary>
+    private void CancelAllEditing()
+    {
+        _isEditingTitle = false;
+        _editTitleValue = string.Empty;
+        _isEditingBody = false;
+        _editBodyValue = string.Empty;
+        _editingCommentId = null;
+        _editCommentValue = string.Empty;
+        _replyingToCommentId = null;
+        _replyContent = string.Empty;
+        _editError = string.Empty;
+    }
+
+    /// <summary>
+    /// Enter title editing mode, pre-populating the input with the current title.
+    /// </summary>
+    private void StartTitleEdit()
+    {
+        CancelAllEditing();
+        _isEditingTitle = true;
+        _editTitleValue = _thread!.Title;
+    }
+
+    /// <summary>
+    /// Exit title editing mode without saving.
+    /// </summary>
+    private void CancelTitleEdit()
+    {
+        _isEditingTitle = false;
+        _editTitleValue = string.Empty;
+        _editError = string.Empty;
+    }
+
+    /// <summary>
+    /// Saves the edited title via the API and reloads the thread on success.
+    /// </summary>
+    private async Task SaveTitleEdit()
+    {
+        if (string.IsNullOrWhiteSpace(_editTitleValue)) return;
+        _editError = string.Empty;
+        _isSubmitting = true;
+        try
+        {
+            var dto = new UpdateThreadDto(Title: _editTitleValue.Trim());
+            var response = await ThreadService.UpdateAsync(Id, dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _isEditingTitle = false;
+                _editTitleValue = string.Empty;
+                await LoadThread();
+            }
+            else
+            {
+                _editError = "Failed to update thread title.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _editError = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    /// <summary>
+    /// Enter body editing mode, pre-populating the textarea with the current body content.
+    /// </summary>
+    private void StartBodyEdit()
+    {
+        CancelAllEditing();
+        _isEditingBody = true;
+        _editBodyValue = _thread!.BodyComment!.Content;
+    }
+
+    /// <summary>
+    /// Exit body editing mode without saving.
+    /// </summary>
+    private void CancelBodyEdit()
+    {
+        _isEditingBody = false;
+        _editBodyValue = string.Empty;
+        _editError = string.Empty;
+    }
+
+    /// <summary>
+    /// Saves the edited body content via CommentService and reloads the thread on success.
+    /// </summary>
+    private async Task SaveBodyEdit()
+    {
+        if (string.IsNullOrWhiteSpace(_editBodyValue)) return;
+        _editError = string.Empty;
+        _isSubmitting = true;
+        try
+        {
+            var dto = new UpdateCommentDto(_editBodyValue.Trim());
+            var response = await CommentService.UpdateAsync(_thread!.BodyComment!.CommentId, dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _isEditingBody = false;
+                _editBodyValue = string.Empty;
+                await LoadThread();
+            }
+            else
+            {
+                _editError = "Failed to update thread body.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _editError = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    /// <summary>
+    /// Enter comment editing mode for the specified comment.
+    /// </summary>
+    private void StartCommentEdit(int commentId, string currentContent)
+    {
+        CancelAllEditing();
+        _editingCommentId = commentId;
+        _editCommentValue = currentContent;
+    }
+
+    /// <summary>
+    /// Exit comment editing mode without saving.
+    /// </summary>
+    private void CancelCommentEdit()
+    {
+        _editingCommentId = null;
+        _editCommentValue = string.Empty;
+        _editError = string.Empty;
+    }
+
+    /// <summary>
+    /// Saves the edited comment content and reloads comments on success.
+    /// </summary>
+    private async Task SaveCommentEdit(int commentId)
+    {
+        if (string.IsNullOrWhiteSpace(_editCommentValue)) return;
+        _editError = string.Empty;
+        _isSubmitting = true;
+        try
+        {
+            var dto = new UpdateCommentDto(_editCommentValue.Trim());
+            var response = await CommentService.UpdateAsync(commentId, dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _editingCommentId = null;
+                _editCommentValue = string.Empty;
+                await LoadComments(_pageNumber);
+            }
+            else
+            {
+                _editError = "Failed to update comment.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _editError = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
 }
