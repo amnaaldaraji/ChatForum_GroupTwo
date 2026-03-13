@@ -25,8 +25,11 @@ builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={db
 // Register Infrastructure layer services (DbContext, repositories, UnitOfWork, AuthService).
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Configure Identity with the custom User entity (extends IdentityUser) and IdentityRole.
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+// Required by SignInManager (since we changed from AddIdentity, registers this implicitly, AddIdentityCore does not)
+builder.Services.AddHttpContextAccessor();
+
+// Configure Identity with AddIdentityCore.
+builder.Services.AddIdentityCore<User>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
@@ -38,7 +41,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<Forum.Infrastructure.Data.ForumDbContext>()
+    .AddSignInManager()
     .AddDefaultTokenProviders();
 
 // Read JWT settings from configuration, falling back to development defaults.
@@ -115,7 +120,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowBlazor");
 app.UseAuthentication();
 app.UseAuthorization();
