@@ -25,6 +25,9 @@ builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={db
 // Register Infrastructure layer services (DbContext, repositories, UnitOfWork, AuthService).
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// Required by SignInManager (since we changed from AddIdentity, registers this implicitly, AddIdentityCore does not)
+builder.Services.AddHttpContextAccessor();
+
 // Configure Identity with AddIdentityCore.
 builder.Services.AddIdentityCore<User>(options =>
 {
@@ -117,7 +120,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowBlazor");
 app.UseAuthentication();
 app.UseAuthorization();
