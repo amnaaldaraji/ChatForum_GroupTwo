@@ -9,16 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Read API base URL from configuration (appsettings.json / appsettings.Production.json)
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"]!;
+
 // Named HTTP client pointing to the API — used by services that need IHttpClientFactory
 builder.Services.AddHttpClient("ForumApi", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5141");
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 // Default scoped HttpClient — injected directly into services that take HttpClient
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://localhost:5141"),
+    BaseAddress = new Uri(apiBaseUrl),
     Timeout = TimeSpan.FromSeconds(15)
 });
 

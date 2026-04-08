@@ -1,4 +1,4 @@
-# ChatForum_GroupTwo
+# Overtime Sports Forum
 
 A Clean Architecture implementation of a Sports Forum, built with .NET 8, Entity Framework Core and ASP.NET Core Identity.
 

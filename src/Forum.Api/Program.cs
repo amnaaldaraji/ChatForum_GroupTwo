@@ -79,7 +79,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5159", "https://localhost:7224")
+        policy.WithOrigins(
+                "http://localhost:5159", 
+                "https://localhost:7224",
+                "https://overtime-forum-ghhyh8abe3ecdzev.swedencentral-01.azurewebsites.net")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
