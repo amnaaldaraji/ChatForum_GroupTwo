@@ -233,6 +233,7 @@
 
 .popular-title {
     flex: 1;
+    min-width: 0;
     font-size: 15px;
     font-weight: 600;
     color: #b8cfe0;
@@ -277,4 +278,43 @@
     color: #555d6b;
     font-size: 12px;
     font-style: italic;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .home-overlay {
+        padding: 16px 10px;
+    }
+
+    .popular-item {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px 10px;
+    }
+
+    .popular-title {
+        flex-basis: 100%;
+        font-size: 14px;
+    }
+
+    .popular-meta {
+        font-size: 12px;
+    }
+
+    .popular-replies {
+        font-size: 13px;
+    }
+
+    .thread-item {
+        padding: 6px 10px;
+    }
+
+    .thread-title {
+        font-size: 14px;
+    }
+
+    .cat-name {
+        font-size: 14px;
+        letter-spacing: 1.5px;
+    }
 }

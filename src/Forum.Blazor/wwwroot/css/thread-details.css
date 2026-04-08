@@ -28,6 +28,11 @@
     margin-bottom: 12px;
     color: #d1d5db;
     font-size: 1.6em;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
 }
 
 .thread-meta {
@@ -306,3 +311,65 @@
 .vote-bar-locked { cursor: default; }
 .vote-btn.locked { opacity: 0.3; cursor: not-allowed; }
 .vote-bar-locked:hover .vote-btn.locked { color: #555e68; background: none; }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .thread-details {
+        padding: 16px 10px;
+    }
+
+    .thread-header {
+        padding: 14px;
+    }
+
+    .thread-header h1 {
+        font-size: 1.2em;
+    }
+
+    .thread-meta {
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .body-comment {
+        padding: 14px;
+    }
+
+    .comments-section {
+        padding: 14px;
+    }
+
+    .comment {
+        padding: 10px;
+    }
+
+    .comment-header {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .comment-footer {
+        flex-wrap: wrap;
+    }
+
+    /* Wrap toolbar rows (page size, pagination) */
+    .comments-section > .d-flex {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .comments-section > .d-flex > .ms-auto {
+        margin-left: 0 !important;
+        width: 100%;
+    }
+
+    .comment-body {
+        margin-left: 0;
+        word-break: break-word;
+    }
+
+    .reply-citation {
+        word-break: break-word;
+    }
+}
