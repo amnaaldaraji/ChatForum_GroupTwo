@@ -21,6 +21,7 @@
 
 html {
     scrollbar-gutter: stable;
+    overflow-x: hidden;
 }
 
 html, body {

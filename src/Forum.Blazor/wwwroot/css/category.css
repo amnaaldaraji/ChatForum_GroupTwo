@@ -185,6 +185,11 @@
     text-decoration: none;
     font-weight: 600;
     font-size: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
 }
 
 .thread-title:hover {
@@ -288,4 +293,58 @@
 .auth-prompt-links .auth-link:hover {
     color: #85b1db;
     text-decoration: underline;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .category-page {
+        padding: 12px 10px;
+    }
+
+    .category-hero {
+        height: 120px;
+    }
+
+    .hero-content {
+        padding: 12px 20px;
+    }
+
+    .category-title {
+        font-size: 1.1em;
+        letter-spacing: 1.5px;
+    }
+
+    /* Hide Author, Created, Last Activity columns (keep Thread + Replies) */
+    .threads-table tr th:nth-child(2),
+    .threads-table tr th:nth-child(4),
+    .threads-table tr th:nth-child(5),
+    .threads-table tr td:nth-child(2),
+    .threads-table tr td:nth-child(4),
+    .threads-table tr td:nth-child(5) {
+        display: none !important;
+    }
+
+    .thread-title-cell {
+        width: auto;
+    }
+
+    .replies-cell {
+        width: 60px;
+    }
+
+    .threads-table td,
+    .threads-table th {
+        padding: 10px 8px;
+    }
+
+    /* Wrap toolbar rows (page size, sort, pagination) */
+    .forum-view-wrapper > .d-flex {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .forum-view-wrapper > .d-flex > .ms-auto {
+        margin-left: 0 !important;
+        width: 100%;
+    }
 }

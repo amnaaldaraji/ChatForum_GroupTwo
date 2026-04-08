@@ -317,3 +317,24 @@
         max-width: 120px;
     }
 }
+
+/* Wrap toolbar rows (page size, sort, pagination) on mobile */
+@media (max-width: 768px) {
+    .panel-section > .d-flex {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .panel-section > .d-flex > .ms-auto {
+        margin-left: 0 !important;
+        width: 100%;
+    }
+
+    .panel-add-form {
+        flex-wrap: wrap;
+    }
+
+    .panel-add-form .panel-input {
+        width: 100%;
+    }
+}

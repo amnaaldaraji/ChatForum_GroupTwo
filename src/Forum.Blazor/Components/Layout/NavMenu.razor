@@ -1,6 +1,8 @@
-@inject CategoryService CategoryService    
+@inject CategoryService CategoryService
 @inject IAuthClientService AuthService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IDisposable
 
 <!-- Navigation bar visible on all pages -->
 <header class="main-header">
@@ -111,6 +113,25 @@
             // Fall back to an empty list if the API is unavailable
             _categories = [];
         }
+
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    /// <summary>
+    /// Close the mobile hamburger menu when navigating to a new page.
+    /// </summary>
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval",
+                "var el = document.getElementById('navMenuCollapse'); " +
+                "if (el && el.classList.contains('show')) { bootstrap.Collapse.getOrCreateInstance(el).hide(); }");
+        }
+        catch
+        {
+            // Ignore JS interop errors during dispose/prerendering
+        }
     }
 
     /// <summary>
@@ -120,5 +141,10 @@
     {
         await AuthService.LogoutAsync();
         Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }
